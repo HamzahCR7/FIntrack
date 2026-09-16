@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                   String        @id @default(uuid())
+  name                 String
+  type                 String        // BANK_ACCOUNT, CREDIT_CARD, CASH, UPI, AMAZON_PAY
+  institution          String?
+  currentBalance       Float         @default(0.0)
+  includeInTotalBalance Boolean      @default(true)
+  creditLimit          Float?
+  lastFourDigits       String?
+  statementCycleDay    Int?          // Day of month (1-31) when statement is generated
+  paymentDueDay        Int?          // Day of month (1-31) when payment is due
+  statementAmount      Float?        @default(0.0)
+  minimumPayment       Float?        @default(0.0)
+  isActive             Boolean       @default(true)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  outgoingTransactions Transaction[] @relation("SourceAccount")
+  incomingTransactions Transaction[] @relation("DestinationAccount")
+  subscriptions        Subscription[]
+}
+
+model Category {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  icon         String?
+  color        String?
+  isSystem     Boolean       @default(false)
+  parentId     String?
+  createdAt    DateTime      @default(now())
+
+  transactions Transaction[]
+  subcategoryTransactions Transaction[] @relation("TransactionSubcategory")
+  subscriptions Subscription[]
+  budgets      Budget[]
+  parent       Category?     @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Category[]    @relation("CategoryHierarchy")
+}
+
+model Transaction {
+  id                   String        @id @default(uuid())
+  type                 String        // INCOME, EXPENSE, TRANSFER
+  amount               Float
+  currency             String        @default("INR")
+  
+  categoryId           String?
+  subcategoryId        String?
+  sourceAccountId      String?
+  destinationAccountId String?
+  
+  paymentMethod        String        // BANK_TRANSFER, CREDIT_CARD, CASH, UPI
+  merchant             String?
+  description          String?
+  itemTag              String?
+  transactionDate      DateTime      @default(now())
+  referenceNumber      String?
+  
+  isSubscription       Boolean       @default(false)
+  subscriptionId       String?
+  
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  category             Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  subcategory          Category?     @relation("TransactionSubcategory", fields: [subcategoryId], references: [id], onDelete: SetNull)
+  sourceAccount        Account?      @relation("SourceAccount", fields: [sourceAccountId], references: [id], onDelete: SetNull)
+  destinationAccount   Account?      @relation("DestinationAccount", fields: [destinationAccountId], references: [id], onDelete: SetNull)
+  subscription         Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+}
+
+model Subscription {
+  id              String        @id @default(uuid())
+  name            String
+  amount          Float
+  billingCycle    String        // WEEKLY, MONTHLY, QUARTERLY, YEARLY
+  nextBillingDate DateTime
+  
+  sourceAccountId String
+  categoryId      String
+  status          String        @default("ACTIVE") // ACTIVE, PAUSED, CANCELLED
+  
+  startDate       DateTime      @default(now())
+  endDate         DateTime?
+  notes           String?
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  sourceAccount   Account       @relation(fields: [sourceAccountId], references: [id], onDelete: Restrict)
+  category        Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  transactions    Transaction[]
+}
+
+model Debt {
+  id            String    @id @default(uuid())
+  personName    String
+  type          String    // OWED_TO_ME (They owe me), I_OWE (I owe them)
+  recordKind    String    @default("PERSONAL") // PERSONAL, LOAN
+  loanCategory  String?
+  loanItem      String?
+  emiAmount     Float?
+  amount        Float
+  settledAmount Float     @default(0.0)
+  dueDate       DateTime?
+  status        String    @default("PENDING") // PENDING, PARTIALLY_SETTLED, SETTLED
+  notes         String?
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model FinancialProfile {
+  id                      String    @id @default(uuid())
+  monthlyIncomeTarget     Float?
+  monthlySavingsGoal      Float?
+  emergencyFundTarget     Float?
+  discretionarySpendCap   Float?
+  preferredSavingsRate    Float?    @default(20.0) // Percentage (e.g. 20.0 for 20%)
+  
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+model InsightFeedback {
+  id        String   @id @default(uuid())
+  insightId String   @unique
+  isUseful  Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuickItem {
+  id          String    @id @default(uuid())
+  type        String    // NOTE, TODO, REMINDER
+  title       String
+  details     String?
+  price       Float?
+  category    String?
+  priority    String    @default("NORMAL") // LOW, NORMAL, HIGH
+  dueDate     DateTime?
+  isCompleted Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Budget {
+  id              String    @id @default(uuid())
+  name            String
+  categoryId      String?   // Backward-compatible single category value
+  categoryIds     String?   // Comma-separated category ids for multi-category budgets
+  amount          Float     // Monthly budget limit
+  billingCycleStartDate DateTime // Start date of current billing cycle
+  billingCycleEndDate   DateTime // End date of current billing cycle
+  alertThreshold  Float     @default(80.0) // Alert when spending reaches 80% of budget
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+}
+
+model Goal {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  type            String    // SAVINGS, INVESTMENT, EXPENSE_REDUCTION, EMI
+  targetAmount    Float
+  currentAmount   Float     @default(0.0)
+  deadline        DateTime
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH
+  category        String?   // Category this goal is related to
+  autoContribute  Boolean   @default(false) // Auto-allocate savings
+  monthlyTarget   Float?    // Monthly saving target
+  emiMonths       Int?      // Number of months for EMI goal
+  emiAmount       Float?    // Monthly EMI installment
+  downPayment     Float?    // Initial down payment
+  isActive        Boolean   @default(true)
+  status          String    @default("ACTIVE") // ACTIVE, COMPLETED, FAILED, PAUSED
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}

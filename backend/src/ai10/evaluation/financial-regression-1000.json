@@ -1,0 +1,5002 @@
+[
+  {
+    "id": 1,
+    "query": "How much did I save in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 2,
+    "query": "What were my savings in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 3,
+    "query": "Show my savings for January",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 4,
+    "query": "How much did I earn in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 5,
+    "query": "What was my income in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 6,
+    "query": "How much did I spend in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 7,
+    "query": "What were my expenses in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 8,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 9,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 10,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 11,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 12,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 13,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 14,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 15,
+    "query": "How much did I save in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 16,
+    "query": "What were my savings in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 17,
+    "query": "Show my savings for February",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 18,
+    "query": "How much did I earn in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 19,
+    "query": "What was my income in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 20,
+    "query": "How much did I spend in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 21,
+    "query": "What were my expenses in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 22,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 23,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 24,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 25,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 26,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 27,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 28,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 29,
+    "query": "How much did I save in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 30,
+    "query": "What were my savings in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 31,
+    "query": "Show my savings for March",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 32,
+    "query": "How much did I earn in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 33,
+    "query": "What was my income in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 34,
+    "query": "How much did I spend in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 35,
+    "query": "What were my expenses in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 36,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 37,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 38,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 39,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 40,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 41,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 42,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 43,
+    "query": "How much did I save in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 44,
+    "query": "What were my savings in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 45,
+    "query": "Show my savings for April",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 46,
+    "query": "How much did I earn in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 47,
+    "query": "What was my income in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 48,
+    "query": "How much did I spend in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 49,
+    "query": "What were my expenses in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 50,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 51,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 52,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 53,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 54,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 55,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 56,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 57,
+    "query": "How much did I save in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 58,
+    "query": "What were my savings in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 59,
+    "query": "Show my savings for May",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 60,
+    "query": "How much did I earn in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 61,
+    "query": "What was my income in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 62,
+    "query": "How much did I spend in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 63,
+    "query": "What were my expenses in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 64,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 65,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 66,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 67,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 68,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 69,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 70,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 71,
+    "query": "How much did I save in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 72,
+    "query": "What were my savings in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 73,
+    "query": "Show my savings for June",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 74,
+    "query": "How much did I earn in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 75,
+    "query": "What was my income in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 76,
+    "query": "How much did I spend in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 77,
+    "query": "What were my expenses in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 78,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 79,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 80,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 81,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 82,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 83,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 84,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 85,
+    "query": "How much did I save in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 86,
+    "query": "What were my savings in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 87,
+    "query": "Show my savings for July",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 88,
+    "query": "How much did I earn in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 89,
+    "query": "What was my income in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 90,
+    "query": "How much did I spend in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 91,
+    "query": "What were my expenses in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 92,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 93,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 94,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 95,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 96,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 97,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 98,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 99,
+    "query": "How much did I save in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 100,
+    "query": "What were my savings in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 101,
+    "query": "Show my savings for August",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 102,
+    "query": "How much did I earn in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 103,
+    "query": "What was my income in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 104,
+    "query": "How much did I spend in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 105,
+    "query": "What were my expenses in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 106,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 107,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 108,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 109,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 110,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 111,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 112,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 113,
+    "query": "How much did I save in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 114,
+    "query": "What were my savings in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 115,
+    "query": "Show my savings for September",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 116,
+    "query": "How much did I earn in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 117,
+    "query": "What was my income in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 118,
+    "query": "How much did I spend in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 119,
+    "query": "What were my expenses in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 120,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 121,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 122,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 123,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 124,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 125,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 126,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 127,
+    "query": "How much did I save in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 128,
+    "query": "What were my savings in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 129,
+    "query": "Show my savings for October",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 130,
+    "query": "How much did I earn in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 131,
+    "query": "What was my income in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 132,
+    "query": "How much did I spend in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 133,
+    "query": "What were my expenses in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 134,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 135,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 136,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 137,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 138,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 139,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 140,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 141,
+    "query": "How much did I save in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 142,
+    "query": "What were my savings in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 143,
+    "query": "Show my savings for November",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 144,
+    "query": "How much did I earn in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 145,
+    "query": "What was my income in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 146,
+    "query": "How much did I spend in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 147,
+    "query": "What were my expenses in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 148,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 149,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 150,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 151,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 152,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 153,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 154,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 155,
+    "query": "How much did I save in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 156,
+    "query": "What were my savings in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 157,
+    "query": "Show my savings for December",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 158,
+    "query": "How much did I earn in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 159,
+    "query": "What was my income in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 160,
+    "query": "How much did I spend in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 161,
+    "query": "What were my expenses in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 162,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 163,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 164,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 165,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 166,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 167,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 168,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 169,
+    "query": "How much did I save in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 170,
+    "query": "What were my savings in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 171,
+    "query": "Show my savings for January",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 172,
+    "query": "How much did I earn in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 173,
+    "query": "What was my income in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 174,
+    "query": "How much did I spend in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 175,
+    "query": "What were my expenses in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 176,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 177,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 178,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 179,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 180,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 181,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 182,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 183,
+    "query": "How much did I save in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 184,
+    "query": "What were my savings in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 185,
+    "query": "Show my savings for February",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 186,
+    "query": "How much did I earn in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 187,
+    "query": "What was my income in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 188,
+    "query": "How much did I spend in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 189,
+    "query": "What were my expenses in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 190,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 191,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 192,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 193,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 194,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 195,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 196,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 197,
+    "query": "How much did I save in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 198,
+    "query": "What were my savings in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 199,
+    "query": "Show my savings for March",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 200,
+    "query": "How much did I earn in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 201,
+    "query": "What was my income in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 202,
+    "query": "How much did I spend in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 203,
+    "query": "What were my expenses in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 204,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 205,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 206,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 207,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 208,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 209,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 210,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 211,
+    "query": "How much did I save in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 212,
+    "query": "What were my savings in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 213,
+    "query": "Show my savings for April",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 214,
+    "query": "How much did I earn in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 215,
+    "query": "What was my income in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 216,
+    "query": "How much did I spend in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 217,
+    "query": "What were my expenses in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 218,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 219,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 220,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 221,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 222,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 223,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 224,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 225,
+    "query": "How much did I save in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 226,
+    "query": "What were my savings in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 227,
+    "query": "Show my savings for May",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 228,
+    "query": "How much did I earn in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 229,
+    "query": "What was my income in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 230,
+    "query": "How much did I spend in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 231,
+    "query": "What were my expenses in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 232,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 233,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 234,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 235,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 236,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 237,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 238,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 239,
+    "query": "How much did I save in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 240,
+    "query": "What were my savings in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 241,
+    "query": "Show my savings for June",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 242,
+    "query": "How much did I earn in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 243,
+    "query": "What was my income in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 244,
+    "query": "How much did I spend in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 245,
+    "query": "What were my expenses in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 246,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 247,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 248,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 249,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 250,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 251,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 252,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 253,
+    "query": "How much did I save in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 254,
+    "query": "What were my savings in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 255,
+    "query": "Show my savings for July",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 256,
+    "query": "How much did I earn in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 257,
+    "query": "What was my income in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 258,
+    "query": "How much did I spend in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 259,
+    "query": "What were my expenses in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 260,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 261,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 262,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 263,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 264,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 265,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 266,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 267,
+    "query": "How much did I save in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 268,
+    "query": "What were my savings in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 269,
+    "query": "Show my savings for August",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 270,
+    "query": "How much did I earn in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 271,
+    "query": "What was my income in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 272,
+    "query": "How much did I spend in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 273,
+    "query": "What were my expenses in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 274,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 275,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 276,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 277,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 278,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 279,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 280,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 281,
+    "query": "How much did I save in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 282,
+    "query": "What were my savings in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 283,
+    "query": "Show my savings for September",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 284,
+    "query": "How much did I earn in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 285,
+    "query": "What was my income in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 286,
+    "query": "How much did I spend in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 287,
+    "query": "What were my expenses in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 288,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 289,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 290,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 291,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 292,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 293,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 294,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 295,
+    "query": "How much did I save in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 296,
+    "query": "What were my savings in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 297,
+    "query": "Show my savings for October",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 298,
+    "query": "How much did I earn in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 299,
+    "query": "What was my income in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 300,
+    "query": "How much did I spend in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 301,
+    "query": "What were my expenses in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 302,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 303,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 304,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 305,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 306,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 307,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 308,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 309,
+    "query": "How much did I save in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 310,
+    "query": "What were my savings in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 311,
+    "query": "Show my savings for November",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 312,
+    "query": "How much did I earn in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 313,
+    "query": "What was my income in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 314,
+    "query": "How much did I spend in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 315,
+    "query": "What were my expenses in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 316,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 317,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 318,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 319,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 320,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 321,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 322,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 323,
+    "query": "How much did I save in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 324,
+    "query": "What were my savings in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 325,
+    "query": "Show my savings for December",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 326,
+    "query": "How much did I earn in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 327,
+    "query": "What was my income in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 328,
+    "query": "How much did I spend in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 329,
+    "query": "What were my expenses in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 330,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 331,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 332,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 333,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 334,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 335,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 336,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 337,
+    "query": "How much did I save in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 338,
+    "query": "What were my savings in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 339,
+    "query": "Show my savings for January",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 340,
+    "query": "How much did I earn in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 341,
+    "query": "What was my income in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 342,
+    "query": "How much did I spend in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 343,
+    "query": "What were my expenses in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 344,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 345,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 346,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 347,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 348,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 349,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 350,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 351,
+    "query": "How much did I save in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 352,
+    "query": "What were my savings in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 353,
+    "query": "Show my savings for February",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 354,
+    "query": "How much did I earn in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 355,
+    "query": "What was my income in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 356,
+    "query": "How much did I spend in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 357,
+    "query": "What were my expenses in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 358,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 359,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 360,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 361,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 362,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 363,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 364,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 365,
+    "query": "How much did I save in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 366,
+    "query": "What were my savings in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 367,
+    "query": "Show my savings for March",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 368,
+    "query": "How much did I earn in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 369,
+    "query": "What was my income in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 370,
+    "query": "How much did I spend in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 371,
+    "query": "What were my expenses in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 372,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 373,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 374,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 375,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 376,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 377,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 378,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 379,
+    "query": "How much did I save in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 380,
+    "query": "What were my savings in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 381,
+    "query": "Show my savings for April",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 382,
+    "query": "How much did I earn in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 383,
+    "query": "What was my income in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 384,
+    "query": "How much did I spend in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 385,
+    "query": "What were my expenses in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 386,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 387,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 388,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 389,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 390,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 391,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 392,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 393,
+    "query": "How much did I save in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 394,
+    "query": "What were my savings in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 395,
+    "query": "Show my savings for May",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 396,
+    "query": "How much did I earn in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 397,
+    "query": "What was my income in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 398,
+    "query": "How much did I spend in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 399,
+    "query": "What were my expenses in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 400,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 401,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 402,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 403,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 404,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 405,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 406,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 407,
+    "query": "How much did I save in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 408,
+    "query": "What were my savings in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 409,
+    "query": "Show my savings for June",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 410,
+    "query": "How much did I earn in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 411,
+    "query": "What was my income in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 412,
+    "query": "How much did I spend in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 413,
+    "query": "What were my expenses in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 414,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 415,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 416,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 417,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 418,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 419,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 420,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 421,
+    "query": "How much did I save in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 422,
+    "query": "What were my savings in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 423,
+    "query": "Show my savings for July",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 424,
+    "query": "How much did I earn in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 425,
+    "query": "What was my income in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 426,
+    "query": "How much did I spend in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 427,
+    "query": "What were my expenses in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 428,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 429,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 430,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 431,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 432,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 433,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 434,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 435,
+    "query": "How much did I save in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 436,
+    "query": "What were my savings in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 437,
+    "query": "Show my savings for August",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 438,
+    "query": "How much did I earn in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 439,
+    "query": "What was my income in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 440,
+    "query": "How much did I spend in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 441,
+    "query": "What were my expenses in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 442,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 443,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 444,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 445,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 446,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 447,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 448,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 449,
+    "query": "How much did I save in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 450,
+    "query": "What were my savings in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 451,
+    "query": "Show my savings for September",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 452,
+    "query": "How much did I earn in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 453,
+    "query": "What was my income in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 454,
+    "query": "How much did I spend in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 455,
+    "query": "What were my expenses in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 456,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 457,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 458,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 459,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 460,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 461,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 462,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 463,
+    "query": "How much did I save in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 464,
+    "query": "What were my savings in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 465,
+    "query": "Show my savings for October",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 466,
+    "query": "How much did I earn in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 467,
+    "query": "What was my income in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 468,
+    "query": "How much did I spend in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 469,
+    "query": "What were my expenses in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 470,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 471,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 472,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 473,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 474,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 475,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 476,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 477,
+    "query": "How much did I save in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 478,
+    "query": "What were my savings in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 479,
+    "query": "Show my savings for November",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 480,
+    "query": "How much did I earn in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 481,
+    "query": "What was my income in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 482,
+    "query": "How much did I spend in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 483,
+    "query": "What were my expenses in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 484,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 485,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 486,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 487,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 488,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 489,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 490,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 491,
+    "query": "How much did I save in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 492,
+    "query": "What were my savings in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 493,
+    "query": "Show my savings for December",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 494,
+    "query": "How much did I earn in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 495,
+    "query": "What was my income in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 496,
+    "query": "How much did I spend in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 497,
+    "query": "What were my expenses in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 498,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 499,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 500,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 501,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 502,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 503,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 504,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 505,
+    "query": "How much did I save in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 506,
+    "query": "What were my savings in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 507,
+    "query": "Show my savings for January",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 508,
+    "query": "How much did I earn in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 509,
+    "query": "What was my income in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 510,
+    "query": "How much did I spend in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 511,
+    "query": "What were my expenses in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 512,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 513,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 514,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 515,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 516,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 517,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 518,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 519,
+    "query": "How much did I save in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 520,
+    "query": "What were my savings in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 521,
+    "query": "Show my savings for February",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 522,
+    "query": "How much did I earn in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 523,
+    "query": "What was my income in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 524,
+    "query": "How much did I spend in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 525,
+    "query": "What were my expenses in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 526,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 527,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 528,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 529,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 530,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 531,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 532,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 533,
+    "query": "How much did I save in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 534,
+    "query": "What were my savings in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 535,
+    "query": "Show my savings for March",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 536,
+    "query": "How much did I earn in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 537,
+    "query": "What was my income in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 538,
+    "query": "How much did I spend in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 539,
+    "query": "What were my expenses in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 540,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 541,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 542,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 543,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 544,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 545,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 546,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 547,
+    "query": "How much did I save in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 548,
+    "query": "What were my savings in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 549,
+    "query": "Show my savings for April",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 550,
+    "query": "How much did I earn in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 551,
+    "query": "What was my income in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 552,
+    "query": "How much did I spend in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 553,
+    "query": "What were my expenses in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 554,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 555,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 556,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 557,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 558,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 559,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 560,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 561,
+    "query": "How much did I save in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 562,
+    "query": "What were my savings in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 563,
+    "query": "Show my savings for May",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 564,
+    "query": "How much did I earn in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 565,
+    "query": "What was my income in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 566,
+    "query": "How much did I spend in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 567,
+    "query": "What were my expenses in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 568,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 569,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 570,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 571,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 572,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 573,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 574,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 575,
+    "query": "How much did I save in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 576,
+    "query": "What were my savings in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 577,
+    "query": "Show my savings for June",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 578,
+    "query": "How much did I earn in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 579,
+    "query": "What was my income in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 580,
+    "query": "How much did I spend in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 581,
+    "query": "What were my expenses in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 582,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 583,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 584,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 585,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 586,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 587,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 588,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 589,
+    "query": "How much did I save in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 590,
+    "query": "What were my savings in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 591,
+    "query": "Show my savings for July",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 592,
+    "query": "How much did I earn in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 593,
+    "query": "What was my income in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 594,
+    "query": "How much did I spend in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 595,
+    "query": "What were my expenses in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 596,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 597,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 598,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 599,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 600,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 601,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 602,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 603,
+    "query": "How much did I save in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 604,
+    "query": "What were my savings in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 605,
+    "query": "Show my savings for August",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 606,
+    "query": "How much did I earn in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 607,
+    "query": "What was my income in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 608,
+    "query": "How much did I spend in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 609,
+    "query": "What were my expenses in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 610,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 611,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 612,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 613,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 614,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 615,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 616,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 617,
+    "query": "How much did I save in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 618,
+    "query": "What were my savings in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 619,
+    "query": "Show my savings for September",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 620,
+    "query": "How much did I earn in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 621,
+    "query": "What was my income in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 622,
+    "query": "How much did I spend in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 623,
+    "query": "What were my expenses in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 624,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 625,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 626,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 627,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 628,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 629,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 630,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 631,
+    "query": "How much did I save in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 632,
+    "query": "What were my savings in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 633,
+    "query": "Show my savings for October",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 634,
+    "query": "How much did I earn in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 635,
+    "query": "What was my income in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 636,
+    "query": "How much did I spend in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 637,
+    "query": "What were my expenses in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 638,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 639,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 640,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 641,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 642,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 643,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 644,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 645,
+    "query": "How much did I save in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 646,
+    "query": "What were my savings in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 647,
+    "query": "Show my savings for November",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 648,
+    "query": "How much did I earn in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 649,
+    "query": "What was my income in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 650,
+    "query": "How much did I spend in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 651,
+    "query": "What were my expenses in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 652,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 653,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 654,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 655,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 656,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 657,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 658,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 659,
+    "query": "How much did I save in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 660,
+    "query": "What were my savings in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 661,
+    "query": "Show my savings for December",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 662,
+    "query": "How much did I earn in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 663,
+    "query": "What was my income in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 664,
+    "query": "How much did I spend in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 665,
+    "query": "What were my expenses in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 666,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 667,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 668,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 669,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 670,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 671,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 672,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 673,
+    "query": "How much did I save in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 674,
+    "query": "What were my savings in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 675,
+    "query": "Show my savings for January",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 676,
+    "query": "How much did I earn in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 677,
+    "query": "What was my income in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 678,
+    "query": "How much did I spend in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 679,
+    "query": "What were my expenses in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 680,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 681,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 682,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 683,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 684,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 685,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 686,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 687,
+    "query": "How much did I save in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 688,
+    "query": "What were my savings in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 689,
+    "query": "Show my savings for February",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 690,
+    "query": "How much did I earn in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 691,
+    "query": "What was my income in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 692,
+    "query": "How much did I spend in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 693,
+    "query": "What were my expenses in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 694,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 695,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 696,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 697,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 698,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 699,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 700,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 701,
+    "query": "How much did I save in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 702,
+    "query": "What were my savings in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 703,
+    "query": "Show my savings for March",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 704,
+    "query": "How much did I earn in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 705,
+    "query": "What was my income in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 706,
+    "query": "How much did I spend in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 707,
+    "query": "What were my expenses in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 708,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 709,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 710,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 711,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 712,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 713,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 714,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 715,
+    "query": "How much did I save in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 716,
+    "query": "What were my savings in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 717,
+    "query": "Show my savings for April",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 718,
+    "query": "How much did I earn in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 719,
+    "query": "What was my income in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 720,
+    "query": "How much did I spend in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 721,
+    "query": "What were my expenses in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 722,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 723,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 724,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 725,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 726,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 727,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 728,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 729,
+    "query": "How much did I save in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 730,
+    "query": "What were my savings in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 731,
+    "query": "Show my savings for May",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 732,
+    "query": "How much did I earn in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 733,
+    "query": "What was my income in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 734,
+    "query": "How much did I spend in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 735,
+    "query": "What were my expenses in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 736,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 737,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 738,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 739,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 740,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 741,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 742,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 743,
+    "query": "How much did I save in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 744,
+    "query": "What were my savings in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 745,
+    "query": "Show my savings for June",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 746,
+    "query": "How much did I earn in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 747,
+    "query": "What was my income in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 748,
+    "query": "How much did I spend in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 749,
+    "query": "What were my expenses in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 750,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 751,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 752,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 753,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 754,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 755,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 756,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 757,
+    "query": "How much did I save in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 758,
+    "query": "What were my savings in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 759,
+    "query": "Show my savings for July",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 760,
+    "query": "How much did I earn in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 761,
+    "query": "What was my income in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 762,
+    "query": "How much did I spend in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 763,
+    "query": "What were my expenses in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 764,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 765,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 766,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 767,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 768,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 769,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 770,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 771,
+    "query": "How much did I save in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 772,
+    "query": "What were my savings in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 773,
+    "query": "Show my savings for August",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 774,
+    "query": "How much did I earn in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 775,
+    "query": "What was my income in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 776,
+    "query": "How much did I spend in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 777,
+    "query": "What were my expenses in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 778,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 779,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 780,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 781,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 782,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 783,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 784,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 785,
+    "query": "How much did I save in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 786,
+    "query": "What were my savings in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 787,
+    "query": "Show my savings for September",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 788,
+    "query": "How much did I earn in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 789,
+    "query": "What was my income in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 790,
+    "query": "How much did I spend in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 791,
+    "query": "What were my expenses in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 792,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 793,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 794,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 795,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 796,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 797,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 798,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 799,
+    "query": "How much did I save in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 800,
+    "query": "What were my savings in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 801,
+    "query": "Show my savings for October",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 802,
+    "query": "How much did I earn in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 803,
+    "query": "What was my income in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 804,
+    "query": "How much did I spend in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 805,
+    "query": "What were my expenses in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 806,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 807,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 808,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 809,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 810,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 811,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 812,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 813,
+    "query": "How much did I save in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 814,
+    "query": "What were my savings in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 815,
+    "query": "Show my savings for November",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 816,
+    "query": "How much did I earn in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 817,
+    "query": "What was my income in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 818,
+    "query": "How much did I spend in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 819,
+    "query": "What were my expenses in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 820,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 821,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 822,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 823,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 824,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 825,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 826,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 827,
+    "query": "How much did I save in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 828,
+    "query": "What were my savings in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 829,
+    "query": "Show my savings for December",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 830,
+    "query": "How much did I earn in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 831,
+    "query": "What was my income in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 832,
+    "query": "How much did I spend in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 833,
+    "query": "What were my expenses in December?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 834,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 835,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 836,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 837,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 838,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 839,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 840,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 841,
+    "query": "How much did I save in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 842,
+    "query": "What were my savings in January?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 843,
+    "query": "Show my savings for January",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 844,
+    "query": "How much did I earn in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 845,
+    "query": "What was my income in January?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 846,
+    "query": "How much did I spend in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 847,
+    "query": "What were my expenses in January?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 848,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 849,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 850,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 851,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 852,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 853,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 854,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 855,
+    "query": "How much did I save in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 856,
+    "query": "What were my savings in February?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 857,
+    "query": "Show my savings for February",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 858,
+    "query": "How much did I earn in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 859,
+    "query": "What was my income in February?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 860,
+    "query": "How much did I spend in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 861,
+    "query": "What were my expenses in February?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 862,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 863,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 864,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 865,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 866,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 867,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 868,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 869,
+    "query": "How much did I save in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 870,
+    "query": "What were my savings in March?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 871,
+    "query": "Show my savings for March",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 872,
+    "query": "How much did I earn in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 873,
+    "query": "What was my income in March?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 874,
+    "query": "How much did I spend in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 875,
+    "query": "What were my expenses in March?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 876,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 877,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 878,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 879,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 880,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 881,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 882,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 883,
+    "query": "How much did I save in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 884,
+    "query": "What were my savings in April?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 885,
+    "query": "Show my savings for April",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 886,
+    "query": "How much did I earn in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 887,
+    "query": "What was my income in April?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 888,
+    "query": "How much did I spend in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 889,
+    "query": "What were my expenses in April?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 890,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 891,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 892,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 893,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 894,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 895,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 896,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 897,
+    "query": "How much did I save in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 898,
+    "query": "What were my savings in May?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 899,
+    "query": "Show my savings for May",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 900,
+    "query": "How much did I earn in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 901,
+    "query": "What was my income in May?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 902,
+    "query": "How much did I spend in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 903,
+    "query": "What were my expenses in May?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 904,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 905,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 906,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 907,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 908,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 909,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 910,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 911,
+    "query": "How much did I save in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 912,
+    "query": "What were my savings in June?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 913,
+    "query": "Show my savings for June",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 914,
+    "query": "How much did I earn in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 915,
+    "query": "What was my income in June?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 916,
+    "query": "How much did I spend in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 917,
+    "query": "What were my expenses in June?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 918,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 919,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 920,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 921,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 922,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 923,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 924,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 925,
+    "query": "How much did I save in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 926,
+    "query": "What were my savings in July?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 927,
+    "query": "Show my savings for July",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 928,
+    "query": "How much did I earn in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 929,
+    "query": "What was my income in July?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 930,
+    "query": "How much did I spend in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 931,
+    "query": "What were my expenses in July?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 932,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 933,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 934,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 935,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 936,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 937,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 938,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 939,
+    "query": "How much did I save in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 940,
+    "query": "What were my savings in August?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 941,
+    "query": "Show my savings for August",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 942,
+    "query": "How much did I earn in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 943,
+    "query": "What was my income in August?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 944,
+    "query": "How much did I spend in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 945,
+    "query": "What were my expenses in August?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 946,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 947,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 948,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 949,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 950,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 951,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 952,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 953,
+    "query": "How much did I save in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 954,
+    "query": "What were my savings in September?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 955,
+    "query": "Show my savings for September",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 956,
+    "query": "How much did I earn in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 957,
+    "query": "What was my income in September?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 958,
+    "query": "How much did I spend in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 959,
+    "query": "What were my expenses in September?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 960,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 961,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 962,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 963,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 964,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 965,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 966,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 967,
+    "query": "How much did I save in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 968,
+    "query": "What were my savings in October?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 969,
+    "query": "Show my savings for October",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 970,
+    "query": "How much did I earn in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 971,
+    "query": "What was my income in October?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 972,
+    "query": "How much did I spend in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 973,
+    "query": "What were my expenses in October?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 974,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 975,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 976,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 977,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 978,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 979,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 980,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 981,
+    "query": "How much did I save in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 982,
+    "query": "What were my savings in November?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 983,
+    "query": "Show my savings for November",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 984,
+    "query": "How much did I earn in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 985,
+    "query": "What was my income in November?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 986,
+    "query": "How much did I spend in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 987,
+    "query": "What were my expenses in November?",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 988,
+    "query": "How much money do people owe me?",
+    "expectedSubject": "RECEIVABLES"
+  },
+  {
+    "id": 989,
+    "query": "How much do I owe?",
+    "expectedSubject": "DEBT"
+  },
+  {
+    "id": 990,
+    "query": "Show my savings trend",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 991,
+    "query": "Show my spending trend",
+    "expectedSubject": "SPENDING"
+  },
+  {
+    "id": 992,
+    "query": "What is my current balance?",
+    "expectedSubject": "BALANCE"
+  },
+  {
+    "id": 993,
+    "query": "How much do subscriptions cost?",
+    "expectedSubject": "SUBSCRIPTIONS"
+  },
+  {
+    "id": 994,
+    "query": "How much do I owe on my credit card?",
+    "expectedSubject": "CREDIT_CARD"
+  },
+  {
+    "id": 995,
+    "query": "How much did I save in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 996,
+    "query": "What were my savings in December?",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 997,
+    "query": "Show my savings for December",
+    "expectedSubject": "SAVINGS"
+  },
+  {
+    "id": 998,
+    "query": "How much did I earn in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 999,
+    "query": "What was my income in December?",
+    "expectedSubject": "INCOME"
+  },
+  {
+    "id": 1000,
+    "query": "How much did I spend in December?",
+    "expectedSubject": "SPENDING"
+  }
+]
