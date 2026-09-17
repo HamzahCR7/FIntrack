@@ -22,3 +22,8 @@ dist/
 build/
 .vite/
 *.log
+
+!.env.example
+!backend/.env.example
+deployment-data/
+backend/prisma/schema.postgresql.prisma

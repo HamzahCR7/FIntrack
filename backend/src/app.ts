@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import { createProductionAuth, validateProductionConfig } from './common/middleware/productionAuth';
 import fs from 'fs';
 import path from 'path';
 import { AccountController } from './controllers/account.controller';
@@ -20,15 +21,18 @@ import { ReceiptController } from './controllers/receipt.controller';
 import { errorHandler } from './common/middleware/errorHandler';
 
 export function createApp(): Application {
+  validateProductionConfig();
   const app = express();
 
-  app.use(cors());
+  if (process.env.NODE_ENV !== 'production') app.use(cors());
   app.use(express.json({ limit: '12mb' }));
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', service: 'FinTrack API', phase: 5 });
   });
+
+  app.use('/api/v1', createProductionAuth());
 
   // API V1 Routes
   const accountController = new AccountController();
