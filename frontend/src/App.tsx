@@ -37,14 +37,6 @@ type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions'
 
 export const App: React.FC = () => {
   const { addToast } = useToast();
-  const [themeMode, setThemeMode] = useState<'light' | 'dark'>(() => {
-    const savedTheme = localStorage.getItem('fintrack_theme_mode');
-    if (savedTheme === 'light' || savedTheme === 'dark') {
-      return savedTheme;
-    }
-
-    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-  });
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<{ id: string; username: string; name?: string } | null>(null);
@@ -92,9 +84,9 @@ export const App: React.FC = () => {
   });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', themeMode);
-    localStorage.setItem('fintrack_theme_mode', themeMode);
-  }, [themeMode]);
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('fintrack_theme_mode', 'dark');
+  }, []);
 
   // Verify stored session on mount
   useEffect(() => {
@@ -257,7 +249,7 @@ export const App: React.FC = () => {
   }
 
   return (
-    <div className={`dashboard-shell ${themeMode === 'light' ? 'theme-light' : 'theme-dark'} min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-300 selection:text-slate-950`}>
+    <div className="dashboard-shell min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-cyan-300 selection:text-slate-950">
       {/* Header */}
       <Navbar
         onAddTransaction={() => handleOpenAddModal()}
@@ -273,8 +265,6 @@ export const App: React.FC = () => {
         goals={goals}
         onNavigate={setActiveTab}
         isLoading={isLoading}
-        themeMode={themeMode}
-        onToggleTheme={() => setThemeMode((prev) => (prev === 'dark' ? 'light' : 'dark'))}
       />
 
       {/* Main Content */}

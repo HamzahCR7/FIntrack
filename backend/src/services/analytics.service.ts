@@ -61,77 +61,89 @@ export class AnalyticsService {
     const totalLiquidBalance = bankBalances + cashBalances + upiBalances;
 
     // 2. All-Time Aggregates
-    const allIncome = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: { type: TransactionType.INCOME },
-    });
-    const allExpenses = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: { type: TransactionType.EXPENSE },
-    });
+    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: { type: TransactionType.INCOME },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: { type: TransactionType.EXPENSE },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: {
+          type: TransactionType.INCOME,
+          transactionDate: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: {
+          type: TransactionType.EXPENSE,
+          transactionDate: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: {
+          type: TransactionType.INCOME,
+          destinationAccountId: { in: pocketAccountIds },
+          transactionDate: { gte: startOfMonth, lte: endOfMonth },
+        },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: {
+          type: TransactionType.INCOME,
+          transactionDate: { gte: new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0)), lte: new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)) },
+        },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: {
+          type: TransactionType.EXPENSE,
+          transactionDate: { gte: new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0)), lte: new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)) },
+        },
+      }),
+      this.db.transaction.findMany({
+        where: { type: TransactionType.EXPENSE },
+        select: {
+          amount: true,
+          categoryId: true,
+          paymentMethod: true,
+          category: { select: { name: true, icon: true, color: true } },
+        },
+      }),
+      this.db.subscription.findMany({
+        where: { status: 'ACTIVE' },
+        include: { sourceAccount: true, category: true },
+      }),
+      this.db.subscription.findMany({
+        where: { status: 'ACTIVE' },
+        orderBy: { nextBillingDate: 'asc' },
+        take: 5,
+        include: { sourceAccount: true, category: true },
+      }),
+      this.db.debt.findMany({
+        where: { status: { not: 'SETTLED' } },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
 
     const totalIncome = allIncome._sum.amount || 0;
     const totalExpenses = allExpenses._sum.amount || 0;
     const totalSavings = totalIncome - totalExpenses;
 
-    // 3. Current Month Aggregates
-    const monthIncomeAgg = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: {
-        type: TransactionType.INCOME,
-        transactionDate: { gte: startOfMonth, lte: endOfMonth },
-      },
-    });
-    const monthExpensesAgg = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: {
-        type: TransactionType.EXPENSE,
-        transactionDate: { gte: startOfMonth, lte: endOfMonth },
-      },
-    });
-
     const spendingThisMonth = monthExpensesAgg._sum.amount || 0;
     const incomeThisMonth = monthIncomeAgg._sum.amount || 0;
     const savingsThisMonth = incomeThisMonth - spendingThisMonth;
 
-    const pocketAllowanceAgg = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: {
-        type: TransactionType.INCOME,
-        destinationAccountId: { in: pocketAccountIds },
-        transactionDate: { gte: startOfMonth, lte: endOfMonth },
-      },
-    });
     const pocketAllowanceThisMonth = pocketAllowanceAgg._sum.amount || 0;
-
-    // 3b. Previous Month Aggregates (Strict Previous Calendar Month)
-    const startOfPrevMonth = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
-    const endOfPrevMonth = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
-
-    const prevMonthIncomeAgg = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: {
-        type: TransactionType.INCOME,
-        transactionDate: { gte: startOfPrevMonth, lte: endOfPrevMonth },
-      },
-    });
-    const prevMonthExpensesAgg = await this.db.transaction.aggregate({
-      _sum: { amount: true },
-      where: {
-        type: TransactionType.EXPENSE,
-        transactionDate: { gte: startOfPrevMonth, lte: endOfPrevMonth },
-      },
-    });
 
     const previousMonthIncome = prevMonthIncomeAgg._sum.amount || 0;
     const previousMonthExpenses = prevMonthExpensesAgg._sum.amount || 0;
     const previousMonthSavings = previousMonthIncome - previousMonthExpenses;
-
-    // 4. Spending by Category (This Month & All Time)
-    const categoryExpenses = await this.db.transaction.findMany({
-      where: { type: TransactionType.EXPENSE },
-      include: { category: true },
-    });
 
     const categoryMap: Record<string, { id: string; name: string; icon?: string; color?: string; amount: number }> = {};
     for (const tx of categoryExpenses) {
@@ -174,41 +186,39 @@ export class AnalyticsService {
     }));
 
     // 6. Monthly Trends (Last 6 months)
-    const monthlyTrends: { month: string; income: number; expenses: number; savings: number }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const mStart = new Date(d.getFullYear(), d.getMonth(), 1);
-      const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+    const monthlyTrendsData = await Promise.all(
+      Array.from({ length: 6 }, (_, index) => {
+        const offset = 5 - index;
+        const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+        const mStart = new Date(d.getFullYear(), d.getMonth(), 1);
+        const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+        const monthName = d.toLocaleString('default', { month: 'short', year: '2-digit' });
 
-      const monthName = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+        return Promise.all([
+          this.db.transaction.aggregate({
+            _sum: { amount: true },
+            where: { type: TransactionType.INCOME, transactionDate: { gte: mStart, lte: mEnd } },
+          }),
+          this.db.transaction.aggregate({
+            _sum: { amount: true },
+            where: { type: TransactionType.EXPENSE, transactionDate: { gte: mStart, lte: mEnd } },
+          }),
+        ]).then(([incAgg, expAgg]) => {
+          const inc = incAgg._sum.amount || 0;
+          const exp = expAgg._sum.amount || 0;
+          return {
+            month: monthName,
+            income: Number(inc.toFixed(2)),
+            expenses: Number(exp.toFixed(2)),
+            savings: Number((inc - exp).toFixed(2)),
+          };
+        });
+      }),
+    );
 
-      const incAgg = await this.db.transaction.aggregate({
-        _sum: { amount: true },
-        where: { type: TransactionType.INCOME, transactionDate: { gte: mStart, lte: mEnd } },
-      });
-
-      const expAgg = await this.db.transaction.aggregate({
-        _sum: { amount: true },
-        where: { type: TransactionType.EXPENSE, transactionDate: { gte: mStart, lte: mEnd } },
-      });
-
-      const inc = incAgg._sum.amount || 0;
-      const exp = expAgg._sum.amount || 0;
-
-      monthlyTrends.push({
-        month: monthName,
-        income: Number(inc.toFixed(2)),
-        expenses: Number(exp.toFixed(2)),
-        savings: Number((inc - exp).toFixed(2)),
-      });
-    }
+    const monthlyTrends = monthlyTrendsData;
 
     // 7. Active Subscriptions Overview
-    const activeSubs = await this.db.subscription.findMany({
-      where: { status: 'ACTIVE' },
-      include: { sourceAccount: true, category: true },
-    });
-
     let monthlySubscriptionCost = 0;
     for (const sub of activeSubs) {
       if (sub.billingCycle === 'WEEKLY') monthlySubscriptionCost += (sub.amount * 52) / 12;
@@ -218,19 +228,7 @@ export class AnalyticsService {
       else if (sub.billingCycle === 'YEARLY') monthlySubscriptionCost += sub.amount / 12;
     }
 
-    const upcomingSubscriptions = await this.db.subscription.findMany({
-      where: { status: 'ACTIVE' },
-      orderBy: { nextBillingDate: 'asc' },
-      take: 5,
-      include: { sourceAccount: true, category: true },
-    });
-
     // 8. Money Owed / Borrowed (Debts)
-    const allDebts = await this.db.debt.findMany({
-      where: { status: { not: 'SETTLED' } },
-      orderBy: { createdAt: 'desc' },
-    });
-
     let totalOwedToMe = 0; // People owe me
     let totalIOwe = 0;     // I owe people
 

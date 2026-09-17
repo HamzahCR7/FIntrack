@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3, Sun, Moon } from 'lucide-react';
+import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3 } from 'lucide-react';
 import { DashboardData, Budget, Goal } from '../types';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -17,8 +17,6 @@ interface NavbarProps {
   goals?: Goal[];
   onNavigate: (tab: any) => void;
   isLoading: boolean;
-  themeMode: 'light' | 'dark';
-  onToggleTheme: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -35,11 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   goals,
   onNavigate,
   isLoading,
-  themeMode,
-  onToggleTheme,
 }) => {
-  const isLightMode = themeMode === 'light';
-
   return (
     <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3.5">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -101,14 +95,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             title="Refresh Financial Data"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-400' : ''}`} />
-          </button>
-
-          <button
-            onClick={onToggleTheme}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
-            title={isLightMode ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            {isLightMode ? <Moon className="w-4 h-4 text-indigo-300" /> : <Sun className="w-4 h-4 text-amber-300" />}
           </button>
 
           <NotificationCenter
