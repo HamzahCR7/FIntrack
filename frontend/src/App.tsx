@@ -281,8 +281,8 @@ export const App: React.FC = () => {
       {/* Main Content */}
       <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8 pb-32 md:pb-8 space-y-6 sm:space-y-8">
         <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-5 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-24 -left-14 h-64 w-64 rounded-full bg-gradient-to-tr from-orange-400/25 to-transparent blur-2xl" />
+          <div className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl sm:-right-16 sm:-top-20 sm:h-56 sm:w-56" />
+          <div className="pointer-events-none absolute -bottom-16 -left-8 h-48 w-48 rounded-full bg-gradient-to-tr from-orange-400/25 to-transparent blur-2xl sm:-bottom-24 sm:-left-14 sm:h-64 sm:w-64" />
 
           <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
@@ -366,7 +366,7 @@ export const App: React.FC = () => {
             <section
               className="dashboard-cockpit hidden md:block relative overflow-hidden rounded-[1.75rem] border border-slate-700/70 bg-gradient-to-br from-slate-900/95 via-slate-900 to-slate-950 p-4 shadow-2xl shadow-slate-950/40 sm:p-5"
             >
-              <div className="pointer-events-none absolute -right-16 -top-20 h-48 w-48 rounded-full border-[24px] border-blue-500/10" />
+              <div className="pointer-events-none absolute -right-8 -top-10 h-32 w-32 rounded-full border-[18px] border-blue-500/10 sm:-right-16 sm:-top-20 sm:h-48 sm:w-48 sm:border-[24px]" />
               <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                   <div className="mb-1 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-blue-400">
