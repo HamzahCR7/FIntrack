@@ -138,8 +138,9 @@ export const App: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
+      const dashboardPromise = api.getDashboard();
       const [dash, txs, cats, accs, budgetsData, goalsData] = await Promise.all([
-        api.getDashboard(),
+        dashboardPromise,
         api.getTransactions(filters),
         api.getCategories(),
         api.getAccounts(),
@@ -154,6 +155,16 @@ export const App: React.FC = () => {
       setAccounts(accs);
       setBudgets(budgetsData || []);
       setGoals(goalsData || []);
+
+      void api
+        .getForecast()
+        .then((forecast) => {
+          setDashboardData((current) => (current ? { ...current, forecast } : { ...dash, forecast }));
+        })
+        .catch(() => {
+          // Keep the dashboard usable even if the forecast request fails.
+        });
+
       setIsLoading(false);
     } catch (err: any) {
       setIsLoading(false);
