@@ -4,6 +4,51 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+img,
+svg,
+canvas,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+.recharts-responsive-container,
+.recharts-wrapper {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.recharts-surface {
+  max-width: 100%;
+}
+
 :root {
   --fin-bg-0: #05070d;
   --fin-bg-1: #0b1422;
@@ -205,6 +250,20 @@ select:focus-visible {
 
 .dashboard-enter {
   animation: dashboardRise 500ms ease-out both;
+}
+
+@media (max-width: 767px) {
+  .dashboard-main {
+    padding-bottom: 10rem !important;
+  }
+
+  .dashboard-main > * {
+    min-width: 0;
+  }
+
+  .mobile-tabbar {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
 }
 
 @keyframes sidebarSlideIn {

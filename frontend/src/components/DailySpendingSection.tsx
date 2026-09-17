@@ -461,7 +461,7 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
       )}
 
       {/* Chart Section */}
-      <div className="mt-5 h-72">
+      <div className="mt-5 h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}

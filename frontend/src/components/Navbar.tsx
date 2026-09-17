@@ -54,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2.5">
           {onExportCSV && (
             <button
               onClick={onExportCSV}
@@ -91,7 +91,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors disabled:opacity-50"
+            className="shrink-0 p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors disabled:opacity-50"
             title="Refresh Financial Data"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-400' : ''}`} />
@@ -106,19 +106,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             onClick={onAddDebt}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all transform active:scale-95"
+            className="flex shrink-0 items-center gap-1.5 sm:gap-2 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-[10px] sm:text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all transform active:scale-95"
             title="Record Money Owed to You or Borrowed from Someone"
           >
-            <HandCoins className="w-4 h-4" />
-            <span>Add Debt / Loan</span>
+            <HandCoins className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="whitespace-nowrap">Add Debt / Loan</span>
           </button>
 
           <button
             onClick={onAddTransaction}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/25 transition-all transform active:scale-95"
+            className="flex shrink-0 items-center gap-1.5 sm:gap-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-2 sm:px-3.5 sm:py-2.5 text-[10px] sm:text-sm font-semibold shadow-lg shadow-blue-600/25 transition-all transform active:scale-95"
           >
-            <Plus className="w-4 h-4" />
-            <span>Add Transaction</span>
+            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="whitespace-nowrap">Add Transaction</span>
           </button>
 
           {onLogout && (

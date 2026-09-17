@@ -279,7 +279,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content */}
-      <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-4 lg:px-8 py-8 pb-28 md:pb-8 space-y-8">
+      <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8 pb-32 md:pb-8 space-y-6 sm:space-y-8">
         <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-5 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
           <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl" />
           <div className="pointer-events-none absolute -bottom-24 -left-14 h-64 w-64 rounded-full bg-gradient-to-tr from-orange-400/25 to-transparent blur-2xl" />
