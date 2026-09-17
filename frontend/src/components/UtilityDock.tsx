@@ -441,9 +441,9 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   }
 
   return (
-    <div ref={dockRef} className="fixed right-4 top-20 z-40 flex flex-col items-end gap-2">
+    <div ref={dockRef} className="fixed bottom-4 right-3 z-40 flex flex-col items-end gap-2 sm:bottom-auto sm:right-4 sm:top-20">
       {/* Utility Launcher Bar Buttons */}
-      <div className="flex flex-col items-stretch gap-2 whitespace-nowrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700/80 shadow-xl backdrop-blur-md">
+      <div className="flex flex-row items-stretch gap-2 whitespace-nowrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700/80 shadow-xl backdrop-blur-md sm:flex-col">
         {/* 1. Privacy Shield Quick Toggle */}
         <button
           onClick={handlePrivacyButtonClick}
@@ -458,7 +458,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           <span className="hidden sm:inline">{isPrivacyMode ? 'Stealth ON' : 'Privacy'}</span>
         </button>
 
-        <div className="h-px w-full bg-slate-700" />
+        <div className="h-full w-px bg-slate-700 sm:h-px sm:w-full" />
 
         {/* 2. Dock Launcher Toggle Button */}
         <button
@@ -477,7 +477,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
 
       {/* Utility Window Drawer */}
       {isOpen && (
-        <div className="w-80 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-3 duration-200">
+        <div className="w-[calc(100vw-1.5rem)] max-w-sm bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-3 duration-200 sm:w-80">
           {/* Header & Tabs */}
           <div className="bg-slate-800/90 px-3 py-2.5 border-b border-slate-700/60 flex items-center justify-between">
             <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar">

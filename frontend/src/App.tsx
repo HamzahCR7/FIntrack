@@ -281,41 +281,41 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content */}
-      <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-3 sm:px-4 lg:px-8 py-6 sm:py-8 pb-32 md:pb-8 space-y-6 sm:space-y-8">
-        <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-5 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
+      <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-1.5 sm:px-4 lg:px-8 py-2 sm:py-6 md:py-8 pb-20 sm:pb-32 md:pb-8 space-y-2 sm:space-y-8">
+        <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-3 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
           <div className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl sm:-right-16 sm:-top-20 sm:h-56 sm:w-56" />
           <div className="pointer-events-none absolute -bottom-16 -left-8 h-48 w-48 rounded-full bg-gradient-to-tr from-orange-400/25 to-transparent blur-2xl sm:-bottom-24 sm:-left-14 sm:h-64 sm:w-64" />
 
-          <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="relative grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-cyan-300/90">Financial command center</p>
-              <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                 {dayGreeting}, {displayName}.
               </h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-300 sm:text-[15px]">
+              <p className="mt-1 max-w-2xl text-sm text-slate-300 sm:text-[15px]">
                 {todayLabel} at a glance. Track cashflow, prioritize due items, and take the next best action quickly.
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-2 text-xs sm:gap-3">
-              <div className="hero-metric-card rounded-2xl border border-cyan-300/30 bg-cyan-400/10 px-3 py-2.5">
+              <div className="hero-metric-card rounded-2xl border border-cyan-300/30 bg-cyan-400/10 px-2.5 py-2">
                 <p className="text-[10px] uppercase tracking-[0.16em] text-cyan-200/90">Due now</p>
                 <p className="mt-1 text-lg font-semibold text-cyan-100">{dueTimelineCount}</p>
               </div>
-              <div className="hero-metric-card rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-3 py-2.5">
+              <div className="hero-metric-card rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-2.5 py-2">
                 <p className="text-[10px] uppercase tracking-[0.16em] text-emerald-200/90">This month</p>
                 <p className="mt-1 text-lg font-semibold text-emerald-100">{ledgerTransactionCount}</p>
               </div>
               <button
                 onClick={() => setIsAffordModalOpen(true)}
-                className="hero-action-btn rounded-2xl border border-amber-300/35 bg-amber-400/10 px-3 py-2.5 text-left text-amber-200 transition-colors hover:bg-amber-400/20"
+                className="hero-action-btn rounded-2xl border border-amber-300/35 bg-amber-400/10 px-2.5 py-2 text-left text-amber-200 transition-colors hover:bg-amber-400/20"
               >
                 <p className="text-[10px] uppercase tracking-[0.16em]">Quick check</p>
                 <p className="mt-1 text-sm font-semibold">Can I afford this?</p>
               </button>
               <button
                 onClick={() => setIsTimeMachineModalOpen(true)}
-                className="hero-action-btn rounded-2xl border border-fuchsia-300/35 bg-fuchsia-400/10 px-3 py-2.5 text-left text-fuchsia-200 transition-colors hover:bg-fuchsia-400/20"
+                className="hero-action-btn rounded-2xl border border-fuchsia-300/35 bg-fuchsia-400/10 px-2.5 py-2 text-left text-fuchsia-200 transition-colors hover:bg-fuchsia-400/20"
               >
                 <p className="text-[10px] uppercase tracking-[0.16em]">Scenario plan</p>
                 <p className="mt-1 text-sm font-semibold">Open time machine</p>
@@ -662,8 +662,8 @@ export const App: React.FC = () => {
         <p>FinTrack Personal Financial System — Developed by Hamzah</p>
       </footer>
 
-      <nav className="mobile-tabbar fixed inset-x-3 bottom-3 z-50 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-2 py-2 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:hidden">
-        <div className="grid grid-cols-5 gap-1">
+      <nav className="mobile-tabbar fixed inset-x-2 bottom-2 z-50 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-1.5 py-1.5 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:hidden">
+        <div className="grid grid-cols-5 gap-0.5">
           {navigationItems.slice(0, 5).map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -672,21 +672,21 @@ export const App: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 transition-colors ${
+                className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${
                   isActive ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'
                 }`}
                 aria-label={item.label}
                 aria-pressed={isActive}
               >
                 <Icon className="h-4 w-4" />
-                <span className="text-[10px] font-semibold leading-none">{item.label.split(' ')[0]}</span>
-                {item.badge ? <span className="absolute right-1.5 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
+                <span className="text-[9px] font-semibold leading-none">{item.label.split(' ')[0]}</span>
+                {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[8px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
           })}
         </div>
 
-        <div className="mt-1.5 flex items-center justify-between gap-1">
+        <div className="mt-1 flex items-center justify-between gap-0.5">
           {navigationItems.slice(5).map((item) => {
             const isActive = activeTab === item.id;
 
@@ -694,7 +694,7 @@ export const App: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`truncate rounded-lg px-2 py-1 text-[10px] font-semibold transition-colors ${
+                className={`truncate rounded-lg px-1.5 py-1 text-[9px] font-semibold transition-colors ${
                   isActive ? 'bg-sky-400/20 text-sky-200' : 'text-slate-400 hover:bg-slate-800/80'
                 }`}
               >
