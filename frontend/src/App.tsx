@@ -201,7 +201,9 @@ export const App: React.FC = () => {
         await api.createTransaction(data);
         addToast('Transaction saved successfully', 'success');
       }
+
       setEditingTransaction(null);
+      await fetchAllData();
     } catch (error: any) {
       addToast(error?.response?.data?.message || error?.message || 'Failed to save transaction', 'error');
       throw error;

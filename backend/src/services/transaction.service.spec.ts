@@ -145,4 +145,47 @@ describe('TransactionService - Core Financial Rules', () => {
     summary = await transactionService.getFinancialSummary();
     expect(summary.totalExpenses).toBe(5000);
   });
+
+  test('updates run with an explicit Prisma timeout above the default 5s interactive transaction limit', async () => {
+    const transactionRepo = {
+      findById: jest.fn().mockResolvedValue({
+        id: 'txn_123',
+        type: TransactionType.EXPENSE,
+        amount: 500,
+        sourceAccountId: null,
+        destinationAccountId: null,
+      }),
+      update: jest.fn().mockResolvedValue({ id: 'txn_123' }),
+    };
+
+    const accountRepo = {
+      findById: jest.fn().mockResolvedValue({ id: 'acc_123', isActive: true }),
+      updateBalance: jest.fn().mockResolvedValue({ id: 'acc_123' }),
+    };
+
+    const categoryRepo = {
+      findById: jest.fn().mockResolvedValue({ id: 'cat_123' }),
+    };
+
+    const db = {
+      $transaction: jest.fn(async (callback, options) => callback({})),
+    } as any;
+
+    const service = new TransactionService(db, transactionRepo as any, accountRepo as any, categoryRepo as any);
+
+    await service.updateTransaction('txn_123', {
+      type: TransactionType.EXPENSE,
+      amount: 750,
+      sourceAccountId: 'acc_123',
+      categoryId: 'cat_123',
+      paymentMethod: PaymentMethod.CREDIT_CARD,
+      description: 'Updated purchase',
+      transactionDate: new Date('2024-01-01T00:00:00.000Z'),
+    });
+
+    expect(db.$transaction).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ timeout: 30000, maxWait: 30000 })
+    );
+  });
 });

@@ -8,6 +8,11 @@ import { BadRequestError, NotFoundError } from '../common/errors';
 import { TransactionType, AccountType } from '../types/enums';
 
 export class TransactionService {
+  private readonly prismaTransactionOptions = {
+    timeout: 30000,
+    maxWait: 30000,
+  };
+
   constructor(
     private db: PrismaClient = defaultPrisma,
     private transactionRepo: TransactionRepository = new TransactionRepository(db),
@@ -96,7 +101,7 @@ export class TransactionService {
         },
         tx
       );
-    });
+    }, this.prismaTransactionOptions);
   }
 
   async updateTransaction(id: string, input: CreateTransactionInputDto): Promise<any> {
@@ -202,7 +207,7 @@ export class TransactionService {
         },
         tx
       );
-    });
+    }, this.prismaTransactionOptions);
   }
 
   async deleteTransaction(id: string): Promise<Transaction> {
@@ -237,7 +242,7 @@ export class TransactionService {
       }
 
       return this.transactionRepo.delete(id, tx);
-    });
+    }, this.prismaTransactionOptions);
   }
 
   async getFinancialSummary() {
