@@ -441,7 +441,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   }
 
   return (
-    <div ref={dockRef} className="fixed bottom-4 right-3 z-40 flex flex-col items-end gap-2 sm:bottom-auto sm:right-4 sm:top-20">
+    <div ref={dockRef} className="fixed bottom-32 right-3 z-[60] flex flex-col items-end gap-2 sm:bottom-auto sm:right-4 sm:top-20 sm:z-40">
       {/* Utility Launcher Bar Buttons */}
       <div className="flex flex-row items-stretch gap-2 whitespace-nowrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700/80 shadow-xl backdrop-blur-md sm:flex-col">
         {/* 1. Privacy Shield Quick Toggle */}
@@ -455,7 +455,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           title={isPrivacyMode ? 'Stealth Mode Active (Click to unlock values with password)' : 'Click to hide/mask all balance numbers'}
         >
           {isPrivacyMode ? <EyeOff className="w-4 h-4 text-white" /> : <Eye className="w-4 h-4 text-blue-400" />}
-          <span className="hidden sm:inline">{isPrivacyMode ? 'Stealth ON' : 'Privacy'}</span>
+          <span>{isPrivacyMode ? 'Stealth ON' : 'Stealth'}</span>
         </button>
 
         <div className="h-full w-px bg-slate-700 sm:h-px sm:w-full" />
@@ -471,7 +471,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           title={isOpen ? 'Close Utility Drawer' : 'Open Utilities (Calculator, Daily Gauge, Runway)'}
         >
           <Calculator className="w-4 h-4 text-indigo-400" />
-          <span className="hidden sm:inline">Utilities</span>
+          <span>Utilities</span>
         </button>
       </div>
 

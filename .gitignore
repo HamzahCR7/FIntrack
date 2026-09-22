@@ -25,5 +25,6 @@ build/
 
 !.env.example
 !backend/.env.example
+!backend/.env.cloud.example
 deployment-data/
 backend/prisma/schema.postgresql.prisma

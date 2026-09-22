@@ -686,19 +686,24 @@ export const App: React.FC = () => {
           })}
         </div>
 
-        <div className="mt-1 flex items-center justify-between gap-0.5">
+        <div className="mt-1 grid grid-cols-6 gap-0.5">
           {navigationItems.slice(5).map((item) => {
+            const Icon = item.icon;
             const isActive = activeTab === item.id;
 
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`truncate rounded-lg px-1.5 py-1 text-[9px] font-semibold transition-colors ${
+                className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 text-[8px] font-semibold transition-colors ${
                   isActive ? 'bg-sky-400/20 text-sky-200' : 'text-slate-400 hover:bg-slate-800/80'
                 }`}
+                aria-label={item.label}
+                aria-pressed={isActive}
               >
-                {item.label}
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="w-full truncate text-center leading-none">{item.label.split(' ')[0]}</span>
+                {item.badge ? <span className="absolute right-0.5 top-0.5 rounded-full bg-emerald-400 px-1 py-0.5 text-[7px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
           })}

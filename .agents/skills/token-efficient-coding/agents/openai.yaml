@@ -1,0 +1,6 @@
+interface:
+  display_name: "Token-Efficient Coding"
+  short_description: "Complete focused coding tasks with minimal context and output."
+  default_prompt: "Use $token-efficient-coding to complete this task with minimal token usage."
+policy:
+  allow_implicit_invocation: true
