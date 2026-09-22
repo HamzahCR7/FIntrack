@@ -678,9 +678,9 @@ export const App: React.FC = () => {
                 aria-label={item.label}
                 aria-pressed={isActive}
               >
-                <Icon className="h-4 w-4" />
-                <span className="text-[9px] font-semibold leading-none">{item.label.split(' ')[0]}</span>
-                {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[8px] font-bold text-emerald-950">{item.badge}</span> : null}
+                <Icon className="h-[18px] w-[18px]" />
+                <span className="text-[11px] font-semibold leading-none">{item.label.split(' ')[0]}</span>
+                {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
           })}
@@ -695,15 +695,15 @@ export const App: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-1.5 text-[8px] font-semibold transition-colors ${
+                className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-2 text-[10px] font-semibold transition-colors ${
                   isActive ? 'bg-sky-400/20 text-sky-200' : 'text-slate-400 hover:bg-slate-800/80'
                 }`}
                 aria-label={item.label}
                 aria-pressed={isActive}
               >
-                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <Icon className="h-4 w-4 shrink-0" />
                 <span className="w-full truncate text-center leading-none">{item.label.split(' ')[0]}</span>
-                {item.badge ? <span className="absolute right-0.5 top-0.5 rounded-full bg-emerald-400 px-1 py-0.5 text-[7px] font-bold text-emerald-950">{item.badge}</span> : null}
+                {item.badge ? <span className="absolute right-0.5 top-0.5 rounded-full bg-emerald-400 px-1 py-0.5 text-[8px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
           })}

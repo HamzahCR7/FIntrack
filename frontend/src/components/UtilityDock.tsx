@@ -447,7 +447,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
         {/* 1. Privacy Shield Quick Toggle */}
         <button
           onClick={handlePrivacyButtonClick}
-          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-sm font-semibold ${
             isPrivacyMode
               ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 border border-rose-400'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -463,7 +463,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
         {/* 2. Dock Launcher Toggle Button */}
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-sm font-semibold ${
             isOpen
               ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
