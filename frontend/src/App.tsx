@@ -720,6 +720,7 @@ export const App: React.FC = () => {
         onSuccess={() => fetchAllData()}
         accounts={accounts}
         categories={categories}
+        transactions={transactions}
         onSubmitTransaction={handleSaveTransaction}
         onOpenDebtModal={() => setIsDebtModalOpen(true)}
         editingTransaction={editingTransaction}

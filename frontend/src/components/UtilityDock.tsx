@@ -21,6 +21,8 @@ import {
   StickyNote,
   Trash2,
   Pencil,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { usePrivacyMode, formatCurrency } from '../utils/privacyStore';
 import { useToast } from '../utils/toastStore';
@@ -39,6 +41,7 @@ interface UtilityDockProps {
 
 export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categories = [], onExportPowerBI }) => {
   const dockRef = useRef<HTMLDivElement | null>(null);
+  const [isLauncherExpanded, setIsLauncherExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'CALCULATOR' | 'SMART_SPLIT' | 'DAILY_GAUGE' | 'RUNWAY' | 'POWER_BI' | 'NOTES'>('CALCULATOR');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -441,9 +444,23 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   }
 
   return (
-    <div ref={dockRef} className="fixed bottom-32 right-3 z-[60] flex flex-col items-end gap-2 sm:bottom-auto sm:right-4 sm:top-20 sm:z-40">
+    <div ref={dockRef} className="fixed right-0 top-20 z-[60] flex flex-col items-end gap-2 sm:z-40">
       {/* Utility Launcher Bar Buttons */}
-      <div className="flex flex-row items-stretch gap-2 whitespace-nowrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700/80 shadow-xl backdrop-blur-md sm:flex-col">
+      <div className={`flex items-stretch whitespace-nowrap rounded-l-2xl border border-r-0 border-slate-700/80 bg-slate-900/90 shadow-xl backdrop-blur-md ${isLauncherExpanded ? 'gap-1 p-1.5' : 'p-0'}`}>
+        {!isLauncherExpanded && (
+          <button
+            onClick={() => setIsLauncherExpanded(true)}
+            className="flex items-center justify-center rounded-lg p-1.5 text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
+            title="Show Stealth and Utilities"
+            aria-label="Show Stealth and Utilities"
+            aria-expanded="false"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
+
+        {isLauncherExpanded && (
+          <>
         {/* 1. Privacy Shield Quick Toggle */}
         <button
           onClick={handlePrivacyButtonClick}
@@ -458,7 +475,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           <span>{isPrivacyMode ? 'Stealth ON' : 'Stealth'}</span>
         </button>
 
-        <div className="h-full w-px bg-slate-700 sm:h-px sm:w-full" />
+        <div className="w-px bg-slate-700" />
 
         {/* 2. Dock Launcher Toggle Button */}
         <button
@@ -473,6 +490,23 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           <Calculator className="w-4 h-4 text-indigo-400" />
           <span>Utilities</span>
         </button>
+
+        <div className="w-px bg-slate-700" />
+
+        <button
+          onClick={() => {
+            setIsLauncherExpanded(false);
+            setIsOpen(false);
+          }}
+          className="flex items-center justify-center rounded-lg p-1.5 text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
+          title="Hide Stealth and Utilities"
+          aria-label="Hide Stealth and Utilities"
+          aria-expanded="true"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+          </>
+        )}
       </div>
 
       {/* Utility Window Drawer */}

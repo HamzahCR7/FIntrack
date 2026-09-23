@@ -18,6 +18,19 @@ async function main() {
     });
   }
 
+  const legacyMetroBusCategory = await prisma.category.findUnique({
+    where: { name: "Transport > Metro / Bus" },
+  });
+  const busCategory = await prisma.category.findUnique({
+    where: { name: "Transport > Bus" },
+  });
+  if (legacyMetroBusCategory && !busCategory) {
+    await prisma.category.update({
+      where: { id: legacyMetroBusCategory.id },
+      data: { name: "Transport > Bus", icon: "bus", color: "#0284C7" },
+    });
+  }
+
   const systemCategories = [
     {
       name: "Food & Dining",
@@ -178,7 +191,8 @@ async function main() {
     { parentName: "Groceries", name: "Groceries > Supermarket", icon: "store", color: "#10B981" },
     { parentName: "Transport", name: "Transport > Office Commute", icon: "briefcase", color: "#6366F1" },
     { parentName: "Transport", name: "Transport > Fuel", icon: "car", color: "#F97316" },
-    { parentName: "Transport", name: "Transport > Metro / Bus", icon: "car", color: "#0EA5E9" },
+    { parentName: "Transport", name: "Transport > Metro", icon: "train", color: "#0EA5E9" },
+    { parentName: "Transport", name: "Transport > Bus", icon: "bus", color: "#0284C7" },
     { parentName: "Transport", name: "Transport > Train", icon: "train", color: "#2563EB" },
     { parentName: "Transport", name: "Transport > Flight", icon: "plane", color: "#0EA5E9" },
     { parentName: "Transport", name: "Transport > Auto / Taxi", icon: "car", color: "#3B82F6" },
