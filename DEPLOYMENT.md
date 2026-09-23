@@ -6,6 +6,20 @@ Free hosting has usage limits: Render sleeps when idle, so the first request can
 See https://render.com/docs/free and https://neon.com/pricing for current limits.
 Do not select Render's free PostgreSQL database: it expires after 30 days.
 
+## Android and iOS apps
+
+The same React frontend also ships through Capacitor. Before building a native app:
+
+1. Copy `frontend/.env.native.example` to `frontend/.env.native` and replace its URL
+   with the public HTTPS URL of this backend.
+2. Run `npm --prefix frontend run android` to sync and open Android Studio, or
+   `npm --prefix frontend run ios` to sync and open Xcode.
+3. Build, sign, and run the app from Android Studio or Xcode. Xcode requires macOS;
+   Android Studio requires an installed Android SDK.
+
+After changing React code, rerun the matching command. `native:sync` refreshes both
+native projects without opening an IDE. The browser/PWA deployment remains unchanged.
+
 ## 1. Create and import the database
 
 1. Create a **Free** Neon project at https://console.neon.tech. Choose a nearby region.

@@ -24,7 +24,41 @@ export function createApp(): Application {
   validateProductionConfig();
   const app = express();
 
-  if (process.env.NODE_ENV !== 'production') app.use(cors());
+  const nativeOrigins = ['https://localhost', 'http://localhost', 'http://127.0.0.1', 'capacitor://localhost'];
+  const configuredOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const allowedOrigins = new Set([...nativeOrigins, ...configuredOrigins]);
+
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      if (origin.startsWith('https://localhost:') || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.startsWith('capacitor://localhost')) {
+        callback(null, true);
+        return;
+      }
+
+      if (process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+        return;
+      }
+
+      callback(null, false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-upi-webhook-secret'],
+    credentials: true,
+  }));
   app.use(express.json({ limit: '12mb' }));
 
   // Health check endpoint
