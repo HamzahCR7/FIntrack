@@ -21,11 +21,22 @@ describe('production authentication', () => {
     expect(validSession(request('Bearer fintrack_b3duZXI='))).toBe(false);
     expect(validSession(request(token))).toBe(false);
   });
-  test('expires sessions after twelve hours', () => {
+  test('expires sessions after the default thirty days', () => {
     jest.useFakeTimers();
     const token = issueSession();
-    jest.advanceTimersByTime(12 * 60 * 60 * 1000 + 1);
+    jest.advanceTimersByTime(30 * 24 * 60 * 60 * 1000 + 1);
     expect(validSession(request(`Bearer ${token}`))).toBe(false);
+  });
+  test('supports a configured session duration', () => {
+    jest.useFakeTimers();
+    process.env.SESSION_DURATION_DAYS = '7';
+    const token = issueSession();
+    jest.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 + 1);
+    expect(validSession(request(`Bearer ${token}`))).toBe(false);
+  });
+  test('rejects an invalid configured session duration', () => {
+    process.env.SESSION_DURATION_DAYS = 'forever';
+    expect(validateProductionConfig).toThrow('SESSION_DURATION_DAYS');
   });
   test('protects data endpoints and permits authenticated requests', () => {
     const res = { setHeader: jest.fn(), status: jest.fn().mockReturnThis(), json: jest.fn() };

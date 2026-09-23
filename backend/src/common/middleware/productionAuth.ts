@@ -6,6 +6,19 @@ export function validateProductionConfig() {
   if (!process.env.ADMIN_USERNAME || (process.env.ADMIN_PASSWORD || '').length < 16 || (process.env.SESSION_SECRET || '').length < 32) {
     throw new Error('Production requires ADMIN_USERNAME, ADMIN_PASSWORD (16+ characters), and SESSION_SECRET (32+ characters)');
   }
+  if (process.env.SESSION_DURATION_DAYS && !validSessionDuration(process.env.SESSION_DURATION_DAYS)) {
+    throw new Error('SESSION_DURATION_DAYS must be a number between 1 and 365');
+  }
+}
+
+function validSessionDuration(value: string) {
+  const days = Number(value);
+  return Number.isFinite(days) && days >= 1 && days <= 365;
+}
+
+function sessionDurationMs() {
+  const days = process.env.SESSION_DURATION_DAYS || '30';
+  return Number(days) * 24 * 60 * 60 * 1000;
 }
 
 function equal(a: string, b: string) {
@@ -15,7 +28,7 @@ function sign(payload: string) {
   return createHmac('sha256', process.env.SESSION_SECRET!).update(payload).digest('base64url');
 }
 export function issueSession() {
-  const payload = Buffer.from(JSON.stringify({ username: process.env.ADMIN_USERNAME, expires: Date.now() + 12 * 60 * 60 * 1000 })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ username: process.env.ADMIN_USERNAME, expires: Date.now() + sessionDurationMs() })).toString('base64url');
   return `${payload}.${sign(payload)}`;
 }
 export function validSession(req: Request): boolean {

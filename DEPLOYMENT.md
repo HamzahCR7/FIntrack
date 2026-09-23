@@ -67,7 +67,8 @@ HTTP 429 with a retry time. This shared limit avoids trusting proxy headers. It 
 temporarily delay your login during an attack; existing sessions remain usable.
 The counter resets on restart and is intended for this single-instance deployment.
 
-Sessions last 12 hours. Changing `SESSION_SECRET` invalidates all sessions.
+Sessions last 30 days by default. Set `SESSION_DURATION_DAYS` to a value from 1 to
+365 to change this. Changing `SESSION_SECRET` invalidates all sessions.
 This remains a single-owner tracker; the ledger is shared, with no per-user tenancy.
 In production all API routes, including UPI ingestion, require the owner's Bearer
 session token. Existing webhook integrations must supply it (and their existing

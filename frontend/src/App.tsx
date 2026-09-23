@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Navbar } from './components/Navbar';
 import { SummaryCards } from './components/SummaryCards';
 import { SpendingSection } from './components/SpendingSection';
@@ -108,10 +109,17 @@ export const App: React.FC = () => {
           setAuthChecking(false);
           fetchAllData();
         })
-        .catch(() => {
-          localStorage.removeItem('fintrack_auth_token');
-          localStorage.removeItem('fintrack_user');
-          setIsAuthenticated(false);
+        .catch((authError) => {
+          if (axios.isAxiosError(authError) && authError.response?.status === 401) {
+            localStorage.removeItem('fintrack_auth_token');
+            localStorage.removeItem('fintrack_user');
+            setCurrentUser(null);
+            setIsAuthenticated(false);
+          } else {
+            // Keep a valid saved session when the host is waking up or temporarily unavailable.
+            setIsAuthenticated(Boolean(storedUser));
+            addToast('Could not verify your session. Check your connection and try again.', 'error');
+          }
           setAuthChecking(false);
         });
     } else {
