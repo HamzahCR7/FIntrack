@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { DashboardData, Transaction, Account, Category, Subscription, Debt, QuickItem, QuickItemType, QuickItemPriority, TransactionFilters, ParsedReceipt, RunwaySimulationResponse } from '../types';
+import { resolveApiOrigin } from './config';
 
-const API_BASE = '/api/v1';
+const API_ORIGIN = resolveApiOrigin();
+const API_BASE = `${API_ORIGIN}/api/v1`;
 
 // Attach authorization header automatically if logged in
 axios.interceptors.request.use((config) => {

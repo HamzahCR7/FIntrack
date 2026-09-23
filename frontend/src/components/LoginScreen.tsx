@@ -24,6 +24,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
     try {
       setIsLoading(true);
+      console.log('FinTrack Login target:', (window as any).location?.origin || 'native-app', 'resolved API base:', (import.meta as any).env?.VITE_API_URL || 'fallback');
       const res = await api.login({ username, password });
       localStorage.setItem('fintrack_auth_token', res.token);
       localStorage.setItem('fintrack_user', JSON.stringify(res.user));
