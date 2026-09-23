@@ -77,7 +77,7 @@ export const App: React.FC = () => {
     (dashboardData?.debts.activeDebts || []).filter((debt) => debt.type === 'I_OWE' && debt.remainingAmount > 0).length;
   const currentHour = new Date().getHours();
   const dayGreeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
-  const displayName = currentUser?.name || currentUser?.username || 'there';
+  const displayName = 'Hamzah';
   const todayLabel = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
     month: 'short',
