@@ -25,9 +25,7 @@ export class AnalyticsController {
   private getDashboardData = async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const data = await this.analyticsService.getDashboardData();
-      const insights = await this.insightsService.generateInsights();
-      const forecast = await this.analysisEngine.getSpendForecast();
-      res.status(200).json({ status: 'success', data: { ...data, proactiveInsights: insights, forecast } });
+      res.status(200).json({ status: 'success', data });
     } catch (err) {
       next(err);
     }

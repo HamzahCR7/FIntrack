@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
+import { createProductionAuth, validateProductionConfig } from './common/middleware/productionAuth';
 import fs from 'fs';
 import path from 'path';
 import { AccountController } from './controllers/account.controller';
@@ -20,15 +21,52 @@ import { ReceiptController } from './controllers/receipt.controller';
 import { errorHandler } from './common/middleware/errorHandler';
 
 export function createApp(): Application {
+  validateProductionConfig();
   const app = express();
 
-  app.use(cors());
+  const nativeOrigins = ['https://localhost', 'http://localhost', 'http://127.0.0.1', 'capacitor://localhost'];
+  const configuredOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  const allowedOrigins = new Set([...nativeOrigins, ...configuredOrigins]);
+
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      if (origin.startsWith('https://localhost:') || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.startsWith('capacitor://localhost')) {
+        callback(null, true);
+        return;
+      }
+
+      if (process.env.NODE_ENV !== 'production') {
+        callback(null, true);
+        return;
+      }
+
+      callback(null, false);
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-upi-webhook-secret'],
+    credentials: true,
+  }));
   app.use(express.json({ limit: '12mb' }));
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok', service: 'FinTrack API', phase: 5 });
   });
+
+  app.use('/api/v1', createProductionAuth());
 
   // API V1 Routes
   const accountController = new AccountController();

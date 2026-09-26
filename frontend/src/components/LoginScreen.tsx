@@ -24,6 +24,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
     try {
       setIsLoading(true);
+      console.log('FinTrack Login target:', (window as any).location?.origin || 'native-app', 'resolved API base:', (import.meta as any).env?.VITE_API_URL || 'fallback');
       const res = await api.login({ username, password });
       localStorage.setItem('fintrack_auth_token', res.token);
       localStorage.setItem('fintrack_user', JSON.stringify(res.user));
@@ -40,9 +41,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white">
       {/* Background Decorative Gradient Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl" />
+        <div className="absolute -top-16 -left-12 h-48 w-48 bg-blue-600/15 rounded-full blur-3xl sm:-top-40 sm:-left-40 sm:h-96 sm:w-96" />
+        <div className="absolute top-1/2 -right-12 h-48 w-48 bg-purple-600/15 rounded-full blur-3xl sm:-right-40 sm:h-96 sm:w-96" />
+        <div className="absolute -bottom-16 left-1/3 h-48 w-48 bg-indigo-600/15 rounded-full blur-3xl sm:-bottom-40 sm:h-96 sm:w-96" />
       </div>
 
       <div className="w-full max-w-md relative z-10">

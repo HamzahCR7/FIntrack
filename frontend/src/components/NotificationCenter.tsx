@@ -248,13 +248,13 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-12 z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl shadow-slate-950/60">
-          <div className="flex items-center justify-between border-b border-slate-800 bg-slate-800/80 px-4 py-3">
-            <div>
+        <div className="fixed right-2 top-[4.5rem] z-[60] w-[min(22rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl shadow-slate-950/60 sm:right-4">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-800/80 px-3 py-3 sm:px-4">
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-bold text-white">Financial alerts</p>
-              <p className="text-[11px] text-slate-400">{notifications.length ? `${urgentCount} urgent · ${notifications.length} total` : 'Everything looks clear'}</p>
+              <p className="text-[11px] text-slate-400 break-words">{notifications.length ? `${urgentCount} urgent · ${notifications.length} total` : 'Everything looks clear'}</p>
             </div>
-            <button onClick={() => setIsOpen(false)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white" aria-label="Close notifications">
+            <button onClick={() => setIsOpen(false)} className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-700 hover:text-white" aria-label="Close notifications">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -273,15 +273,15 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
                 <button
                   key={notification.id}
                   onClick={() => { onNavigate(notification.tab); setIsOpen(false); }}
-                  className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-colors hover:bg-slate-800"
+                  className="flex w-full items-center gap-2 rounded-xl p-2.5 text-left transition-colors hover:bg-slate-800 sm:gap-3 sm:p-3"
                 >
                   <span className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${styles.icon}`}>
                     <Icon className="h-4 w-4" />
                     <span className={`absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full ${styles.dot}`} />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-xs font-bold text-slate-100">{notification.title}</span>
-                    <span className="mt-0.5 block truncate text-[11px] text-slate-400">{notification.detail}</span>
+                    <span className="block text-xs font-bold text-slate-100 leading-snug break-words">{notification.title}</span>
+                    <span className="mt-0.5 block text-[11px] leading-snug text-slate-400 break-words">{notification.detail}</span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-slate-600" />
                 </button>

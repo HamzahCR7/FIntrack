@@ -12,6 +12,21 @@ Open `http://localhost:3000` in a Chromium-based browser and install FinTrack fr
 
 The backend process must remain running while the app is used. A browser PWA cannot start a local Node.js process automatically; on macOS, use a launch agent, Docker, or a hosted backend if you need it to start automatically.
 
+### Use the deployed database locally
+
+Local development uses SQLite by default, so it does not automatically share data
+with the deployed Neon database. To run the local UI and API against the same Neon
+database as the deployed app:
+
+1. Copy `backend/.env.cloud.example` to `backend/.env.cloud`.
+2. Set `DATABASE_URL` in that file to the same Neon connection string configured in Render.
+3. From `backend`, run `npm run dev:cloud`.
+4. From `frontend`, run `npm run dev`, then open `http://localhost:5173`.
+
+Cloud mode reads and writes the live deployed database. Use `npm run dev` to return
+to the isolated local SQLite database. Both commands regenerate the matching Prisma
+client before starting, so switching database engines is safe.
+
 You are the lead software architect and senior full-stack engineer for this project.
 
 We are building a personal finance application called **FinTrack**.

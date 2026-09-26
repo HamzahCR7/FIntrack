@@ -28,6 +28,28 @@ const FancyInput: React.FC<FancyInputProps> = ({ label, className = '', ...props
   </div>
 );
 
+const GENERAL_MERCHANT_SUGGESTIONS = [
+  'Amazon', 'Flipkart', 'Swiggy', 'Zomato', 'Blinkit', 'Zepto', 'BigBasket',
+  'Uber', 'Ola', 'Rapido', 'IRCTC', 'Indian Railways', 'Netflix', 'Spotify',
+  'Jio', 'Airtel', 'Electricity Board', 'Gas Agency', 'Landlord', 'Employer',
+];
+
+const GENERAL_DESCRIPTION_SUGGESTIONS: Record<'INCOME' | 'EXPENSE' | 'TRANSFER', string[]> = {
+  EXPENSE: [
+    'Groceries', 'Lunch', 'Dinner', 'Fuel', 'Cab fare', 'Medicine', 'Shopping',
+    'Mobile recharge', 'Electricity bill', 'Internet bill', 'House rent',
+    'Monthly subscription', 'Entertainment', 'Travel expense', 'Office expense',
+  ],
+  INCOME: [
+    'Monthly salary', 'Freelance payment', 'Bonus', 'Interest income',
+    'Dividend income', 'Cashback', 'Refund received', 'Rental income',
+  ],
+  TRANSFER: [
+    'Account transfer', 'Credit card payment', 'Savings transfer',
+    'Investment transfer', 'Cash withdrawal', 'Cash deposit',
+  ],
+};
+
 const FancySelect: React.FC<FancySelectProps> = ({ value, placeholder, options, onChange, defaultValue = '' }) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement | null>(null);
@@ -119,6 +141,7 @@ interface AddTransactionModalProps {
   onSuccess: () => void;
   accounts: Account[];
   categories: Category[];
+  transactions: Transaction[];
   onSubmitTransaction: (data: any, id?: string) => Promise<void>;
   onOpenDebtModal?: () => void;
   editingTransaction?: Partial<Transaction> | null;
@@ -130,6 +153,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   onSuccess,
   accounts,
   categories,
+  transactions,
   onSubmitTransaction,
   onOpenDebtModal,
   editingTransaction,
@@ -151,6 +175,52 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingReceipt, setIsParsingReceipt] = useState(false);
   const [amountCandidates, setAmountCandidates] = useState<number[]>([]);
+
+  const frequentTextValues = useMemo(() => {
+    const rankValues = (getValue: (transaction: Transaction) => string | undefined) => {
+      const values = new Map<string, { value: string; count: number }>();
+
+      transactions.forEach((transaction) => {
+        const value = getValue(transaction)?.trim();
+        if (!value) return;
+
+        const key = value.toLocaleLowerCase();
+        const existing = values.get(key);
+        if (existing) existing.count += 1;
+        else values.set(key, { value, count: 1 });
+      });
+
+      return Array.from(values.values())
+        .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
+        .slice(0, 12)
+        .map(({ value }) => value);
+    };
+
+    return {
+      merchants: rankValues((transaction) => transaction.merchant),
+      descriptions: rankValues((transaction) => transaction.description),
+    };
+  }, [transactions]);
+
+  const textSuggestions = useMemo(() => {
+    const mergeUnique = (...groups: string[][]) => {
+      const seen = new Set<string>();
+      return groups.flat().filter((value) => {
+        const key = value.toLocaleLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+
+    return {
+      merchants: mergeUnique(frequentTextValues.merchants, GENERAL_MERCHANT_SUGGESTIONS),
+      descriptions: mergeUnique(
+        frequentTextValues.descriptions,
+        GENERAL_DESCRIPTION_SUGGESTIONS[type],
+      ),
+    };
+  }, [frequentTextValues, type]);
 
   useEffect(() => {
     if (isOpen) {
@@ -719,11 +789,15 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <label className="text-slate-300 font-semibold block mb-1">Merchant / Payee</label>
               <FancyInput
                 type="text"
+                list="merchant-suggestions"
                 placeholder="e.g. Zaitoon / Amazon"
                 value={merchant}
                 onChange={(e) => setMerchant(e.target.value)}
                 className="p-2.5 text-xs"
               />
+              <datalist id="merchant-suggestions">
+                {textSuggestions.merchants.map((value) => <option key={value} value={value} />)}
+              </datalist>
             </div>
             <div>
               <label className="text-slate-300 font-semibold block mb-1">Date</label>
@@ -735,11 +809,15 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             <label className="text-slate-300 font-semibold block mb-1">Notes / Description</label>
             <FancyInput
               type="text"
+              list="description-suggestions"
               placeholder="e.g. Team dinner / Monthly salary"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="p-2.5 text-xs"
             />
+            <datalist id="description-suggestions">
+              {textSuggestions.descriptions.map((value) => <option key={value} value={value} />)}
+            </datalist>
           </div>
 
           {/* Actions */}

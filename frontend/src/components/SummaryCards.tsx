@@ -42,12 +42,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
   const [selectedMetric, setSelectedMetric] = useState<MetricType | null>(null);
   const prevSavings = summary.previousMonthSavings || 0;
 
-  const cardPadding = isColumn ? 'p-3.5' : 'p-5';
-  const headingSize = isColumn ? 'text-xl' : 'text-2xl';
+  const cardPadding = isColumn ? 'p-3.5' : 'p-3.5 sm:p-5';
+  const headingSize = isColumn ? 'text-xl' : 'text-lg sm:text-2xl';
 
   return (
     <>
-      <div className={`dashboard-summary grid gap-3 ${isColumn ? 'grid-cols-1 w-full' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'}`}>
+      <div className={`dashboard-summary grid gap-2 sm:gap-3 ${isColumn ? 'grid-cols-1 w-full' : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 md:gap-4'}`}>
         {/* 1. Total Balance */}
         <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
           <div className="flex items-center justify-between">

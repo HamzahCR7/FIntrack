@@ -1,8 +1,55 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+  font: inherit;
+}
+
+img,
+svg,
+canvas,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+.recharts-responsive-container,
+.recharts-wrapper {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+.recharts-surface {
+  max-width: 100%;
+}
 
 :root {
   --fin-bg-0: #05070d;
@@ -34,85 +81,14 @@ body {
   min-height: 100vh;
 }
 
-html[data-theme='light'] body {
-  color: #0f172a;
-  background-color: #f5f7fb;
-  background-image: radial-gradient(circle at 8% 0%, rgba(6, 182, 212, 0.14), transparent 22rem),
-    radial-gradient(circle at 88% 10%, rgba(245, 158, 11, 0.18), transparent 20rem),
-    linear-gradient(160deg, #ffffff 0%, #f4f7fb 52%, #eef2f8 100%),
-    linear-gradient(rgba(148, 163, 184, 0.24) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.24) 1px, transparent 1px);
-}
-
-.theme-light {
-  color: #0f172a;
-}
-
-.theme-light .dashboard-shell::before {
-  opacity: 0.7;
-}
-
-.theme-light .hero-banner {
-  background: linear-gradient(128deg, rgba(255, 255, 255, 0.9), rgba(244, 248, 255, 0.88));
-  box-shadow: 0 18px 48px rgba(30, 41, 59, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
-.theme-light .dashboard-cockpit,
-.theme-light .mobile-tabbar {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(243, 247, 253, 0.96));
-  border-color: rgba(100, 116, 139, 0.32);
-  box-shadow: 0 20px 36px rgba(30, 41, 59, 0.12);
-}
-
-.theme-light header,
-.theme-light footer {
-  background: rgba(250, 252, 255, 0.9) !important;
-  border-color: rgba(148, 163, 184, 0.35) !important;
-}
-
-.theme-light .bg-slate-900,
-.theme-light .bg-slate-900\/80,
-.theme-light .bg-slate-900\/85,
-.theme-light .bg-slate-900\/95,
-.theme-light .bg-slate-950,
-.theme-light .bg-slate-950\/60,
-.theme-light .bg-slate-950\/90,
-.theme-light .bg-slate-800,
-.theme-light .bg-slate-800\/70 {
-  background-color: rgba(248, 250, 252, 0.95) !important;
-}
-
-.theme-light .border-slate-800,
-.theme-light .border-slate-800\/80,
-.theme-light .border-slate-700,
-.theme-light .border-slate-700\/60,
-.theme-light .border-slate-700\/70 {
-  border-color: rgba(148, 163, 184, 0.35) !important;
-}
-
-.theme-light .text-white,
-.theme-light .text-slate-100,
-.theme-light .text-slate-200,
-.theme-light .text-slate-300,
-.theme-light .text-slate-400,
-.theme-light .text-slate-500 {
-  color: #0f172a !important;
-}
-
-.theme-light .text-cyan-100,
-.theme-light .text-cyan-200,
-.theme-light .text-cyan-300,
-.theme-light .text-emerald-100,
-.theme-light .text-emerald-200,
-.theme-light .text-amber-200,
-.theme-light .text-fuchsia-200,
-.theme-light .text-sky-200 {
-  color: #0f172a !important;
-}
-
-.theme-light .mobile-tab-btn[aria-pressed='true'] {
-  background: rgba(6, 182, 212, 0.2) !important;
-  color: #155e75 !important;
+html[data-theme='dark'] body {
+  color: #f8fafc;
+  background-color: var(--fin-bg-0);
+  background-image: radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.2), transparent 26rem),
+    radial-gradient(circle at 92% 8%, rgba(251, 146, 60, 0.18), transparent 24rem),
+    linear-gradient(160deg, var(--fin-bg-2) 0%, var(--fin-bg-1) 40%, var(--fin-bg-0) 100%),
+    linear-gradient(rgba(51, 65, 85, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(51, 65, 85, 0.2) 1px, transparent 1px);
 }
 
 button,
@@ -278,6 +254,20 @@ select:focus-visible {
   animation: dashboardRise 500ms ease-out both;
 }
 
+@media (max-width: 767px) {
+  .dashboard-main {
+    padding-bottom: 10rem !important;
+  }
+
+  .dashboard-main > * {
+    min-width: 0;
+  }
+
+  .mobile-tabbar {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+}
+
 @keyframes sidebarSlideIn {
   from {
     opacity: 0;
@@ -438,6 +428,115 @@ select:focus-visible {
 
   .hero-banner {
     border-radius: 1.5rem;
+  }
+
+  /* Keep dense financial metadata readable on small screens. */
+  .text-\[7px\],
+  .text-\[8px\],
+  .text-\[9px\],
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+  }
+
+  .text-xs {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+
+  .text-sm,
+  .text-\[15px\] {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+
+  .text-base {
+    font-size: 1.125rem !important;
+    line-height: 1.6rem !important;
+  }
+
+  .text-lg {
+    font-size: 1.25rem !important;
+    line-height: 1.75rem !important;
+  }
+
+  .text-xl {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  .text-2xl {
+    font-size: 1.75rem !important;
+    line-height: 2.2rem !important;
+  }
+
+  .text-3xl {
+    font-size: 2rem !important;
+    line-height: 2.4rem !important;
+  }
+
+  /* Scale compact interface icons alongside the larger mobile typography. */
+  .lucide.w-2,
+  .lucide.w-2\.5 {
+    width: 0.875rem !important;
+  }
+
+  .lucide.h-2,
+  .lucide.h-2\.5 {
+    height: 0.875rem !important;
+  }
+
+  .lucide.w-3 {
+    width: 1rem !important;
+  }
+
+  .lucide.h-3 {
+    height: 1rem !important;
+  }
+
+  .lucide.w-3\.5 {
+    width: 1.125rem !important;
+  }
+
+  .lucide.h-3\.5 {
+    height: 1.125rem !important;
+  }
+
+  .lucide.w-4,
+  .lucide.w-\[18px\] {
+    width: 1.25rem !important;
+  }
+
+  .lucide.h-4,
+  .lucide.h-\[18px\] {
+    height: 1.25rem !important;
+  }
+
+  .lucide.w-5 {
+    width: 1.5rem !important;
+  }
+
+  .lucide.h-5 {
+    height: 1.5rem !important;
+  }
+
+  .lucide.w-5\.5,
+  .lucide.w-6 {
+    width: 1.75rem !important;
+  }
+
+  .lucide.h-5\.5,
+  .lucide.h-6 {
+    height: 1.75rem !important;
+  }
+
+  .lucide.w-7 {
+    width: 2rem !important;
+  }
+
+  .lucide.h-7 {
+    height: 2rem !important;
   }
 }
 

@@ -461,12 +461,12 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
       )}
 
       {/* Chart Section */}
-      <div className="mt-5 h-72">
+      <div className="mt-5 h-72 sm:h-80">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
-            margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
-            barCategoryGap="12%"
+            margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
+            barCategoryGap="8%"
             barGap={1}
             className="cursor-pointer"
             onClick={(state) => {
@@ -479,22 +479,24 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
             <XAxis
               dataKey="day"
               stroke="#94a3b8"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={(dayNum) => {
                 const item = chartData.find((d) => d.day === Number(dayNum));
-                return item ? `${item.day} ${item.dayName}` : `${dayNum}`;
+                const compactDay = item ? `${item.day}` : `${dayNum}`;
+                const compactName = item ? item.dayName.slice(0, 3) : '';
+                return compactName ? `${compactDay} ${compactName}` : compactDay;
               }}
-              interval={Math.max(0, Math.ceil(daysInMonth / 8) - 1)}
+              interval={Math.max(0, Math.ceil(daysInMonth / 7) - 1)}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
               stroke="#94a3b8"
-              tick={{ fontSize: 11 }}
+              tick={{ fontSize: 10 }}
               tickFormatter={formatCompactCurrency}
               tickLine={false}
               axisLine={false}
-              width={52}
+              width={42}
             />
             <Tooltip
               cursor={{ fill: '#334155', opacity: 0.35 }}

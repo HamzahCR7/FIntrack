@@ -21,6 +21,8 @@ import {
   StickyNote,
   Trash2,
   Pencil,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { usePrivacyMode, formatCurrency } from '../utils/privacyStore';
 import { useToast } from '../utils/toastStore';
@@ -39,6 +41,7 @@ interface UtilityDockProps {
 
 export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categories = [], onExportPowerBI }) => {
   const dockRef = useRef<HTMLDivElement | null>(null);
+  const [isLauncherExpanded, setIsLauncherExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'CALCULATOR' | 'SMART_SPLIT' | 'DAILY_GAUGE' | 'RUNWAY' | 'POWER_BI' | 'NOTES'>('CALCULATOR');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -441,13 +444,27 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   }
 
   return (
-    <div ref={dockRef} className="fixed right-4 top-20 z-40 flex flex-col items-end gap-2">
+    <div ref={dockRef} className="fixed right-0 top-20 z-[60] flex flex-col items-end gap-2 sm:z-40">
       {/* Utility Launcher Bar Buttons */}
-      <div className="flex flex-col items-stretch gap-2 whitespace-nowrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700/80 shadow-xl backdrop-blur-md">
+      <div className={`flex items-stretch whitespace-nowrap rounded-l-2xl border border-r-0 border-slate-700/80 bg-slate-900/90 shadow-xl backdrop-blur-md ${isLauncherExpanded ? 'gap-1 p-1.5' : 'p-0'}`}>
+        {!isLauncherExpanded && (
+          <button
+            onClick={() => setIsLauncherExpanded(true)}
+            className="flex items-center justify-center rounded-lg p-1.5 text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
+            title="Show Stealth and Utilities"
+            aria-label="Show Stealth and Utilities"
+            aria-expanded="false"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
+
+        {isLauncherExpanded && (
+          <>
         {/* 1. Privacy Shield Quick Toggle */}
         <button
           onClick={handlePrivacyButtonClick}
-          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-sm font-semibold ${
             isPrivacyMode
               ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 border border-rose-400'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -455,15 +472,15 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           title={isPrivacyMode ? 'Stealth Mode Active (Click to unlock values with password)' : 'Click to hide/mask all balance numbers'}
         >
           {isPrivacyMode ? <EyeOff className="w-4 h-4 text-white" /> : <Eye className="w-4 h-4 text-blue-400" />}
-          <span className="hidden sm:inline">{isPrivacyMode ? 'Stealth ON' : 'Privacy'}</span>
+          <span>{isPrivacyMode ? 'Stealth ON' : 'Stealth'}</span>
         </button>
 
-        <div className="h-px w-full bg-slate-700" />
+        <div className="w-px bg-slate-700" />
 
         {/* 2. Dock Launcher Toggle Button */}
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-sm font-semibold ${
             isOpen
               ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -471,13 +488,30 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           title={isOpen ? 'Close Utility Drawer' : 'Open Utilities (Calculator, Daily Gauge, Runway)'}
         >
           <Calculator className="w-4 h-4 text-indigo-400" />
-          <span className="hidden sm:inline">Utilities</span>
+          <span>Utilities</span>
         </button>
+
+        <div className="w-px bg-slate-700" />
+
+        <button
+          onClick={() => {
+            setIsLauncherExpanded(false);
+            setIsOpen(false);
+          }}
+          className="flex items-center justify-center rounded-lg p-1.5 text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
+          title="Hide Stealth and Utilities"
+          aria-label="Hide Stealth and Utilities"
+          aria-expanded="true"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+          </>
+        )}
       </div>
 
       {/* Utility Window Drawer */}
       {isOpen && (
-        <div className="w-80 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-3 duration-200">
+        <div className="w-[calc(100vw-1.5rem)] max-w-sm bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-3 duration-200 sm:w-80">
           {/* Header & Tabs */}
           <div className="bg-slate-800/90 px-3 py-2.5 border-b border-slate-700/60 flex items-center justify-between">
             <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar">

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: fintrack
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm --prefix frontend ci --include=dev && npm --prefix backend ci --include=dev && node scripts/prepare-postgres.cjs && npm --prefix backend exec -- prisma generate --schema backend/prisma/schema.postgresql.prisma && npm --prefix backend run build:app
+    startCommand: cd backend && npx prisma db push --schema prisma/schema.postgresql.prisma --skip-generate && npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: SESSION_DURATION_DAYS
+        value: 30
