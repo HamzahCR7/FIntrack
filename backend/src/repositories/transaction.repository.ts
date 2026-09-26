@@ -58,6 +58,10 @@ export class TransactionRepository {
     });
   }
 
+  async findByReferenceNumber(referenceNumber: string): Promise<Transaction | null> {
+    return this.db.transaction.findFirst({ where: { referenceNumber } });
+  }
+
   async findByDateRange(startDate: Date, endDate: Date): Promise<any[]> {
     return this.db.transaction.findMany({
       where: {

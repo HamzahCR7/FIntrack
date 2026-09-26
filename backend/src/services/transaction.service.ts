@@ -34,6 +34,10 @@ export class TransactionService {
 
   async createTransaction(input: CreateTransactionInputDto): Promise<Transaction> {
     const dto: CreateTransactionDto = CreateTransactionSchema.parse(input);
+    if (dto.referenceNumber?.startsWith('offline:')) {
+      const existing = await this.transactionRepo.findByReferenceNumber(dto.referenceNumber);
+      if (existing) return existing;
+    }
     return this.db.$transaction(async (tx) => {
       let sourceAccount: Account | null = null;
       let destinationAccount: Account | null = null;

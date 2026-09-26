@@ -661,6 +661,11 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                               Recurring
                             </span>
                           )}
+                          {tx.syncStatus === 'pending' && (
+                            <span className="mt-0.5 inline-block rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-300">
+                              Pending sync
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -727,8 +732,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                         {onEditTransaction && (
                           <button
                             onClick={() => onEditTransaction(tx)}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                            title="Edit Transaction"
+                            disabled={tx.id.startsWith('offline-')}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                            title={tx.id.startsWith('offline-') ? 'Available after this transaction syncs' : 'Edit Transaction'}
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
@@ -736,8 +742,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                         {onDeleteTransaction && (
                           <button
                             onClick={() => setDeleteConfirmDialog({ isOpen: true, transactionId: tx.id })}
-                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
-                            title="Delete Transaction"
+                            disabled={tx.id.startsWith('offline-')}
+                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                            title={tx.id.startsWith('offline-') ? 'Available after this transaction syncs' : 'Delete Transaction'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

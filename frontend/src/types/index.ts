@@ -91,6 +91,7 @@ export interface Transaction {
   subcategory?: Category;
   sourceAccount?: Account;
   destinationAccount?: Account;
+  syncStatus?: 'pending';
 }
 
 export interface BudgetSpentTransaction {

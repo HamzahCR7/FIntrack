@@ -6,6 +6,13 @@ import { LoginScreen } from './components/LoginScreen';
 import { AccordionSection } from './components/AccordionSection';
 import { ToastContainer } from './components/ToastContainer';
 import { useToast } from './utils/toastStore';
+import {
+  createOutboxId,
+  enqueueTransactionOperation,
+  mergePendingTransactions,
+  removeTransactionOperation,
+  syncTransactionOutbox,
+} from './utils/transactionOutbox';
 import { api } from './api/client';
 import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from './utils/exportUtils';
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
@@ -192,9 +199,11 @@ export const App: React.FC = () => {
         api.getGoals(),
       ]);
 
+      const visibleTransactions = await mergePendingTransactions(txs);
+
       setDashboardData(dash);
-      setTransactions(txs);
-      setLedgerTransactions(txs);
+      setTransactions(visibleTransactions);
+      setLedgerTransactions(visibleTransactions);
       setCategories(cats);
       setAccounts(accs);
       setBudgets(budgetsData || []);
@@ -202,7 +211,7 @@ export const App: React.FC = () => {
 
       localStorage.setItem(APP_DATA_CACHE_KEY, JSON.stringify({
         dashboardData: dash,
-        transactions: txs,
+        transactions: visibleTransactions,
         categories: cats,
         accounts: accs,
         budgets: budgetsData || [],
@@ -225,6 +234,24 @@ export const App: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const sync = () => {
+      void syncTransactionOutbox().then((changed) => {
+        if (changed) void fetchAllData();
+      });
+    };
+
+    sync();
+    window.addEventListener('online', sync);
+    const interval = window.setInterval(sync, 5 * 60 * 1000);
+    return () => {
+      window.removeEventListener('online', sync);
+      window.clearInterval(interval);
+    };
+  }, [isAuthenticated]);
+
   const handleFilterChange = (filters: TransactionFilters) => {
     api.getTransactions(filters).then(setLedgerTransactions).catch(console.error);
   };
@@ -246,30 +273,61 @@ export const App: React.FC = () => {
   };
 
   const handleSaveTransaction = async (data: any, id?: string) => {
-    try {
-      if (id) {
-        await api.updateTransaction(id, data);
-        addToast('Transaction updated successfully', 'success');
-      } else {
-        await api.createTransaction(data);
-        addToast('Transaction saved successfully', 'success');
-      }
+    const operationId = createOutboxId();
+    const entityId = id || operationId;
+    await enqueueTransactionOperation({
+      id: operationId,
+      type: id ? 'update' : 'create',
+      entityId,
+      payload: data,
+      createdAt: Date.now(),
+    });
 
-      setEditingTransaction(null);
-    } catch (error: any) {
-      addToast(error?.response?.data?.message || error?.message || 'Failed to save transaction', 'error');
-      throw error;
-    }
+    const optimisticTransaction = {
+      ...data,
+      id: entityId,
+      currency: data.currency || 'INR',
+      isSubscription: data.isSubscription || false,
+      category: categories.find((category) => category.id === data.categoryId),
+      subcategory: categories.find((category) => category.id === data.subcategoryId),
+      sourceAccount: accounts.find((account) => account.id === data.sourceAccountId),
+      destinationAccount: accounts.find((account) => account.id === data.destinationAccountId),
+      syncStatus: 'pending' as const,
+    } as Transaction;
+
+    const applyOptimisticSave = (current: Transaction[]) => id
+      ? current.map((transaction) => transaction.id === id ? { ...transaction, ...optimisticTransaction } : transaction)
+      : [optimisticTransaction, ...current];
+
+    setTransactions(applyOptimisticSave);
+    setLedgerTransactions(applyOptimisticSave);
+    setEditingTransaction(null);
+    addToast(id ? 'Update saved locally — syncing' : 'Transaction saved locally — syncing', 'success');
+
+    void syncTransactionOutbox().then((changed) => {
+      if (changed) void fetchAllData();
+    });
   };
 
   const handleDeleteTransaction = async (id: string) => {
     if (confirm('Are you sure you want to delete this transaction? Account balances will be reverted.')) {
-      try {
-        await api.deleteTransaction(id);
-        fetchAllData();
-      } catch (err) {
-        console.error(err);
+      const pendingCreate = transactions.find((transaction) => transaction.id === id)?.syncStatus === 'pending' && id.startsWith('offline-');
+      if (pendingCreate) {
+        await removeTransactionOperation(id);
+      } else {
+        await enqueueTransactionOperation({
+          id: createOutboxId(),
+          type: 'delete',
+          entityId: id,
+          createdAt: Date.now(),
+        });
       }
+      setTransactions((current) => current.filter((transaction) => transaction.id !== id));
+      setLedgerTransactions((current) => current.filter((transaction) => transaction.id !== id));
+      addToast('Transaction removed locally — syncing', 'success');
+      void syncTransactionOutbox().then((changed) => {
+        if (changed) void fetchAllData();
+      });
     }
   };
 
@@ -779,7 +837,7 @@ export const App: React.FC = () => {
           setIsModalOpen(false);
           setEditingTransaction(null);
         }}
-        onSuccess={() => fetchAllData()}
+        onSuccess={() => undefined}
         accounts={accounts}
         categories={categories}
         transactions={transactions}
