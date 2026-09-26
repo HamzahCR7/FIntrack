@@ -43,7 +43,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   const dockRef = useRef<HTMLDivElement | null>(null);
   const [isLauncherExpanded, setIsLauncherExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'CALCULATOR' | 'SMART_SPLIT' | 'DAILY_GAUGE' | 'RUNWAY' | 'POWER_BI' | 'NOTES'>('CALCULATOR');
+  const [activeTab, setActiveTab] = useState<'CALCULATOR' | 'SMART_SPLIT' | 'DATE_COST' | 'DAILY_GAUGE' | 'RUNWAY' | 'POWER_BI' | 'NOTES'>('CALCULATOR');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [quickItems, setQuickItems] = useState<QuickItem[]>([]);
   const [quickItemType, setQuickItemType] = useState<QuickItemType>('NOTE');
@@ -59,6 +59,10 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   const [needsPercent, setNeedsPercent] = useState('50');
   const [wantsPercent, setWantsPercent] = useState('30');
   const [savingsPercent, setSavingsPercent] = useState('20');
+  const [dateCostAmount, setDateCostAmount] = useState('999');
+  const [dateCostType, setDateCostType] = useState<'RECURRING' | 'ONE_TIME'>('RECURRING');
+  const [dateCostPeriod, setDateCostPeriod] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY'>('MONTHLY');
+  const [usefulLifeMonths, setUsefulLifeMonths] = useState('24');
 
   const { isPrivacyMode, enablePrivacyMode, disablePrivacyMode } = usePrivacyMode();
   const { addToast } = useToast();
@@ -394,6 +398,16 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   const hasHighWants = wantsPctValue > 35;
   const hasHeavyNeeds = needsPctValue > 65;
 
+  const dateCostBase = Math.max(0, parseFloat(dateCostAmount) || 0);
+  const recurringAnnualFactors = { DAILY: 365, WEEKLY: 52, MONTHLY: 12, QUARTERLY: 4, YEARLY: 1 };
+  const usefulYears = Math.max(1 / 12, (parseFloat(usefulLifeMonths) || 1) / 12);
+  const dateCostYearly = dateCostType === 'RECURRING'
+    ? dateCostBase * recurringAnnualFactors[dateCostPeriod]
+    : dateCostBase / usefulYears;
+  const dateCostMonthly = dateCostYearly / 12;
+  const dateCostWeekly = dateCostYearly / 52;
+  const dateCostDaily = dateCostYearly / 365;
+
   let splitInsightContainerClass = 'rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-[10px] text-cyan-100 space-y-1.5';
   let splitInsightHeadingClass = 'flex items-center gap-1.5 font-semibold text-cyan-200';
   let splitInsightLine1 = 'Splitting before spending helps you protect essentials and savings first, then spend the rest with confidence.';
@@ -547,6 +561,17 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
                 title="Smart Split Calculator"
               >
                 Split
+              </button>
+              <button
+                onClick={() => setActiveTab('DATE_COST')}
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeTab === 'DATE_COST'
+                    ? 'bg-violet-600 text-white'
+                    : 'text-violet-400/80 hover:text-violet-300 hover:bg-slate-700/50'
+                }`}
+                title="Daily, weekly, monthly and yearly cost"
+              >
+                Cost
               </button>
               <button
                 onClick={() => setActiveTab('RUNWAY')}
@@ -874,6 +899,68 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
                 <p>{splitInsightLine1}</p>
                 <p>{splitInsightLine2}</p>
                 <p>{splitInsightLine3}</p>
+              </div>
+            </div>
+          )}
+
+          {/* DATE COST CALCULATOR */}
+          {activeTab === 'DATE_COST' && (
+            <div className="space-y-4 p-4 text-xs">
+              <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                <div className="rounded-lg bg-violet-500/15 p-2 text-violet-300">
+                  <CalendarDays className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-bold text-white">Date Cost Calculator</p>
+                  <p className="text-[10px] text-slate-500">See what a purchase really costs over time.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-950/60 p-1">
+                <button onClick={() => setDateCostType('RECURRING')} className={`rounded-lg py-2 font-semibold ${dateCostType === 'RECURRING' ? 'bg-violet-600 text-white' : 'text-slate-400'}`}>Subscription</button>
+                <button onClick={() => setDateCostType('ONE_TIME')} className={`rounded-lg py-2 font-semibold ${dateCostType === 'ONE_TIME' ? 'bg-violet-600 text-white' : 'text-slate-400'}`}>One-time purchase</button>
+              </div>
+
+              <label className="block space-y-1.5">
+                <span className="font-medium text-slate-300">Amount</span>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-slate-500">₹</span>
+                  <input type="number" min="0" step="0.01" value={dateCostAmount} onChange={(event) => setDateCostAmount(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 py-2.5 pl-7 pr-3 text-sm font-semibold text-white focus:border-violet-500 focus:outline-none" />
+                </div>
+              </label>
+
+              {dateCostType === 'RECURRING' ? (
+                <label className="block space-y-1.5">
+                  <span className="font-medium text-slate-300">Charged</span>
+                  <select value={dateCostPeriod} onChange={(event) => setDateCostPeriod(event.target.value as typeof dateCostPeriod)} className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-violet-500 focus:outline-none">
+                    <option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="MONTHLY">Monthly</option><option value="QUARTERLY">Quarterly</option><option value="YEARLY">Yearly</option>
+                  </select>
+                </label>
+              ) : (
+                <label className="block space-y-1.5">
+                  <span className="font-medium text-slate-300">Expected useful life</span>
+                  <div className="relative"><input type="number" min="1" value={usefulLifeMonths} onChange={(event) => setUsefulLifeMonths(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 pr-16 text-white focus:border-violet-500 focus:outline-none" /><span className="absolute right-3 top-2.5 text-slate-500">months</span></div>
+                </label>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ['Per day', dateCostDaily, 'text-cyan-300'],
+                  ['Per week', dateCostWeekly, 'text-blue-300'],
+                  ['Per month', dateCostMonthly, 'text-violet-300'],
+                  ['Per year', dateCostYearly, 'text-amber-300'],
+                ].map(([label, value, color]) => (
+                  <div key={String(label)} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+                    <p className="text-[10px] text-slate-500">{label}</p>
+                    <p className={`mt-1 text-sm font-bold ${color}`}>{formatCurrency(Number(value))}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-3 text-[10px] leading-relaxed text-violet-100">
+                {dateCostType === 'RECURRING'
+                  ? `${formatCurrency(dateCostBase)} billed ${dateCostPeriod.toLowerCase()} becomes ${formatCurrency(dateCostYearly)} each year.`
+                  : `Over ${Math.max(1, parseFloat(usefulLifeMonths) || 1)} months, this purchase costs about ${formatCurrency(dateCostDaily)} per day.`}
               </div>
             </div>
           )}

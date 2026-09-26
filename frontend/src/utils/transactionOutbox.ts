@@ -7,6 +7,9 @@ export type OutboxOperation = {
   entityId: string;
   payload?: Partial<Transaction>;
   createdAt: number;
+  status?: 'pending' | 'retrying' | 'failed';
+  attempts?: number;
+  lastError?: string;
 };
 
 const DB_NAME = 'fintrack-offline';
@@ -38,11 +41,17 @@ const runRequest = async <T>(mode: IDBTransactionMode, action: (store: IDBObject
 export const createOutboxId = () =>
   `offline-${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
 
-export const enqueueTransactionOperation = (operation: OutboxOperation) =>
-  runRequest('readwrite', (store) => store.put(operation));
+const notifyOutboxChanged = () => window.dispatchEvent(new Event('fintrack-outbox-change'));
 
-export const removeTransactionOperation = (id: string) =>
-  runRequest('readwrite', (store) => store.delete(id));
+export const enqueueTransactionOperation = async (operation: OutboxOperation) => {
+  await runRequest('readwrite', (store) => store.put({ status: 'pending', attempts: 0, ...operation }));
+  notifyOutboxChanged();
+};
+
+export const removeTransactionOperation = async (id: string) => {
+  await runRequest('readwrite', (store) => store.delete(id));
+  notifyOutboxChanged();
+};
 
 export const getTransactionOutbox = () =>
   runRequest<OutboxOperation[]>('readonly', (store) => store.getAll());
@@ -82,6 +91,7 @@ export function syncTransactionOutbox(): Promise<boolean> {
 
     for (const operation of operations) {
       try {
+        await enqueueTransactionOperation({ ...operation, status: 'retrying', attempts: operation.attempts || 0 });
         if (operation.type === 'create') {
           await api.createTransaction({
             ...operation.payload,
@@ -94,7 +104,13 @@ export function syncTransactionOutbox(): Promise<boolean> {
         }
         await removeTransactionOperation(operation.id);
         changed = true;
-      } catch {
+      } catch (error) {
+        await enqueueTransactionOperation({
+          ...operation,
+          status: 'failed',
+          attempts: (operation.attempts || 0) + 1,
+          lastError: error instanceof Error ? error.message : 'Sync failed',
+        });
         // Preserve ordering and retry after reconnect or on the next timer.
         break;
       }

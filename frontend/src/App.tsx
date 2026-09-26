@@ -16,13 +16,10 @@ import {
 import { api } from './api/client';
 import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from './utils/exportUtils';
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
-import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge } from 'lucide-react';
+import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical } from 'lucide-react';
 
 const SummaryCards = lazy(() => import('./components/SummaryCards').then((module) => ({ default: module.SummaryCards })));
-const SpendingSection = lazy(() => import('./components/SpendingSection').then((module) => ({ default: module.SpendingSection })));
-const DailySpendingSection = lazy(() => import('./components/DailySpendingSection').then((module) => ({ default: module.DailySpendingSection })));
-const TrendsSection = lazy(() => import('./components/TrendsSection').then((module) => ({ default: module.TrendsSection })));
-const RunwaySimulatorCard = lazy(() => import('./components/RunwaySimulatorCard').then((module) => ({ default: module.RunwaySimulatorCard })));
+const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard').then((module) => ({ default: module.CustomizableDashboard })));
 const AccountsSection = lazy(() => import('./components/AccountsSection').then((module) => ({ default: module.AccountsSection })));
 const RecurringSection = lazy(() => import('./components/RecurringSection').then((module) => ({ default: module.RecurringSection })));
 const DebtsSection = lazy(() => import('./components/DebtsSection').then((module) => ({ default: module.DebtsSection })));
@@ -39,8 +36,9 @@ const BudgetsSection = lazy(() => import('./components/BudgetsSection'));
 const GoalsSection = lazy(() => import('./components/GoalsSection'));
 const SpendForecastCard = lazy(() => import('./components/SpendForecastCard').then((module) => ({ default: module.SpendForecastCard })));
 const SmartGuidancePanel = lazy(() => import('./components/SmartGuidancePanel').then((module) => ({ default: module.SmartGuidancePanel })));
+const FinancialIntelligenceHub = lazy(() => import('./components/FinancialIntelligenceHub').then((module) => ({ default: module.FinancialIntelligenceHub })));
 
-type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions' | 'accounts' | 'debts' | 'subscriptions' | 'budgets' | 'goals' | 'forecast' | 'ai';
+type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions' | 'accounts' | 'debts' | 'subscriptions' | 'budgets' | 'goals' | 'forecast' | 'financial-hub' | 'ai';
 
 const APP_DATA_CACHE_KEY = 'fintrack_app_data_cache_v1';
 
@@ -356,6 +354,7 @@ export const App: React.FC = () => {
     { id: 'budgets', label: 'Budgets', caption: 'Spending limits', icon: PieChart, color: 'green' },
     { id: 'goals', label: 'Goals', caption: 'Financial targets', icon: Target, color: 'purple' },
     { id: 'forecast', label: 'Forecast', caption: 'Spend projection', icon: Gauge, color: 'amber' },
+    { id: 'financial-hub', label: 'Money Lab', caption: 'Automation & review', icon: FlaskConical, color: 'cyan' },
     { id: 'ai', label: 'Ask FinTrack', caption: 'Personal money guide', icon: Sparkles, color: 'fuchsia' },
   ];
   if (authChecking) {
@@ -559,77 +558,17 @@ export const App: React.FC = () => {
 
             {/* 1. OVERVIEW TAB */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <AccordionSection
-                  title="Monthly Spending Analytics"
-                  subtitle="Category breakdown & payment method distribution"
-                  icon={ReceiptText}
-                  defaultOpen={true}
-                >
-                  <SpendingSection
-                    spendingThisMonth={dashboardData.summary.spendingThisMonth}
-                    spendingByCategory={dashboardData.spendingByCategory}
-                    spendingByPaymentMethod={dashboardData.spendingByPaymentMethod}
-                    totalIncome={dashboardData.summary.totalIncome}
-                    totalExpenses={dashboardData.summary.totalExpenses}
-                    incomeThisMonth={dashboardData.summary.incomeThisMonth}
-                    savingsThisMonth={dashboardData.summary.savingsThisMonth}
-                    monthlyTrends={dashboardData.monthlyTrends}
-                    transactions={transactions}
-                  />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="Upcoming Dues & Bill Reminders"
-                  subtitle="Credit cards, active debts & subscription renewals"
-                  icon={BellRing}
-                  badge={dashboardData.recurring.upcomingSubscriptions.length + dashboardData.debts.activeDebts.length}
-                  badgeColor="bg-amber-500/10 text-amber-300 border-amber-500/20"
-                  defaultOpen={true}
-                >
-                  <BillRemindersSection
-                    creditCards={dashboardData.accounts.breakdown.CREDIT_CARD}
-                    subscriptions={dashboardData.recurring.upcomingSubscriptions}
-                    debts={dashboardData.debts.activeDebts}
-                    onPayCreditCard={handlePayCreditCard}
-                    onPaySubscription={() => setActiveTab('subscriptions')}
-                    onPayDebt={() => setActiveTab('debts')}
-                  />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="Daily Spending Activity"
-                  subtitle="Day-by-day expenses for the selected month"
-                  icon={ReceiptText}
-                  defaultOpen={true}
-                >
-                  <DailySpendingSection
-                    transactions={transactions}
-                    onAddTransactionForDate={(dateStr) => {
-                      setEditingTransaction({ transactionDate: dateStr, type: 'EXPENSE' });
-                      setIsModalOpen(true);
-                    }}
-                  />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="6-Month Financial Trends"
-                  subtitle="Historical income vs expense vs net savings trends"
-                  icon={Sparkles}
-                  defaultOpen={true}
-                >
-                  <TrendsSection monthlyTrends={dashboardData.monthlyTrends} />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="Cashflow Runway Simulator"
-                  subtitle="Model 3-24 month balance scenarios with salary, rent, and EMI changes"
-                  icon={Gauge}
-                  defaultOpen={false}
-                >
-                  <RunwaySimulatorCard />
-                </AccordionSection>
-              </div>
+              <CustomizableDashboard
+                dashboardData={dashboardData}
+                transactions={transactions}
+                onAddTransactionForDate={(dateStr) => {
+                  setEditingTransaction({ transactionDate: dateStr, type: 'EXPENSE' });
+                  setIsModalOpen(true);
+                }}
+                onPayCreditCard={handlePayCreditCard}
+                onPaySubscription={() => setActiveTab('subscriptions')}
+                onPayDebt={() => setActiveTab('debts')}
+              />
             )}
 
             {/* 1B. SMART GUIDANCE TAB */}
@@ -758,6 +697,11 @@ export const App: React.FC = () => {
             )}
 
             {/* 10. AI ASSISTANT TAB */}
+            {activeTab === 'financial-hub' && (
+              <FinancialIntelligenceHub transactions={transactions} accounts={accounts} dashboardData={dashboardData} />
+            )}
+
+            {/* 11. AI ASSISTANT TAB */}
             {activeTab === 'ai' && (
               <AccordionSection
                 title="FinTrack AI Financial Guide"
