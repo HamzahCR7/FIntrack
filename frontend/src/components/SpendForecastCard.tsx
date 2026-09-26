@@ -168,8 +168,9 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
                   </Pie>
                   <Tooltip
                     formatter={(value: number) => formatCurrency(Number(value))}
-                    contentStyle={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 10 }}
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '10px', color: '#f8fafc' }}
                     labelStyle={{ color: '#cbd5e1' }}
+                    itemStyle={{ color: '#f8fafc' }}
                   />
                 </PieChart>
               </ResponsiveContainer>

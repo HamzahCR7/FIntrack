@@ -1,4 +1,4 @@
-export const DEFAULT_NATIVE_API_URL = 'https://fintrack-9in0.onrender.com';
+export const DEFAULT_NATIVE_API_URL = 'https://p01--financetrack--ydkd8hhsbwn4.code.run';
 
 function isMobileNativeWebView(userAgent?: string) {
   const ua = userAgent ?? (typeof navigator !== 'undefined' ? navigator.userAgent || '' : '');

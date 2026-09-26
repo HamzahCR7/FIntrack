@@ -139,6 +139,7 @@ export class DebtService {
       throw new BadRequestError(`Debt record for ${debt.personName} is already fully settled.`);
     }
 
+    const settlementDate = dto.settlementDate || new Date();
     const newSettledAmount = Number((debt.settledAmount + dto.amountToSettle).toFixed(2));
     if (newSettledAmount > debt.amount) {
       throw new BadRequestError(`Settlement amount exceeds remaining debt balance.`);
@@ -164,7 +165,7 @@ export class DebtService {
           paymentMethod,
           merchant: debt.personName,
           description: `Returned money / Debt settlement from ${debt.personName}`,
-          transactionDate: new Date(),
+          transactionDate: settlementDate,
         });
       } else if (debt.type === DebtType.I_OWE) {
         // Paying back borrowed money -> Expense (Money leaving account)
@@ -175,7 +176,7 @@ export class DebtService {
           paymentMethod,
           merchant: debt.personName,
           description: `Paid back borrowed money to ${debt.personName}`,
-          transactionDate: new Date(),
+          transactionDate: settlementDate,
         });
       }
     }

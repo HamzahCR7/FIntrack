@@ -8,6 +8,7 @@ import { useToast } from '../utils/toastStore';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Search, Filter, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Calendar, Tag, CreditCard, X, Pencil, Trash2, Download, Printer, ChevronLeft, ChevronRight, ChevronDown, Check, Clock, Loader } from 'lucide-react';
 import { exportTransactionsToCSV } from '../utils/exportUtils';
+import { matchesLedgerSearch } from '../utils/ledgerSearch';
 
 interface FancySelectOption {
   value: string;
@@ -300,13 +301,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
     }
 
     if (search) {
-      const query = search.toLowerCase();
-      const matchDesc = tx.description?.toLowerCase().includes(query);
-      const matchMerchant = tx.merchant?.toLowerCase().includes(query);
-      const matchCat = tx.category?.name.toLowerCase().includes(query);
-      const matchSubCat = tx.subcategory?.name.toLowerCase().includes(query);
-      const matchTag = tx.itemTag?.toLowerCase().includes(query);
-      if (!matchDesc && !matchMerchant && !matchCat && !matchSubCat && !matchTag) return false;
+      if (!matchesLedgerSearch(tx, search)) {
+        return false;
+      }
     }
     return true;
   });

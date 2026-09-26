@@ -154,8 +154,8 @@ export const api = {
     return res.data.data;
   },
 
-  settleDebt: async (id: string, amountToSettle: number, accountId?: string): Promise<Debt> => {
-    const res = await apiClient.post(`${API_BASE}/debts/${id}/settle`, { amountToSettle, accountId });
+  settleDebt: async (id: string, amountToSettle: number, accountId?: string, settlementDate?: string): Promise<Debt> => {
+    const res = await apiClient.post(`${API_BASE}/debts/${id}/settle`, { amountToSettle, accountId, settlementDate });
     return res.data.data;
   },
 
