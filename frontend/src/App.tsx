@@ -1,55 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import axios from 'axios';
 import { Navbar } from './components/Navbar';
-import { SummaryCards } from './components/SummaryCards';
-import { SpendingSection } from './components/SpendingSection';
-import { DailySpendingSection } from './components/DailySpendingSection';
-import { TrendsSection } from './components/TrendsSection';
-import { RunwaySimulatorCard } from './components/RunwaySimulatorCard';
-import { AccountsSection } from './components/AccountsSection';
-import { RecurringSection } from './components/RecurringSection';
-import { DebtsSection } from './components/DebtsSection';
-import { TransactionsSection } from './components/TransactionsSection';
-import { AIInsightsPlaceholder } from './components/AIInsightsPlaceholder';
-import { AIAssistantChat } from './components/AIAssistantChat';
-import { AIPersonalizationSection } from './components/AIPersonalizationSection';
-import { AddTransactionModal } from './components/AddTransactionModal';
-import { AddDebtModal } from './components/AddDebtModal';
-import { AddSubscriptionModal } from './components/AddSubscriptionModal';
-import { BillRemindersSection } from './components/BillRemindersSection';
-import { CanIAffordThisModal } from './components/CanIAffordThisModal';
-import { TimeMachineModal } from './components/TimeMachineModal';
 import { UtilityDock } from './components/UtilityDock';
 import { LoginScreen } from './components/LoginScreen';
 import { AccordionSection } from './components/AccordionSection';
 import { ToastContainer } from './components/ToastContainer';
-import { BudgetsSection } from './components/BudgetsSection';
-import { GoalsSection } from './components/GoalsSection';
-import { DashboardBudgetsAndGoals } from './components/DashboardBudgetsAndGoals';
-import { SpendForecastCard } from './components/SpendForecastCard';
-import { SmartGuidancePanel } from './components/SmartGuidancePanel';
 import { useToast } from './utils/toastStore';
 import { api } from './api/client';
 import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from './utils/exportUtils';
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
 import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge } from 'lucide-react';
 
+const SummaryCards = lazy(() => import('./components/SummaryCards').then((module) => ({ default: module.SummaryCards })));
+const SpendingSection = lazy(() => import('./components/SpendingSection').then((module) => ({ default: module.SpendingSection })));
+const DailySpendingSection = lazy(() => import('./components/DailySpendingSection').then((module) => ({ default: module.DailySpendingSection })));
+const TrendsSection = lazy(() => import('./components/TrendsSection').then((module) => ({ default: module.TrendsSection })));
+const RunwaySimulatorCard = lazy(() => import('./components/RunwaySimulatorCard').then((module) => ({ default: module.RunwaySimulatorCard })));
+const AccountsSection = lazy(() => import('./components/AccountsSection').then((module) => ({ default: module.AccountsSection })));
+const RecurringSection = lazy(() => import('./components/RecurringSection').then((module) => ({ default: module.RecurringSection })));
+const DebtsSection = lazy(() => import('./components/DebtsSection').then((module) => ({ default: module.DebtsSection })));
+const TransactionsSection = lazy(() => import('./components/TransactionsSection').then((module) => ({ default: module.TransactionsSection })));
+const AIAssistantChat = lazy(() => import('./components/AIAssistantChat').then((module) => ({ default: module.AIAssistantChat })));
+const AIPersonalizationSection = lazy(() => import('./components/AIPersonalizationSection').then((module) => ({ default: module.AIPersonalizationSection })));
+const AddTransactionModal = lazy(() => import('./components/AddTransactionModal').then((module) => ({ default: module.AddTransactionModal })));
+const AddDebtModal = lazy(() => import('./components/AddDebtModal').then((module) => ({ default: module.AddDebtModal })));
+const AddSubscriptionModal = lazy(() => import('./components/AddSubscriptionModal').then((module) => ({ default: module.AddSubscriptionModal })));
+const BillRemindersSection = lazy(() => import('./components/BillRemindersSection').then((module) => ({ default: module.BillRemindersSection })));
+const CanIAffordThisModal = lazy(() => import('./components/CanIAffordThisModal').then((module) => ({ default: module.CanIAffordThisModal })));
+const TimeMachineModal = lazy(() => import('./components/TimeMachineModal').then((module) => ({ default: module.TimeMachineModal })));
+const BudgetsSection = lazy(() => import('./components/BudgetsSection'));
+const GoalsSection = lazy(() => import('./components/GoalsSection'));
+const SpendForecastCard = lazy(() => import('./components/SpendForecastCard').then((module) => ({ default: module.SpendForecastCard })));
+const SmartGuidancePanel = lazy(() => import('./components/SmartGuidancePanel').then((module) => ({ default: module.SmartGuidancePanel })));
+
 type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions' | 'accounts' | 'debts' | 'subscriptions' | 'budgets' | 'goals' | 'forecast' | 'ai';
 
+const APP_DATA_CACHE_KEY = 'fintrack_app_data_cache_v1';
+
+type CachedAppData = {
+  dashboardData: DashboardData;
+  transactions: Transaction[];
+  categories: Category[];
+  accounts: Account[];
+  budgets: Budget[];
+  goals: Goal[];
+};
+
+const readCachedAppData = (): CachedAppData | null => {
+  try {
+    const value = localStorage.getItem(APP_DATA_CACHE_KEY);
+    return value ? JSON.parse(value) as CachedAppData : null;
+  } catch {
+    return null;
+  }
+};
+
 export const App: React.FC = () => {
+  const [cachedAppData] = useState(readCachedAppData);
   const { addToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<{ id: string; username: string; name?: string } | null>(null);
 
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [ledgerTransactions, setLedgerTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(cachedAppData?.dashboardData ?? null);
+  const [transactions, setTransactions] = useState<Transaction[]>(cachedAppData?.transactions ?? []);
+  const [ledgerTransactions, setLedgerTransactions] = useState<Transaction[]>(cachedAppData?.transactions ?? []);
+  const [categories, setCategories] = useState<Category[]>(cachedAppData?.categories ?? []);
+  const [accounts, setAccounts] = useState<Account[]>(cachedAppData?.accounts ?? []);
+  const [budgets, setBudgets] = useState<Budget[]>(cachedAppData?.budgets ?? []);
+  const [goals, setGoals] = useState<Goal[]>(cachedAppData?.goals ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!cachedAppData);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDebtModalOpen, setIsDebtModalOpen] = useState<boolean>(false);
@@ -89,6 +109,17 @@ export const App: React.FC = () => {
     localStorage.setItem('fintrack_theme_mode', 'dark');
   }, []);
 
+  const clearLocalAppData = () => {
+    localStorage.removeItem(APP_DATA_CACHE_KEY);
+    setDashboardData(null);
+    setTransactions([]);
+    setLedgerTransactions([]);
+    setCategories([]);
+    setAccounts([]);
+    setBudgets([]);
+    setGoals([]);
+  };
+
   // Verify stored session on mount
   useEffect(() => {
     const token = localStorage.getItem('fintrack_auth_token');
@@ -98,6 +129,9 @@ export const App: React.FC = () => {
       if (storedUser) {
         try {
           setCurrentUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+          setAuthChecking(false);
+          void fetchAllData();
         } catch {}
       }
 
@@ -107,12 +141,13 @@ export const App: React.FC = () => {
           setCurrentUser(data.user);
           setIsAuthenticated(true);
           setAuthChecking(false);
-          fetchAllData();
+          if (!storedUser) void fetchAllData();
         })
         .catch((authError) => {
           if (axios.isAxiosError(authError) && authError.response?.status === 401) {
             localStorage.removeItem('fintrack_auth_token');
             localStorage.removeItem('fintrack_user');
+            clearLocalAppData();
             setCurrentUser(null);
             setIsAuthenticated(false);
           } else {
@@ -137,6 +172,7 @@ export const App: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('fintrack_auth_token');
     localStorage.removeItem('fintrack_user');
+    clearLocalAppData();
     setIsAuthenticated(false);
     setCurrentUser(null);
   };
@@ -163,6 +199,15 @@ export const App: React.FC = () => {
       setAccounts(accs);
       setBudgets(budgetsData || []);
       setGoals(goalsData || []);
+
+      localStorage.setItem(APP_DATA_CACHE_KEY, JSON.stringify({
+        dashboardData: dash,
+        transactions: txs,
+        categories: cats,
+        accounts: accs,
+        budgets: budgetsData || [],
+        goals: goalsData || [],
+      } satisfies CachedAppData));
 
       void api
         .getForecast()
@@ -211,7 +256,6 @@ export const App: React.FC = () => {
       }
 
       setEditingTransaction(null);
-      await fetchAllData();
     } catch (error: any) {
       addToast(error?.response?.data?.message || error?.message || 'Failed to save transaction', 'error');
       throw error;
@@ -289,6 +333,14 @@ export const App: React.FC = () => {
       />
 
       {/* Main Content */}
+      <Suspense fallback={(
+        <main className="flex min-h-[28rem] flex-1 items-center justify-center">
+          <div className="flex items-center gap-3 text-sm font-medium text-slate-400">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+            Loading dashboard…
+          </div>
+        </main>
+      )}>
       <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-1.5 sm:px-4 lg:px-8 py-2 sm:py-6 md:py-8 pb-20 sm:pb-32 md:pb-8 space-y-2 sm:space-y-8">
         <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-3 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
           <div className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl sm:-right-16 sm:-top-20 sm:h-56 sm:w-56" />
@@ -664,6 +716,7 @@ export const App: React.FC = () => {
           </div>
         ) : null}
       </main>
+      </Suspense>
 
       {/* Footer */}
       <footer className="border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-xs text-slate-500 backdrop-blur-sm">
@@ -718,8 +771,9 @@ export const App: React.FC = () => {
         </div>
       </nav>
 
+      <Suspense fallback={null}>
       {/* Add / Edit Transaction Modal */}
-      <AddTransactionModal
+      {isModalOpen && <AddTransactionModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
@@ -732,38 +786,39 @@ export const App: React.FC = () => {
         onSubmitTransaction={handleSaveTransaction}
         onOpenDebtModal={() => setIsDebtModalOpen(true)}
         editingTransaction={editingTransaction}
-      />
+      />}
 
       {/* Add Debt / Loan Modal */}
-      <AddDebtModal
+      {isDebtModalOpen && <AddDebtModal
         isOpen={isDebtModalOpen}
         onClose={() => setIsDebtModalOpen(false)}
         onSuccess={() => fetchAllData()}
         accounts={accounts}
-      />
+      />}
 
       {/* Add Subscription Modal */}
-      <AddSubscriptionModal
+      {isSubscriptionModalOpen && <AddSubscriptionModal
         isOpen={isSubscriptionModalOpen}
         onClose={() => setIsSubscriptionModalOpen(false)}
         onSuccess={() => fetchAllData()}
         accounts={accounts}
         categories={categories}
-      />
+      />}
 
       {/* "Can I Afford This?" Affordability Modal */}
-      <CanIAffordThisModal
+      {isAffordModalOpen && <CanIAffordThisModal
         isOpen={isAffordModalOpen}
         onClose={() => setIsAffordModalOpen(false)}
         dashboardData={dashboardData}
-      />
+      />}
 
       {/* Financial Time Machine Future Simulator Modal */}
-      <TimeMachineModal
+      {isTimeMachineModalOpen && <TimeMachineModal
         isOpen={isTimeMachineModalOpen}
         onClose={() => setIsTimeMachineModalOpen(false)}
         dashboardData={dashboardData}
-      />
+      />}
+      </Suspense>
 
       {/* Right-Side Utility Dock (Calculator, Privacy Shield, Daily Cap, Runway, Power BI Hub) */}
       <UtilityDock

@@ -37,6 +37,11 @@ apiClient.interceptors.response.use(
 );
 
 export const api = {
+  // Wake a sleeping remote host while the user is entering credentials.
+  warmUp: async (): Promise<void> => {
+    await apiClient.get(`${API_ORIGIN}/health`, { timeout: 10000 });
+  },
+
   // Authentication
   login: async (credentials: { username: string; password: string }) => {
     const res = await apiClient.post(`${API_BASE}/auth/login`, credentials);
