@@ -1,8 +1,8 @@
 # Free deployment: Render + Neon
 
-The React frontend and Express API run together on one free Render web service.
+The React frontend and Express API run together on one Render web service.
 Neon Free stores the PostgreSQL database. Local development continues using SQLite.
-Free hosting has usage limits: Render sleeps when idle, so the first request can be slow.
+Render's free plan sleeps when idle, which makes the Android app feel stuck for up to ~2 minutes on the first login or save after a period of inactivity. For a free-only setup, keep the service on the free tier and add a periodic health-check ping from a free external monitor (for example, UptimeRobot) to keep it warm.
 See https://render.com/docs/free and https://neon.com/pricing for current limits.
 Do not select Render's free PostgreSQL database: it expires after 30 days.
 
