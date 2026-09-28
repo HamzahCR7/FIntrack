@@ -190,7 +190,13 @@ const BudgetBoard: React.FC<{ dashboard: DashboardData }> = ({ dashboard }) => {
     const items: Array<{ id: string; title: string; amount: number; dueDate: Date; kind: string }> = [];
     dashboard.recurring.upcomingSubscriptions.forEach((item) => items.push({ id: `sub-${item.id}`, title: item.name, amount: item.amount, dueDate: new Date(item.nextBillingDate), kind: 'Subscription' }));
     dashboard.debts.activeDebts.filter((item) => item.dueDate && item.type === 'I_OWE').forEach((item) => items.push({ id: `debt-${item.id}`, title: item.personName, amount: item.remainingAmount, dueDate: new Date(item.dueDate!), kind: 'Debt' }));
-    (dashboard.accounts.breakdown.CREDIT_CARD || []).filter((item) => item.paymentDueDay && (item.statementAmount || item.currentBalance) > 0).forEach((item) => items.push({ id: `card-${item.id}`, title: item.name, amount: item.statementAmount || item.currentBalance, dueDate: new Date(today.getFullYear(), today.getMonth(), item.paymentDueDay!), kind: 'Card' }));
+    (dashboard.accounts.breakdown.CREDIT_CARD || [])
+      .filter((item) => item.paymentDueDay && (item.statementAmount || item.currentBalance) > 0)
+      .forEach((item) => {
+        const dueDate = new Date(today.getFullYear(), today.getMonth(), item.paymentDueDay!);
+        if (dueDate < today) dueDate.setMonth(dueDate.getMonth() + 1);
+        items.push({ id: `card-${item.id}`, title: item.name, amount: item.statementAmount || item.currentBalance, dueDate, kind: 'Card' });
+      });
     return items.filter((item) => !Number.isNaN(item.dueDate.getTime())).map((item) => {
       const daysUntilDue = Math.ceil((item.dueDate.getTime() - today.getTime()) / 86400000);
       const automaticStatus: BoardStatus = daysUntilDue < 0 ? 'overdue' : daysUntilDue <= 7 ? 'due' : 'planned';
