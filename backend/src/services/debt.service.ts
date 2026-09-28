@@ -11,6 +11,14 @@ export interface EnhancedDebt extends Debt {
   remainingAmount: number;
 }
 
+const nextMonthlyDueDate = (currentDueDate: Date | null, paymentDate: Date): Date => {
+  const source = currentDueDate ? new Date(currentDueDate) : paymentDate;
+  const day = source.getUTCDate();
+  const nextMonthStart = new Date(Date.UTC(source.getUTCFullYear(), source.getUTCMonth() + 1, 1));
+  const lastDay = new Date(Date.UTC(nextMonthStart.getUTCFullYear(), nextMonthStart.getUTCMonth() + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(nextMonthStart.getUTCFullYear(), nextMonthStart.getUTCMonth(), Math.min(day, lastDay)));
+};
+
 export class DebtService {
   constructor(
     private db: PrismaClient = defaultPrisma,
@@ -134,14 +142,16 @@ export class DebtService {
 
   async settleDebt(id: string, dto: SettleDebtDto): Promise<EnhancedDebt> {
     const debt = await this.getDebtById(id);
+    const isRecurringLoan = debt.recordKind === DebtRecordKind.LOAN;
 
-    if (debt.status === DebtStatus.SETTLED) {
+    if (debt.status === DebtStatus.SETTLED && !isRecurringLoan) {
       throw new BadRequestError(`Debt record for ${debt.personName} is already fully settled.`);
     }
 
     const settlementDate = dto.settlementDate || new Date();
     const newSettledAmount = Number((debt.settledAmount + dto.amountToSettle).toFixed(2));
-    if (newSettledAmount > debt.amount) {
+    const cycleAmount = isRecurringLoan ? (debt.emiAmount || debt.amount) : debt.amount;
+    if (newSettledAmount > cycleAmount) {
       throw new BadRequestError(`Settlement amount exceeds remaining debt balance.`);
     }
 
@@ -181,15 +191,18 @@ export class DebtService {
       }
     }
 
-    let newStatus: DebtStatus = DebtStatus.PARTIALLY_SETTLED;
-    if (newSettledAmount >= debt.amount) {
-      newStatus = DebtStatus.SETTLED;
-    }
-
-    const updated = await this.debtRepo.update(id, {
-      settledAmount: newSettledAmount,
-      status: newStatus,
-    });
+    const cyclePaid = newSettledAmount >= cycleAmount;
+    const updated = await this.debtRepo.update(id, isRecurringLoan && cyclePaid
+      ? {
+          settledAmount: 0,
+          status: DebtStatus.PENDING,
+          dueDate: nextMonthlyDueDate(debt.dueDate, settlementDate),
+          emiAmount: debt.emiAmount || debt.amount,
+        }
+      : {
+          settledAmount: newSettledAmount,
+          status: cyclePaid ? DebtStatus.SETTLED : DebtStatus.PARTIALLY_SETTLED,
+        });
 
     return this.enhanceDebt(updated);
   }

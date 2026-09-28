@@ -661,7 +661,9 @@ export const App: React.FC = () => {
               >
                 <RecurringSection
                   recurring={dashboardData.recurring}
+                  debts={dashboardData.debts.activeDebts}
                   onAddSubscription={() => setIsSubscriptionModalOpen(true)}
+                  onManageDebt={() => setActiveTab('debts')}
                   onRefresh={() => fetchAllData()}
                 />
               </AccordionSection>

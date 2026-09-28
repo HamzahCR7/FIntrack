@@ -243,11 +243,24 @@ export interface SpendForecast {
     points: Array<{
       weekNumber: number;
       weekLabel: string;
+      weekRangeLabel: string;
       spent: number;
       daysCovered: number;
       burnRate: number;
     }>;
   };
+  historicalMonthlyTrends: Array<{
+    monthKey: string;
+    monthLabel: string;
+    points: Array<{
+      weekNumber: number;
+      weekLabel: string;
+      weekRangeLabel: string;
+      spent: number;
+      daysCovered: number;
+      burnRate: number;
+    }>;
+  }>;
   budgetForecasts: Array<{
     budgetId: string;
     budgetName: string;

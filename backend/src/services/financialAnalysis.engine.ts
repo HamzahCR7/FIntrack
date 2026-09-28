@@ -467,13 +467,14 @@ export class FinancialAnalysisEngine {
     const dailyBurnRate = Number((spendingSoFar / daysElapsed).toFixed(2));
     const projectedMonthEndSpend = Number((dailyBurnRate * daysInMonth).toFixed(2));
     const monthStart = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
+    const monthEnd = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
 
     const currentMonthExpenseTxs = await this.db.transaction.findMany({
       where: {
         type: TransactionType.EXPENSE,
         transactionDate: {
           gte: monthStart,
-          lte: now,
+          lte: monthEnd,
         },
       },
       select: {
@@ -482,8 +483,20 @@ export class FinancialAnalysisEngine {
       },
     });
 
+    const historicalExpenseTxs = await this.db.transaction.findMany({
+      where: {
+        type: TransactionType.EXPENSE,
+        transactionDate: { lt: monthStart },
+      },
+      select: { amount: true, transactionDate: true },
+    });
+
     const weeklyBuckets: Record<number, { spent: number; daysCovered: number }> = {};
-    for (let day = 1; day <= daysElapsed; day += 1) {
+    const latestEnteredDay = currentMonthExpenseTxs.reduce(
+      (latest, tx) => Math.max(latest, new Date(tx.transactionDate).getUTCDate()),
+      daysElapsed
+    );
+    for (let day = 1; day <= latestEnteredDay; day += 1) {
       const weekNumber = Math.floor((day - 1) / 7) + 1;
       if (!weeklyBuckets[weekNumber]) {
         weeklyBuckets[weekNumber] = { spent: 0, daysCovered: 0 };
@@ -510,14 +523,62 @@ export class FinancialAnalysisEngine {
       const spent = Number(bucket.spent.toFixed(2));
       const daysCovered = Math.max(1, bucket.daysCovered);
       const burnRate = Number((spent / daysCovered).toFixed(2));
+      const startDay = ((weekNumber - 1) * 7) + 1;
+      const endDay = Math.min(weekNumber * 7, daysInMonth);
+      const monthLabel = monthStart.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
       return {
         weekNumber,
         weekLabel: `W${weekNumber}`,
+        weekRangeLabel: `${monthLabel} ${startDay}–${endDay}`,
         spent,
         daysCovered,
         burnRate,
       };
     });
+
+    const historicalMonthTransactions = new Map<string, typeof historicalExpenseTxs>();
+    for (const tx of historicalExpenseTxs) {
+      const date = new Date(tx.transactionDate);
+      const key = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`;
+      historicalMonthTransactions.set(key, [...(historicalMonthTransactions.get(key) || []), tx]);
+    }
+
+    const historicalMonthlyTrends = Array.from(historicalMonthTransactions.entries())
+      .sort(([a], [b]) => b.localeCompare(a))
+      .map(([monthKey, transactions]) => {
+        const [historyYear, historyMonthNumber] = monthKey.split('-').map(Number);
+        const historyMonthIndex = historyMonthNumber - 1;
+        const historyMonthStart = new Date(Date.UTC(historyYear, historyMonthIndex, 1));
+        const historyDaysInMonth = new Date(Date.UTC(historyYear, historyMonthIndex + 1, 0)).getUTCDate();
+        const shortMonthLabel = historyMonthStart.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+        const points = Array.from({ length: Math.ceil(historyDaysInMonth / 7) }, (_, index) => {
+          const weekNumber = index + 1;
+          const startDay = (index * 7) + 1;
+          const endDay = Math.min(weekNumber * 7, historyDaysInMonth);
+          const spent = transactions
+            .filter((tx) => {
+              const day = new Date(tx.transactionDate).getUTCDate();
+              return day >= startDay && day <= endDay;
+            })
+            .reduce((sum, tx) => sum + tx.amount, 0);
+          const daysCovered = endDay - startDay + 1;
+
+          return {
+            weekNumber,
+            weekLabel: `W${weekNumber}`,
+            weekRangeLabel: `${shortMonthLabel} ${startDay}–${endDay}`,
+            spent: Number(spent.toFixed(2)),
+            daysCovered,
+            burnRate: Number((spent / daysCovered).toFixed(2)),
+          };
+        });
+
+        return {
+          monthKey,
+          monthLabel: historyMonthStart.toLocaleString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }),
+          points,
+        };
+      });
 
     const latestWeekPoint = weeklyTrendPoints[weeklyTrendPoints.length - 1] || null;
     const previousWeekPoint = weeklyTrendPoints[weeklyTrendPoints.length - 2] || null;
@@ -601,6 +662,7 @@ export class FinancialAnalysisEngine {
         changePercent: weekOverWeekBurnRateChangePercent,
         points: weeklyTrendPoints,
       },
+      historicalMonthlyTrends,
       budgetForecasts: budgetForecasts.sort((a, b) => b.projectedOverBudget - a.projectedOverBudget),
     };
   }
