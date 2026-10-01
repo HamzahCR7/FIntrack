@@ -4,9 +4,12 @@ import { prisma as defaultPrisma } from '../config/prisma';
 export class BudgetRepository {
   constructor(private db: PrismaClient = defaultPrisma) {}
 
-  async findAll(): Promise<Budget[]> {
+  async findByCycleMonth(startDate: Date, endDate: Date): Promise<Budget[]> {
     return this.db.budget.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        billingCycleStartDate: { gte: startDate, lt: endDate },
+      },
       include: { category: true },
       orderBy: { createdAt: 'desc' },
     });

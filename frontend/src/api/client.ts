@@ -199,8 +199,8 @@ export const api = {
   },
 
   // Budgets
-  getBudgets: async () => {
-    const res = await apiClient.get(`${API_BASE}/budgets`);
+  getBudgets: async (month?: string) => {
+    const res = await apiClient.get(`${API_BASE}/budgets`, { params: month ? { month } : undefined });
     return res.data.data;
   },
 

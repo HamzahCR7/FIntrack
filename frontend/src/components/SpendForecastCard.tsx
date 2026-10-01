@@ -21,7 +21,9 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
   const spendPercentOfIncome = forecast.incomeThisMonth > 0
     ? Math.min(999, Math.round((forecast.projectedMonthEndSpend / forecast.incomeThisMonth) * 100))
     : 0;
-  const budgetsAtRisk = forecast.budgetForecasts.filter((b) => b.willExceed);
+  const budgetsAtRisk = forecast.budgetForecasts.filter(
+    (b) => b.willExceed && b.budgetName.trim().toLowerCase() !== 'personal expenses',
+  );
   const selectedHistoricalTrend = forecast.historicalMonthlyTrends.find(
     (trend) => trend.monthKey === selectedHistoryMonth
   );

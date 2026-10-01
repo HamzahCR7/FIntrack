@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import { BudgetCard } from './BudgetCard';
 import BudgetForm from './BudgetForm';
-import { Target, Plus, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Target, Plus, AlertTriangle, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import { formatCurrency } from '../utils/privacyStore';
 import { Budget } from '../types';
 
@@ -15,24 +15,33 @@ interface BudgetsSectionProps {
 const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: parentBudgets, onRefresh }) => {
   const [budgets, setBudgets] = useState<Budget[]>(parentBudgets || []);
   const [loading, setLoading] = useState(!parentBudgets);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
 
+  const monthParam = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonth = new Date();
+  const isCurrentMonth = selectedMonth.getFullYear() === currentMonth.getFullYear() &&
+    selectedMonth.getMonth() === currentMonth.getMonth();
+
   useEffect(() => {
-    if (parentBudgets) {
+    if (isCurrentMonth && parentBudgets) {
       setBudgets(parentBudgets);
       setLoading(false);
     } else {
-      fetchBudgets();
+      fetchBudgets(monthParam);
     }
-  }, [parentBudgets]);
+  }, [parentBudgets, isCurrentMonth, monthParam]);
 
-  const fetchBudgets = async () => {
+  const fetchBudgets = async (month = monthParam) => {
     setLoading(true);
     setError('');
     try {
-      const data = await api.getBudgets();
+      const data = await api.getBudgets(month);
       setBudgets(data);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch budgets');
@@ -52,7 +61,7 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
       try {
         await api.deleteBudget(budgetId);
         if (onRefresh) onRefresh();
-        fetchBudgets();
+        fetchBudgets(monthParam);
       } catch (err: any) {
         setError('Failed to delete budget');
       }
@@ -66,7 +75,7 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
 
   const handleFormSuccess = () => {
     if (onRefresh) onRefresh();
-    fetchBudgets();
+    fetchBudgets(monthParam);
   };
 
   const totalBudgeted = budgets.reduce((sum, b) => sum + (b.amount || 0), 0);
@@ -87,17 +96,43 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
             <h2 className="text-xl font-bold text-white tracking-tight">Monthly Budgets</h2>
           </div>
           <p className="text-xs text-slate-400">
-            Category-level spending limits that automatically track all expenses since 1st of the month
+            Category-level spending limits for the selected month
           </p>
         </div>
 
-        <button
-          onClick={() => setIsFormOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs shadow-lg shadow-cyan-500/20 transition-all self-start sm:self-auto"
-        >
-          <Plus className="w-4 h-4" />
-          Create Budget
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-950/70 p-1">
+            <button
+              type="button"
+              onClick={() => setSelectedMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+              aria-label="View previous month"
+              title="Previous month"
+              className="rounded-lg p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="min-w-32 px-2 text-center text-xs font-semibold text-white">
+              {selectedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+              disabled={isCurrentMonth}
+              aria-label="View next month"
+              title="Next month"
+              className="rounded-lg p-2 text-slate-300 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold text-xs shadow-lg shadow-cyan-500/20 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            Create Budget
+          </button>
+        </div>
       </div>
 
       {/* Aggregate Overview Metrics */}

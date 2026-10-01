@@ -57,16 +57,30 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
   };
 
   const displayCategories = React.useMemo(() => {
-    const rootCategories = categories.filter((cat) => !cat.parentId && !cat.name.includes(' > '));
+    const nonPersonalExpenseCategories = new Set([
+      'education loan',
+      'family support',
+      'financial support',
+      'house',
+      'housing',
+      'renting',
+      'rent & housing',
+    ]);
+    const isPersonalExpenseCategory = (name: string) => !nonPersonalExpenseCategories.has(name.trim().toLowerCase());
+    const rootCategories = categories.filter((cat) =>
+      !cat.parentId && !cat.name.includes(' > ') && isPersonalExpenseCategory(cat.name),
+    );
 
     if (rootCategories.length > 0) {
       return rootCategories;
     }
 
-    return categories.map((cat) => ({
-      ...cat,
-      name: cat.name.includes(' > ') ? cat.name.split(' > ')[0].trim() : cat.name,
-    }));
+    return categories
+      .map((cat) => ({
+        ...cat,
+        name: cat.name.includes(' > ') ? cat.name.split(' > ')[0].trim() : cat.name,
+      }))
+      .filter((cat) => isPersonalExpenseCategory(cat.name));
   }, [categories]);
 
   const toggleCategory = (categoryId: string) => {
