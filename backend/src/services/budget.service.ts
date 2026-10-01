@@ -188,7 +188,7 @@ export class BudgetService {
     const transactions = await this.transactionRepo.findByDateRange(start, end);
     const selectedCategoryTokens = this.parseCategoryIds(categoryIds);
     const isNonPersonalCategory = (name?: string | null) =>
-      name !== undefined && NON_PERSONAL_BUDGET_CATEGORIES.has(name.split('>')[0].trim().toLowerCase());
+      name != null && NON_PERSONAL_BUDGET_CATEGORIES.has(name.split('>')[0].trim().toLowerCase());
 
     let matchingTxs = transactions.filter((t) =>
       t.type === 'EXPENSE' &&
