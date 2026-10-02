@@ -5,8 +5,6 @@ import { CreateBudgetDto, UpdateBudgetDto, BudgetResponseDto } from '../dtos/bud
 import { NotFoundError } from '../common/errors';
 import { Budget } from '@prisma/client';
 
-const NON_PERSONAL_BUDGET_CATEGORIES = new Set(['education loan', 'family support', 'financial support']);
-
 export class BudgetService {
   constructor(
     private budgetRepo: BudgetRepository = new BudgetRepository(),
@@ -187,14 +185,7 @@ export class BudgetService {
 
     const transactions = await this.transactionRepo.findByDateRange(start, end);
     const selectedCategoryTokens = this.parseCategoryIds(categoryIds);
-    const isNonPersonalCategory = (name?: string | null) =>
-      name != null && NON_PERSONAL_BUDGET_CATEGORIES.has(name.split('>')[0].trim().toLowerCase());
-
-    let matchingTxs = transactions.filter((t) =>
-      t.type === 'EXPENSE' &&
-      !isNonPersonalCategory(t.category?.name) &&
-      !isNonPersonalCategory(t.subcategory?.name)
-    );
+    let matchingTxs = transactions.filter((t) => t.type === 'EXPENSE');
 
     if (selectedCategoryTokens.length > 0) {
       // Resolve matching category IDs and names (including all subcategories)
@@ -207,9 +198,6 @@ export class BudgetService {
         const selectedCategory = allCategories.find(
           (category) => category.id === token || category.name.toLowerCase() === tokenLower,
         );
-        const rootCategoryName = (selectedCategory?.name || token).split('>')[0].trim().toLowerCase();
-        if (NON_PERSONAL_BUDGET_CATEGORIES.has(rootCategoryName)) continue;
-
         matchingIds.add(token);
 
         for (const cat of allCategories) {
