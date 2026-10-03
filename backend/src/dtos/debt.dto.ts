@@ -22,6 +22,10 @@ export const CreateDebtSchema = z.object({
 export const SettleDebtSchema = z.object({
   amountToSettle: z.number().positive('Settlement amount must be positive'),
   accountId: z.string().optional(),
+  settlementDate: z
+    .union([z.string(), z.date(), z.null()])
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
 });
 
 export const QueryDebtSchema = z.object({

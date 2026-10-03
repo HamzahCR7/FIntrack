@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Wallet, Lock, User, Eye, EyeOff, LogIn } from 'lucide-react';
 import { api } from '../api/client';
 
@@ -13,6 +13,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Start a cold backend before the user submits the form. Failure is harmless;
+    // the real login request will still surface a useful error.
+    void api.warmUp().catch(() => undefined);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -24,6 +30,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
     try {
       setIsLoading(true);
+      console.log('FinTrack Login target:', (window as any).location?.origin || 'native-app', 'resolved API base:', (import.meta as any).env?.VITE_API_URL || 'fallback');
       const res = await api.login({ username, password });
       localStorage.setItem('fintrack_auth_token', res.token);
       localStorage.setItem('fintrack_user', JSON.stringify(res.user));
@@ -40,9 +47,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4 selection:bg-blue-500 selection:text-white">
       {/* Background Decorative Gradient Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-purple-600/15 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl" />
+        <div className="absolute -top-16 -left-12 h-48 w-48 bg-blue-600/15 rounded-full blur-3xl sm:-top-40 sm:-left-40 sm:h-96 sm:w-96" />
+        <div className="absolute top-1/2 -right-12 h-48 w-48 bg-purple-600/15 rounded-full blur-3xl sm:-right-40 sm:h-96 sm:w-96" />
+        <div className="absolute -bottom-16 left-1/3 h-48 w-48 bg-indigo-600/15 rounded-full blur-3xl sm:-bottom-40 sm:h-96 sm:w-96" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -66,7 +73,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 font-medium text-xs text-center animate-in fade-in duration-200">
+              <div className="p-3.5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-medium text-xs text-center animate-in fade-in duration-200">
                 {error}
               </div>
             )}
@@ -117,7 +124,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-blue-600/30 transition-all transform active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Opening your dashboard…</span>
+                </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3, Sun, Moon } from 'lucide-react';
+import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3 } from 'lucide-react';
 import { DashboardData, Budget, Goal } from '../types';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -17,8 +17,6 @@ interface NavbarProps {
   goals?: Goal[];
   onNavigate: (tab: any) => void;
   isLoading: boolean;
-  themeMode: 'light' | 'dark';
-  onToggleTheme: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -35,22 +33,18 @@ export const Navbar: React.FC<NavbarProps> = ({
   goals,
   onNavigate,
   isLoading,
-  themeMode,
-  onToggleTheme,
 }) => {
-  const isLightMode = themeMode === 'light';
-
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 px-4 lg:px-8 py-3.5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/80 px-3 py-2 backdrop-blur-md md:px-4 md:py-3.5 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-nowrap items-center justify-between">
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <Wallet className="w-5.5 h-5.5 text-white" />
+        <div className="flex min-w-0 items-center gap-2 md:gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 shadow-lg shadow-blue-500/20 md:h-10 md:w-10">
+            <Wallet className="h-5 w-5 text-white md:h-5.5 md:w-5.5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+              <h1 className="text-base font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent md:text-xl">
                 FinTrack
               </h1>
             
@@ -60,7 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex shrink-0 items-center justify-end gap-1.5 md:gap-2.5">
           {onExportCSV && (
             <button
               onClick={onExportCSV}
@@ -97,18 +91,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors disabled:opacity-50"
-            title="Refresh Financial Data"
+            className="block shrink-0 rounded-xl border border-slate-700/60 bg-slate-800 p-2.5 text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-white disabled:opacity-50"
+            title="Sync financial data"
+            aria-label="Sync financial data"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-400' : ''}`} />
-          </button>
-
-          <button
-            onClick={onToggleTheme}
-            className="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/60 text-slate-300 hover:text-white transition-colors"
-            title={isLightMode ? 'Switch to dark mode' : 'Switch to light mode'}
-          >
-            {isLightMode ? <Moon className="w-4 h-4 text-indigo-300" /> : <Sun className="w-4 h-4 text-amber-300" />}
           </button>
 
           <NotificationCenter
@@ -118,25 +105,27 @@ export const Navbar: React.FC<NavbarProps> = ({
             onNavigate={onNavigate}
           />
 
-          <button
-            onClick={onAddDebt}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-emerald-600/20 transition-all transform active:scale-95"
-            title="Record Money Owed to You or Borrowed from Someone"
-          >
-            <HandCoins className="w-4 h-4" />
-            <span>Add Debt / Loan</span>
-          </button>
+          <div className="flex items-center gap-1.5 md:gap-2.5">
+            <button
+              onClick={onAddDebt}
+              className="hidden min-h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600/90 px-3.5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-all hover:bg-emerald-500 active:scale-95 md:flex"
+              title="Record Money Owed to You or Borrowed from Someone"
+            >
+              <HandCoins className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">Add Debt / Loan</span>
+            </button>
 
-          <button
-            onClick={onAddTransaction}
-            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold shadow-lg shadow-blue-600/25 transition-all transform active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Add Transaction</span>
-          </button>
+            <button
+              onClick={onAddTransaction}
+              className="hidden items-center justify-center gap-2 rounded-xl bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:bg-blue-500 active:scale-95 md:flex md:min-h-10"
+            >
+              <Plus className="w-3.5 h-3.5 shrink-0 sm:w-4 sm:h-4" />
+              <span className="whitespace-nowrap">Add Transaction</span>
+            </button>
+          </div>
 
           {onLogout && (
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+            <div className="flex items-center gap-2 border-l border-slate-800 pl-1.5 md:pl-2">
               {currentUser && (
                 <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-800/60 border border-slate-700/60 text-slate-300 text-xs">
                   <User className="w-3.5 h-3.5 text-blue-400" />
@@ -145,7 +134,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
               <button
                 onClick={onLogout}
-                className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 transition-colors"
+                className="p-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/20 border border-rose-500/40 text-rose-400 hover:text-rose-400 transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />

@@ -21,6 +21,8 @@ import {
   StickyNote,
   Trash2,
   Pencil,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { usePrivacyMode, formatCurrency } from '../utils/privacyStore';
 import { useToast } from '../utils/toastStore';
@@ -39,8 +41,9 @@ interface UtilityDockProps {
 
 export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categories = [], onExportPowerBI }) => {
   const dockRef = useRef<HTMLDivElement | null>(null);
+  const [isLauncherExpanded, setIsLauncherExpanded] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'CALCULATOR' | 'SMART_SPLIT' | 'DAILY_GAUGE' | 'RUNWAY' | 'POWER_BI' | 'NOTES'>('CALCULATOR');
+  const [activeTab, setActiveTab] = useState<'CALCULATOR' | 'SMART_SPLIT' | 'DATE_COST' | 'DAILY_GAUGE' | 'RUNWAY' | 'POWER_BI' | 'NOTES'>('CALCULATOR');
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [quickItems, setQuickItems] = useState<QuickItem[]>([]);
   const [quickItemType, setQuickItemType] = useState<QuickItemType>('NOTE');
@@ -56,6 +59,10 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   const [needsPercent, setNeedsPercent] = useState('50');
   const [wantsPercent, setWantsPercent] = useState('30');
   const [savingsPercent, setSavingsPercent] = useState('20');
+  const [dateCostAmount, setDateCostAmount] = useState('999');
+  const [dateCostType, setDateCostType] = useState<'RECURRING' | 'ONE_TIME'>('RECURRING');
+  const [dateCostPeriod, setDateCostPeriod] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY'>('MONTHLY');
+  const [usefulLifeMonths, setUsefulLifeMonths] = useState('24');
 
   const { isPrivacyMode, enablePrivacyMode, disablePrivacyMode } = usePrivacyMode();
   const { addToast } = useToast();
@@ -391,6 +398,16 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
   const hasHighWants = wantsPctValue > 35;
   const hasHeavyNeeds = needsPctValue > 65;
 
+  const dateCostBase = Math.max(0, parseFloat(dateCostAmount) || 0);
+  const recurringAnnualFactors = { DAILY: 365, WEEKLY: 52, MONTHLY: 12, QUARTERLY: 4, YEARLY: 1 };
+  const usefulYears = Math.max(1 / 12, (parseFloat(usefulLifeMonths) || 1) / 12);
+  const dateCostYearly = dateCostType === 'RECURRING'
+    ? dateCostBase * recurringAnnualFactors[dateCostPeriod]
+    : dateCostBase / usefulYears;
+  const dateCostMonthly = dateCostYearly / 12;
+  const dateCostWeekly = dateCostYearly / 52;
+  const dateCostDaily = dateCostYearly / 365;
+
   let splitInsightContainerClass = 'rounded-xl border border-cyan-500/20 bg-cyan-500/10 p-3 text-[10px] text-cyan-100 space-y-1.5';
   let splitInsightHeadingClass = 'flex items-center gap-1.5 font-semibold text-cyan-200';
   let splitInsightLine1 = 'Splitting before spending helps you protect essentials and savings first, then spend the rest with confidence.';
@@ -410,7 +427,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
     splitInsightLine2 = `Savings at ${savingsPctValue.toFixed(1)}% gives better cushion for goals and emergencies.`;
     splitInsightLine3 = 'Keep Wants disciplined and direct any surplus to savings or debt reduction.';
   } else if (hasHighWants) {
-    splitInsightContainerClass = 'rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-[10px] text-rose-100 space-y-1.5';
+    splitInsightContainerClass = 'rounded-xl border border-rose-500/40 bg-rose-500/20 p-3 text-[10px] text-rose-100 space-y-1.5';
     splitInsightHeadingClass = 'flex items-center gap-1.5 font-semibold text-rose-200';
     splitInsightLine1 = `Wants are currently ${wantsPctValue.toFixed(1)}%, which may increase month-end pressure.`;
     splitInsightLine2 = 'Consider shifting 5% to 10% from Wants into Savings to reduce stress later in the month.';
@@ -435,19 +452,33 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
 
   let healthVerdict = { label: 'Optimal Buffer', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: ShieldCheck };
   if (runwayMonths < 3) {
-    healthVerdict = { label: 'Vulnerable', color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20', icon: ShieldAlert };
+    healthVerdict = { label: 'Vulnerable', color: 'text-rose-400', bg: 'bg-rose-500/20 border-rose-500/40', icon: ShieldAlert };
   } else if (runwayMonths < 6) {
     healthVerdict = { label: 'Moderate Buffer', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: AlertCircle };
   }
 
   return (
-    <div ref={dockRef} className="fixed right-4 top-20 z-40 flex flex-col items-end gap-2">
+    <div ref={dockRef} className="fixed right-0 top-20 z-[60] flex flex-col items-end gap-2 sm:z-40">
       {/* Utility Launcher Bar Buttons */}
-      <div className="flex flex-col items-stretch gap-2 whitespace-nowrap bg-slate-900/90 p-1.5 rounded-2xl border border-slate-700/80 shadow-xl backdrop-blur-md">
+      <div className={`flex items-stretch whitespace-nowrap rounded-l-2xl border border-r-0 border-slate-700/80 bg-slate-900/90 shadow-xl backdrop-blur-md ${isLauncherExpanded ? 'gap-1 p-1.5' : 'p-0'}`}>
+        {!isLauncherExpanded && (
+          <button
+            onClick={() => setIsLauncherExpanded(true)}
+            className="flex items-center justify-center rounded-lg p-1.5 text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
+            title="Show Stealth and Utilities"
+            aria-label="Show Stealth and Utilities"
+            aria-expanded="false"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
+
+        {isLauncherExpanded && (
+          <>
         {/* 1. Privacy Shield Quick Toggle */}
         <button
           onClick={handlePrivacyButtonClick}
-          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-sm font-semibold ${
             isPrivacyMode
               ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 border border-rose-400'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -455,15 +486,15 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           title={isPrivacyMode ? 'Stealth Mode Active (Click to unlock values with password)' : 'Click to hide/mask all balance numbers'}
         >
           {isPrivacyMode ? <EyeOff className="w-4 h-4 text-white" /> : <Eye className="w-4 h-4 text-blue-400" />}
-          <span className="hidden sm:inline">{isPrivacyMode ? 'Stealth ON' : 'Privacy'}</span>
+          <span>{isPrivacyMode ? 'Stealth ON' : 'Stealth'}</span>
         </button>
 
-        <div className="h-px w-full bg-slate-700" />
+        <div className="w-px bg-slate-700" />
 
         {/* 2. Dock Launcher Toggle Button */}
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${
+          className={`p-2.5 rounded-xl transition-all flex items-center gap-1.5 text-sm font-semibold ${
             isOpen
               ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
               : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -471,13 +502,30 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
           title={isOpen ? 'Close Utility Drawer' : 'Open Utilities (Calculator, Daily Gauge, Runway)'}
         >
           <Calculator className="w-4 h-4 text-indigo-400" />
-          <span className="hidden sm:inline">Utilities</span>
+          <span>Utilities</span>
         </button>
+
+        <div className="w-px bg-slate-700" />
+
+        <button
+          onClick={() => {
+            setIsLauncherExpanded(false);
+            setIsOpen(false);
+          }}
+          className="flex items-center justify-center rounded-lg p-1.5 text-slate-300 transition-all hover:bg-slate-800 hover:text-white"
+          title="Hide Stealth and Utilities"
+          aria-label="Hide Stealth and Utilities"
+          aria-expanded="true"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+          </>
+        )}
       </div>
 
       {/* Utility Window Drawer */}
       {isOpen && (
-        <div className="w-80 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-3 duration-200">
+        <div className="w-[calc(100vw-1.5rem)] max-w-sm bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-top-3 duration-200 sm:w-80">
           {/* Header & Tabs */}
           <div className="bg-slate-800/90 px-3 py-2.5 border-b border-slate-700/60 flex items-center justify-between">
             <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar">
@@ -513,6 +561,17 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
                 title="Smart Split Calculator"
               >
                 Split
+              </button>
+              <button
+                onClick={() => setActiveTab('DATE_COST')}
+                className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeTab === 'DATE_COST'
+                    ? 'bg-violet-600 text-white'
+                    : 'text-violet-400/80 hover:text-violet-300 hover:bg-slate-700/50'
+                }`}
+                title="Daily, weekly, monthly and yearly cost"
+              >
+                Cost
               </button>
               <button
                 onClick={() => setActiveTab('RUNWAY')}
@@ -592,7 +651,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
               <div className="p-3 grid grid-cols-4 gap-2 text-xs font-semibold">
                 <button
                   onClick={handleClear}
-                  className="py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-xl transition-colors font-bold"
+                  className="py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-xl transition-colors font-bold"
                 >
                   C
                 </button>
@@ -840,6 +899,68 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
                 <p>{splitInsightLine1}</p>
                 <p>{splitInsightLine2}</p>
                 <p>{splitInsightLine3}</p>
+              </div>
+            </div>
+          )}
+
+          {/* DATE COST CALCULATOR */}
+          {activeTab === 'DATE_COST' && (
+            <div className="space-y-4 p-4 text-xs">
+              <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                <div className="rounded-lg bg-violet-500/15 p-2 text-violet-300">
+                  <CalendarDays className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-bold text-white">Date Cost Calculator</p>
+                  <p className="text-[10px] text-slate-500">See what a purchase really costs over time.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-slate-950/60 p-1">
+                <button onClick={() => setDateCostType('RECURRING')} className={`rounded-lg py-2 font-semibold ${dateCostType === 'RECURRING' ? 'bg-violet-600 text-white' : 'text-slate-400'}`}>Subscription</button>
+                <button onClick={() => setDateCostType('ONE_TIME')} className={`rounded-lg py-2 font-semibold ${dateCostType === 'ONE_TIME' ? 'bg-violet-600 text-white' : 'text-slate-400'}`}>One-time purchase</button>
+              </div>
+
+              <label className="block space-y-1.5">
+                <span className="font-medium text-slate-300">Amount</span>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-slate-500">₹</span>
+                  <input type="number" min="0" step="0.01" value={dateCostAmount} onChange={(event) => setDateCostAmount(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 py-2.5 pl-7 pr-3 text-sm font-semibold text-white focus:border-violet-500 focus:outline-none" />
+                </div>
+              </label>
+
+              {dateCostType === 'RECURRING' ? (
+                <label className="block space-y-1.5">
+                  <span className="font-medium text-slate-300">Charged</span>
+                  <select value={dateCostPeriod} onChange={(event) => setDateCostPeriod(event.target.value as typeof dateCostPeriod)} className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-white focus:border-violet-500 focus:outline-none">
+                    <option value="DAILY">Daily</option><option value="WEEKLY">Weekly</option><option value="MONTHLY">Monthly</option><option value="QUARTERLY">Quarterly</option><option value="YEARLY">Yearly</option>
+                  </select>
+                </label>
+              ) : (
+                <label className="block space-y-1.5">
+                  <span className="font-medium text-slate-300">Expected useful life</span>
+                  <div className="relative"><input type="number" min="1" value={usefulLifeMonths} onChange={(event) => setUsefulLifeMonths(event.target.value)} className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 pr-16 text-white focus:border-violet-500 focus:outline-none" /><span className="absolute right-3 top-2.5 text-slate-500">months</span></div>
+                </label>
+              )}
+
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ['Per day', dateCostDaily, 'text-cyan-300'],
+                  ['Per week', dateCostWeekly, 'text-blue-300'],
+                  ['Per month', dateCostMonthly, 'text-violet-300'],
+                  ['Per year', dateCostYearly, 'text-amber-300'],
+                ].map(([label, value, color]) => (
+                  <div key={String(label)} className="rounded-xl border border-slate-800 bg-slate-950/70 p-3">
+                    <p className="text-[10px] text-slate-500">{label}</p>
+                    <p className={`mt-1 text-sm font-bold ${color}`}>{formatCurrency(Number(value))}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-3 text-[10px] leading-relaxed text-violet-100">
+                {dateCostType === 'RECURRING'
+                  ? `${formatCurrency(dateCostBase)} billed ${dateCostPeriod.toLowerCase()} becomes ${formatCurrency(dateCostYearly)} each year.`
+                  : `Over ${Math.max(1, parseFloat(usefulLifeMonths) || 1)} months, this purchase costs about ${formatCurrency(dateCostDaily)} per day.`}
               </div>
             </div>
           )}
@@ -1131,11 +1252,11 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
                         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500">
                           {item.price != null && <span className="font-semibold text-amber-300">{formatCurrency(item.price)}</span>}
                           {item.category && <span className="rounded bg-slate-700 px-1.5 py-0.5">{item.category}</span>}
-                          {item.priority !== 'NORMAL' && <span className={item.priority === 'HIGH' ? 'rounded bg-rose-500/15 px-1.5 py-0.5 text-rose-300' : 'rounded bg-slate-700 px-1.5 py-0.5'}>{item.priority}</span>}
+                          {item.priority !== 'NORMAL' && <span className={item.priority === 'HIGH' ? 'rounded bg-rose-500/15 px-1.5 py-0.5 text-rose-400' : 'rounded bg-slate-700 px-1.5 py-0.5'}>{item.priority}</span>}
                           {item.dueDate && <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{new Date(item.dueDate).toLocaleDateString()}</span>}
                         </div>
                       </div>
-                      <button onClick={() => void handleDeleteQuickItem(item.id)} className="rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100" title="Delete this quick item" aria-label="Delete this quick item">
+                      <button onClick={() => void handleDeleteQuickItem(item.id)} className="rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-rose-500/20 hover:text-rose-400 group-hover:opacity-100" title="Delete this quick item" aria-label="Delete this quick item">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>

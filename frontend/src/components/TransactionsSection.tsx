@@ -7,7 +7,7 @@ import { usePrivacyMode } from '../utils/privacyStore';
 import { useToast } from '../utils/toastStore';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Search, Filter, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Calendar, Tag, CreditCard, X, Pencil, Trash2, Download, Printer, ChevronLeft, ChevronRight, ChevronDown, Check, Clock, Loader } from 'lucide-react';
-import { exportTransactionsToCSV } from '../utils/exportUtils';
+import { matchesLedgerSearch } from '../utils/ledgerSearch';
 
 interface FancySelectOption {
   value: string;
@@ -143,6 +143,7 @@ interface TransactionsSectionProps {
   onFilterChange: (filters: any) => void;
   onEditTransaction?: (transaction: Transaction) => void;
   onDeleteTransaction?: (id: string) => void;
+  onExportCSV?: () => void;
   onExportPDF?: () => void;
 }
 
@@ -158,6 +159,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   onFilterChange,
   onEditTransaction,
   onDeleteTransaction,
+  onExportCSV,
   onExportPDF,
 }) => {
   usePrivacyMode();
@@ -300,13 +302,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
     }
 
     if (search) {
-      const query = search.toLowerCase();
-      const matchDesc = tx.description?.toLowerCase().includes(query);
-      const matchMerchant = tx.merchant?.toLowerCase().includes(query);
-      const matchCat = tx.category?.name.toLowerCase().includes(query);
-      const matchSubCat = tx.subcategory?.name.toLowerCase().includes(query);
-      const matchTag = tx.itemTag?.toLowerCase().includes(query);
-      if (!matchDesc && !matchMerchant && !matchCat && !matchSubCat && !matchTag) return false;
+      if (!matchesLedgerSearch(tx, search)) {
+        return false;
+      }
     }
     return true;
   });
@@ -426,9 +424,10 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
 
           {/* CSV Export Button */}
           <button
-            onClick={() => exportTransactionsToCSV(filteredTransactions)}
+            onClick={onExportCSV}
+            disabled={!onExportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold transition-colors"
-            title="Export currently filtered transactions to CSV file"
+            title="Choose a period and export transactions to CSV"
           >
             <Download className="w-3.5 h-3.5 text-blue-400" />
             <span>Export CSV</span>
@@ -644,7 +643,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                             isIncome
                               ? 'bg-emerald-500/10 text-emerald-400'
                               : isExpense
-                              ? 'bg-rose-500/10 text-rose-400'
+                              ? 'bg-rose-500/20 text-rose-400'
                               : 'bg-blue-500/10 text-blue-400'
                           }`}
                         >
@@ -664,6 +663,11 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                               Recurring
                             </span>
                           )}
+                          {tx.syncStatus === 'pending' && (
+                            <span className="mt-0.5 inline-block rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-medium text-amber-300">
+                              Pending sync
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -675,7 +679,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                           isIncome
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : isExpense
-                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
                             : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         }`}
                       >
@@ -730,8 +734,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                         {onEditTransaction && (
                           <button
                             onClick={() => onEditTransaction(tx)}
-                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                            title="Edit Transaction"
+                            disabled={tx.id.startsWith('offline-')}
+                            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                            title={tx.id.startsWith('offline-') ? 'Available after this transaction syncs' : 'Edit Transaction'}
                           >
                             <Pencil className="w-3.5 h-3.5" />
                           </button>
@@ -739,8 +744,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                         {onDeleteTransaction && (
                           <button
                             onClick={() => setDeleteConfirmDialog({ isOpen: true, transactionId: tx.id })}
-                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
-                            title="Delete Transaction"
+                            disabled={tx.id.startsWith('offline-')}
+                            className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/20 text-rose-400 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                            title={tx.id.startsWith('offline-') ? 'Available after this transaction syncs' : 'Delete Transaction'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -765,7 +771,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Expense total</span>
-              <span className="text-sm font-bold text-rose-400">-{formatCurrency(filteredExpenseTotal)}</span>
+              <span className="rounded-lg bg-rose-500/20 px-2 py-1 text-sm font-extrabold text-rose-400 ring-1 ring-rose-500/30">-{formatCurrency(filteredExpenseTotal)}</span>
             </div>
           </div>
         </div>

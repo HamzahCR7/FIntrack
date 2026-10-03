@@ -12,8 +12,14 @@ export class BudgetService {
     private categoryRepo: CategoryRepository = new CategoryRepository()
   ) {}
 
-  async getAllBudgets(): Promise<BudgetResponseDto[]> {
-    const budgets = await this.budgetRepo.findAll();
+  async getAllBudgets(month?: string): Promise<BudgetResponseDto[]> {
+    const now = new Date();
+    const [year, monthIndex] = month
+      ? month.split('-').map(Number)
+      : [now.getUTCFullYear(), now.getUTCMonth() + 1];
+    const startDate = new Date(Date.UTC(year, monthIndex - 1, 1));
+    const endDate = new Date(Date.UTC(year, monthIndex, 1));
+    const budgets = await this.budgetRepo.findByCycleMonth(startDate, endDate);
     return Promise.all(budgets.map((budget) => this.enrichBudget(budget)));
   }
 
@@ -179,7 +185,6 @@ export class BudgetService {
 
     const transactions = await this.transactionRepo.findByDateRange(start, end);
     const selectedCategoryTokens = this.parseCategoryIds(categoryIds);
-
     let matchingTxs = transactions.filter((t) => t.type === 'EXPENSE');
 
     if (selectedCategoryTokens.length > 0) {
@@ -190,6 +195,9 @@ export class BudgetService {
 
       for (const token of selectedCategoryTokens) {
         const tokenLower = token.toLowerCase();
+        const selectedCategory = allCategories.find(
+          (category) => category.id === token || category.name.toLowerCase() === tokenLower,
+        );
         matchingIds.add(token);
 
         for (const cat of allCategories) {

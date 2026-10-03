@@ -32,7 +32,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
     switch (status) {
       case 'EXCEEDED':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/40">
             <XCircle className="w-3.5 h-3.5 text-rose-400" />
             Budget Exceeded ({percentageUsed.toFixed(1)}%)
           </span>
@@ -88,7 +88,7 @@ export const BudgetCard: React.FC<BudgetCardProps> = ({
           </button>
           <button
             onClick={() => onDelete(id)}
-            className="p-1.5 px-3 text-xs font-medium bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl border border-rose-500/20 transition flex items-center gap-1.5"
+            className="p-1.5 px-3 text-xs font-medium bg-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/40 transition flex items-center gap-1.5"
             title="Delete Budget"
           >
             <Trash2 className="w-3.5 h-3.5 text-rose-400" />

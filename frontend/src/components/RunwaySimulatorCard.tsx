@@ -35,7 +35,7 @@ export const RunwaySimulatorCard: React.FC = () => {
     }
 
     if (result.risk.level === 'HIGH') {
-      return 'border-rose-500/30 bg-rose-500/10 text-rose-200';
+      return 'border-rose-500/40 bg-rose-500/20 text-rose-200';
     }
 
     if (result.risk.level === 'MEDIUM') {
@@ -163,7 +163,7 @@ export const RunwaySimulatorCard: React.FC = () => {
       </div>
 
       {error ? (
-        <div className="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">{error}</div>
+        <div className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs text-rose-200">{error}</div>
       ) : null}
 
       {result ? (
@@ -190,13 +190,13 @@ export const RunwaySimulatorCard: React.FC = () => {
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <p className="text-[11px] text-slate-400 uppercase tracking-wider">Baseline net / month</p>
-              <p className={`text-base font-bold mt-0.5 ${result.baseline.monthlyNet >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+              <p className={`text-base font-bold mt-0.5 ${result.baseline.monthlyNet >= 0 ? 'text-emerald-300' : 'text-rose-400'}`}>
                 {formatCurrency(result.baseline.monthlyNet)}
               </p>
             </div>
             <div>
               <p className="text-[11px] text-slate-400 uppercase tracking-wider">Scenario net / month</p>
-              <p className={`text-base font-bold mt-0.5 ${result.scenario.monthlyNet >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+              <p className={`text-base font-bold mt-0.5 ${result.scenario.monthlyNet >= 0 ? 'text-emerald-300' : 'text-rose-400'}`}>
                 {formatCurrency(result.scenario.monthlyNet)}
               </p>
             </div>

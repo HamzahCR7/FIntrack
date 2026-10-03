@@ -36,7 +36,7 @@ export const TrendsSection: React.FC<TrendsSectionProps> = ({ monthlyTrends }) =
         </div>
       </div>
 
-      <div className="mt-6 h-72">
+      <div className="mt-6 h-64 sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={monthlyTrends} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <defs>

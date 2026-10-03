@@ -51,6 +51,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
   const [notes, setNotes] = useState('');
   const [settleAmount, setSettleAmount] = useState('');
   const [settleAccountId, setSettleAccountId] = useState('');
+  const [settleDate, setSettleDate] = useState(new Date().toISOString().split('T')[0]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -174,10 +175,11 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
     try {
       setIsSubmitting(true);
       setError(null);
-      await api.settleDebt(settleDebtItem.id, numericAmount, settleAccountId || undefined);
+      await api.settleDebt(settleDebtItem.id, numericAmount, settleAccountId || undefined, settleDate || undefined);
       setSettleDebtItem(null);
       setSettleAmount('');
       setSettleAccountId('');
+      setSettleDate(new Date().toISOString().split('T')[0]);
       onRefresh();
     } catch (requestError: any) {
       setError(requestError.response?.data?.message || requestError.message || 'Failed to settle debt record');
@@ -253,7 +255,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
             onClick={() => handleDebtTabChange('I_OWE')}
             className={`border-b-2 px-3 py-2 text-xs font-semibold transition-colors ${
               activeDebtTab === 'I_OWE'
-                ? 'border-rose-400 text-rose-300'
+                ? 'border-rose-400 text-rose-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -295,7 +297,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                         ? 'border-amber-500/30 bg-slate-900/60 hover:border-amber-500/60'
                         : isOwedToMe
                         ? 'border-emerald-500/30 bg-slate-900/60 hover:border-emerald-500/60'
-                        : 'border-rose-500/30 bg-slate-900/60 hover:border-rose-500/60'
+                        : 'border-rose-500/40 bg-slate-900/60 hover:border-rose-500/60'
                     }`}
                   >
                     <button
@@ -313,7 +315,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                                 ? 'border-amber-500/30 bg-amber-500/20 text-amber-300'
                                 : isOwedToMe
                                 ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-300'
-                                : 'border-rose-500/30 bg-rose-500/20 text-rose-300'
+                                : 'border-rose-500/40 bg-rose-500/20 text-rose-400'
                             }`}
                           >
                             {isLoan ? `${debt.loanCategory || 'Loan'} Loan` : isOwedToMe ? 'Lent' : 'Borrowed'}
@@ -355,9 +357,11 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                             type="button"
                             onClick={() => {
                               setError(null);
+                              window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
                               setSettleDebtItem(debt);
                               setSettleAmount(debt.remainingAmount.toString());
                               setSettleAccountId('');
+                              setSettleDate(new Date().toISOString().split('T')[0]);
                             }}
                             className="flex items-center gap-1 rounded-lg border border-blue-500/40 bg-blue-600/20 px-2.5 py-1.5 text-[11px] font-semibold text-blue-300 transition-colors hover:bg-blue-600/30"
                           >
@@ -458,6 +462,10 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
               Remaining balance: <span className="font-bold text-white">{formatCurrency(settleDebtItem.remainingAmount)}</span>
             </p>
             <FormInput label="Payment Amount (INR)" value={settleAmount} onChange={setSettleAmount} type="number" required />
+            <div>
+              <label className="mb-1 block font-semibold text-slate-300">Settlement Date</label>
+              <DatePicker value={settleDate} onChange={setSettleDate} accent="blue" />
+            </div>
             {accounts.length > 0 && <AccountSelect label="Payment Account (Optional)" value={settleAccountId} onChange={setSettleAccountId} accounts={accounts} />}
             <ModalActions onCancel={() => setSettleDebtItem(null)} isSubmitting={isSubmitting} submitLabel="Record Payment" />
           </form>
@@ -471,7 +479,7 @@ type SummaryColor = 'emerald' | 'rose' | 'blue' | 'amber';
 
 const summaryCardColors: Record<SummaryColor, { container: string; label: string; amount: string; icon: string }> = {
   emerald: { container: 'border-emerald-500/20 bg-emerald-500/10', label: 'text-emerald-400', amount: 'text-emerald-300', icon: 'bg-emerald-500/20 text-emerald-300' },
-  rose: { container: 'border-rose-500/20 bg-rose-500/10', label: 'text-rose-400', amount: 'text-rose-300', icon: 'bg-rose-500/20 text-rose-300' },
+  rose: { container: 'border-rose-500/40 bg-rose-500/20', label: 'text-rose-400', amount: 'text-rose-400', icon: 'bg-rose-500/20 text-rose-400' },
   blue: { container: 'border-blue-500/20 bg-blue-500/10', label: 'text-blue-400', amount: 'text-blue-300', icon: 'bg-blue-500/20 text-blue-300' },
   amber: { container: 'border-amber-500/20 bg-amber-500/10', label: 'text-amber-400', amount: 'text-amber-300', icon: 'bg-amber-500/20 text-amber-300' },
 };
@@ -491,15 +499,24 @@ const SummaryCard = ({ label, amount, color, icon: Icon }: { label: string; amou
 };
 
 const Modal = ({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-    <div className="w-full max-w-md space-y-4 rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl">
-      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+  <div
+    onClick={(event) => {
+      if (event.target === event.currentTarget) {
+        onClose();
+      }
+    }}
+    className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 pt-6 backdrop-blur-sm"
+  >
+    <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl">
+      <div className="flex shrink-0 items-center justify-between border-b border-slate-800 bg-slate-900/50 p-5">
         <h3 className="text-base font-bold text-white">{title}</h3>
-        <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close">
+        <button type="button" onClick={onClose} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-white" aria-label="Close">
           <X className="h-5 w-5" />
         </button>
       </div>
-      {children}
+      <div className="min-h-0 space-y-4 overflow-y-auto p-5 pt-0 text-xs">
+        {children}
+      </div>
     </div>
   </div>
 );
@@ -539,10 +556,10 @@ const ModalActions = ({ onCancel, isSubmitting, submitLabel }: { onCancel: () =>
   </div>
 );
 
-const ErrorMessage = ({ message }: { message: string }) => <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 font-medium text-rose-400">{message}</div>;
+const ErrorMessage = ({ message }: { message: string }) => <div className="rounded-xl border border-rose-500/40 bg-rose-500/20 p-3 font-medium text-rose-400">{message}</div>;
 
 const IconButton = ({ title, onClick, icon, danger = false }: { title: string; onClick: () => void; icon: React.ReactNode; danger?: boolean }) => (
-  <button type="button" onClick={onClick} title={title} className={`rounded-lg p-1.5 transition-colors ${danger ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}>{icon}</button>
+  <button type="button" onClick={onClick} title={title} className={`rounded-lg p-1.5 transition-colors ${danger ? 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}>{icon}</button>
 );
 
 const PageButton = ({ title, disabled, onClick, icon }: { title: string; disabled: boolean; onClick: () => void; icon: React.ReactNode }) => (

@@ -89,7 +89,7 @@ export const StealthPasswordModal: React.FC<StealthPasswordModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900/60">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20">
+            <div className="p-2 rounded-xl bg-rose-500/20 border border-rose-500/40">
               <Lock className="w-5 h-5 text-rose-400" />
             </div>
             <div>
@@ -116,7 +116,7 @@ export const StealthPasswordModal: React.FC<StealthPasswordModalProps> = ({
           </p>
 
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2 animate-in fade-in">
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-xs flex items-start gap-2 animate-in fade-in">
               <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>

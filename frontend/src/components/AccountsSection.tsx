@@ -119,9 +119,9 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
           <span className="block text-[10px] font-semibold uppercase tracking-wider text-emerald-300">Income</span>
           <span className="text-sm font-bold text-emerald-300">{formatCurrency(monthlyIncome)}</span>
         </div>
-        <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3">
-          <span className="block text-[10px] font-semibold uppercase tracking-wider text-rose-300">Expenses</span>
-          <span className="text-sm font-bold text-rose-300">{formatCurrency(monthlyExpenses)}</span>
+        <div className="rounded-xl border border-rose-500/40 bg-rose-500/20 px-4 py-3 shadow-sm shadow-rose-950/30">
+          <span className="block text-[10px] font-bold uppercase tracking-wider text-rose-400">Expenses</span>
+          <span className="text-sm font-extrabold text-rose-400">{formatCurrency(monthlyExpenses)}</span>
         </div>
       </div>
 
@@ -159,7 +159,7 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
                   <div className="flex justify-between text-[10px]">
                     <span className="text-slate-500">{accountValueLabel}</span>
                     <span className="text-emerald-300">In {formatCurrency(activity.incoming)}</span>
-                    <span className="text-rose-300">Out {formatCurrency(activity.outgoing)}</span>
+                    <span className="text-rose-400">Out {formatCurrency(activity.outgoing)}</span>
                   </div>
                 </div>
                 );
@@ -258,7 +258,7 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
                   <div className="flex justify-between text-[10px]">
                     <span className="text-slate-500">{accountValueLabel}</span>
                     <span className="text-emerald-300">In {formatCurrency(activity.incoming)}</span>
-                    <span className="text-rose-300">Out {formatCurrency(activity.outgoing)}</span>
+                    <span className="text-rose-400">Out {formatCurrency(activity.outgoing)}</span>
                   </div>
                 </div>
                 );
@@ -300,7 +300,7 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
                   <div className="flex justify-between text-[10px]">
                     <span className="text-slate-500">{accountValueLabel}</span>
                     <span className="text-emerald-300">In {formatCurrency(activity.incoming)}</span>
-                    <span className="text-rose-300">Out {formatCurrency(activity.outgoing)}</span>
+                    <span className="text-rose-400">Out {formatCurrency(activity.outgoing)}</span>
                   </div>
                 </div>
                 );

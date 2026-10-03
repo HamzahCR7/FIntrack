@@ -56,18 +56,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const displayCategories = React.useMemo(() => {
-    const rootCategories = categories.filter((cat) => !cat.parentId && !cat.name.includes(' > '));
-
-    if (rootCategories.length > 0) {
-      return rootCategories;
-    }
-
-    return categories.map((cat) => ({
-      ...cat,
-      name: cat.name.includes(' > ') ? cat.name.split(' > ')[0].trim() : cat.name,
-    }));
-  }, [categories]);
+  const displayCategories = React.useMemo(() => categories, [categories]);
 
   const toggleCategory = (categoryId: string) => {
     setFormData((prev) => {
@@ -147,7 +136,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
 
         <form onSubmit={handleSubmit} className="p-5 pt-0 space-y-4 text-xs">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-medium">
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-medium">
               {error}
             </div>
           )}

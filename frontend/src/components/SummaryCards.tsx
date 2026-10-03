@@ -42,12 +42,12 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
   const [selectedMetric, setSelectedMetric] = useState<MetricType | null>(null);
   const prevSavings = summary.previousMonthSavings || 0;
 
-  const cardPadding = isColumn ? 'p-3.5' : 'p-5';
-  const headingSize = isColumn ? 'text-xl' : 'text-2xl';
+  const cardPadding = isColumn ? 'p-3.5' : 'p-3.5 sm:p-5';
+  const headingSize = isColumn ? 'text-xl' : 'text-lg sm:text-2xl';
 
   return (
     <>
-      <div className={`dashboard-summary grid gap-3 ${isColumn ? 'grid-cols-1 w-full' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'}`}>
+      <div className={`dashboard-summary grid gap-2 sm:gap-3 ${isColumn ? 'grid-cols-1 w-full' : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 md:gap-4'}`}>
         {/* 1. Total Balance */}
         <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
           <div className="flex items-center justify-between">
@@ -122,13 +122,13 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 Expenses (This Month)
               </span>
             </div>
-            <div className="p-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 group-hover:bg-rose-500/20 group-hover:scale-105 transition-all flex items-center gap-1">
+            <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 group-hover:bg-rose-500/30 group-hover:scale-105 transition-all flex items-center gap-1">
               <TrendingDown className="w-4 h-4" />
               <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
             </div>
           </div>
           <div className="mt-2">
-            <h3 className={`${headingSize} font-bold text-rose-400 tracking-tight`}>
+            <h3 className={`${headingSize} font-extrabold text-rose-400 tracking-tight drop-shadow-[0_0_10px_rgba(251,113,133,0.18)]`}>
               {formatCurrency(summary.spendingThisMonth)}
             </h3>
             <p className="text-[11px] text-rose-500/90 mt-0.5 flex items-center gap-1">

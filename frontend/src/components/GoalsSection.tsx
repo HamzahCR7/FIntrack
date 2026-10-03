@@ -148,7 +148,7 @@ const GoalsSection: React.FC<GoalsSectionProps> = ({ goals: parentGoals, onRefre
           Loading goals...
         </div>
       ) : error ? (
-        <div className="p-4 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-2xl">
+        <div className="p-4 text-xs text-rose-400 bg-rose-500/20 border border-rose-500/40 rounded-2xl">
           {error}
         </div>
       ) : goals.length === 0 ? (

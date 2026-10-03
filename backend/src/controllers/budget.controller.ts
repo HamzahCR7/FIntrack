@@ -2,6 +2,7 @@ import { Request, Response, NextFunction, Router } from 'express';
 import { BudgetService } from '../services/budget.service';
 import { validateBody } from '../common/middleware/validateRequest';
 import { CreateBudgetSchema, UpdateBudgetSchema } from '../dtos/budget.dto';
+import { BadRequestError } from '../common/errors';
 
 export class BudgetController {
   public router = Router();
@@ -20,9 +21,13 @@ export class BudgetController {
     this.router.delete('/:id', this.deleteBudget);
   }
 
-  private getAllBudgets = async (_req: Request, res: Response, next: NextFunction) => {
+  private getAllBudgets = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const budgets = await this.budgetService.getAllBudgets();
+      const month = req.query.month;
+      if (month !== undefined && (typeof month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))) {
+        throw new BadRequestError('Month must use YYYY-MM format');
+      }
+      const budgets = await this.budgetService.getAllBudgets(month);
       res.status(200).json({ status: 'success', data: budgets });
     } catch (err) {
       next(err);

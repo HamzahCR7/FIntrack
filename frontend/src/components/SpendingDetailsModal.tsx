@@ -492,7 +492,7 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
                                     ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                                     : isTransfer
                                     ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                                    : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
                                 }`}
                               >
                                 {isIncome && <ArrowDownRight className="w-3 h-3" />}
@@ -547,7 +547,7 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-[11px] text-slate-400">
                   <span>Rows: {sortedFilteredTransactions.length}</span>
                   <span className="text-emerald-300">Income: +{formatCurrency(tableIncomeTotal)}</span>
-                  <span className="text-rose-300">Expense: -{formatCurrency(tableExpenseTotal)}</span>
+                  <span className="text-rose-400">Expense: -{formatCurrency(tableExpenseTotal)}</span>
                   <span className="text-indigo-300">Transfer: {formatCurrency(tableTransferTotal)}</span>
                   <span className="font-semibold text-slate-200">Total: {formatCurrency(filteredTableTotal)}</span>
                 </div>
