@@ -248,6 +248,7 @@ export const CustomizableDashboard: React.FC<{
   const [layout, setLayout] = useState<Layout>(() => loadLayout(innerWidth < 768 ? 'mobile' : 'desktop'));
   const [customizing, setCustomizing] = useState(false);
   const [dragged, setDragged] = useState<WidgetId | null>(null);
+  const [mobileWidget, setMobileWidget] = useState<WidgetId>('financial-highlights');
   useEffect(() => { const resize = () => { const next = innerWidth < 768 ? 'mobile' : 'desktop'; if (next !== device) { setDevice(next); setLayout(loadLayout(next)); } }; addEventListener('resize', resize); return () => removeEventListener('resize', resize); }, [device]);
   useEffect(() => localStorage.setItem(`fintrack_dashboard_${device}_v1`, JSON.stringify(layout)), [device, layout]);
   const move = (target: WidgetId) => { if (!dragged || dragged === target) return; setLayout((current) => { const order = current.order.filter((id) => id !== dragged); order.splice(order.indexOf(target), 0, dragged); return { ...current, order }; }); setDragged(null); };
@@ -258,5 +259,23 @@ export const CustomizableDashboard: React.FC<{
     dues: <BillRemindersSection creditCards={dashboardData.accounts.breakdown.CREDIT_CARD} subscriptions={dashboardData.recurring.upcomingSubscriptions} debts={dashboardData.debts.activeDebts} onPayCreditCard={onPayCreditCard} onPaySubscription={onPaySubscription} onPayDebt={onPayDebt}/>,
     daily: <DailySpendingSection transactions={transactions} onAddTransactionForDate={onAddTransactionForDate}/>, trends: <TrendsSection monthlyTrends={dashboardData.monthlyTrends}/>, runway: <RunwaySimulatorCard/>,
   }[id]);
+  if (device === 'mobile') return <div className="space-y-3">
+    <div className="-mx-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Financial insights">
+      <div className="flex min-w-max gap-2">
+        {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={mobileWidget === id}
+            onClick={() => setMobileWidget(id)}
+            className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${mobileWidget === id ? 'border-cyan-300/50 bg-cyan-400 text-slate-950' : 'border-slate-700 bg-slate-900 text-slate-300'}`}
+          >
+            {LABELS[id]}
+          </button>
+        ))}
+      </div>
+    </div>
+    <div role="tabpanel">{render(mobileWidget)}</div>
+  </div>;
   return <div className={layout.mode === 'compact' ? 'space-y-3' : 'space-y-5'}><div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-700/70 bg-slate-900/80 p-3"><div><p className="text-sm font-semibold text-white">My dashboard · {device}</p><p className="text-[10px] text-slate-500">Drag widgets while customizing. Mobile and desktop layouts save separately.</p></div><div className="flex gap-2"><select value={layout.mode} onChange={(event) => setLayout((current) => ({ ...current, mode: event.target.value as DisplayMode }))} className="rounded-xl border border-slate-700 bg-slate-950 px-2 py-2 text-xs text-slate-300"><option value="comfortable">Comfortable</option><option value="compact">Compact</option><option value="presentation">Presentation</option></select><button onClick={() => setCustomizing((value) => !value)} className={`rounded-xl px-3 py-2 text-xs font-semibold ${customizing ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}><Settings2 className="mr-1 inline h-4 w-4"/>Customize</button></div></div>{customizing && <div className="grid gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-3 sm:grid-cols-2 lg:grid-cols-4">{layout.order.map((id) => <div key={id} className="flex items-center justify-between rounded-xl bg-slate-900 px-3 py-2 text-xs"><span className="text-slate-200">{LABELS[id]}</span><div className="flex gap-1"><button onClick={() => toggle('hidden',id)} title="Show or hide">{layout.hidden.includes(id) ? <EyeOff className="h-4 w-4 text-slate-500"/> : <Eye className="h-4 w-4 text-cyan-300"/>}</button><button onClick={() => toggle('wide',id)} title="Resize">{layout.wide.includes(id) ? <Minimize2 className="h-4 w-4"/> : <Maximize2 className="h-4 w-4"/>}</button></div></div>)}<button onClick={() => setLayout(DEFAULT_LAYOUT)} className="rounded-xl bg-slate-800 px-3 py-2 text-xs text-slate-300"><RotateCcw className="mr-1 inline h-4 w-4"/>Reset layout</button></div>}<div className={`grid grid-cols-1 ${layout.mode === 'presentation' ? 'gap-8' : layout.mode === 'compact' ? 'gap-3 lg:grid-cols-2' : 'gap-5 lg:grid-cols-2'}`}>{layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => <div key={id} draggable={customizing} onDragStart={() => setDragged(id)} onDragOver={(event) => event.preventDefault()} onDrop={() => move(id)} className={`${layout.wide.includes(id) || layout.mode === 'presentation' ? 'lg:col-span-2' : ''} relative ${customizing ? 'cursor-grab rounded-2xl ring-1 ring-cyan-400/30' : ''}`}>{customizing && <div className="absolute right-3 top-3 z-20 rounded-lg bg-slate-950/90 p-1 text-cyan-300"><GripVertical className="h-4 w-4"/></div>}{render(id)}</div>)}</div></div>;
 };

@@ -1,6 +1,7 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import axios from 'axios';
 import { Navbar } from './components/Navbar';
+import type { MetricType } from './components/MetricDetailsModal';
 import { UtilityDock } from './components/UtilityDock';
 import { LoginScreen } from './components/LoginScreen';
 import { AccordionSection } from './components/AccordionSection';
@@ -17,9 +18,11 @@ import {
 import { api } from './api/client';
 import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from './utils/exportUtils';
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
-import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical } from 'lucide-react';
+import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical, Menu, X, Plus, ArrowRight, ChevronDown, WalletCards } from 'lucide-react';
+import { formatCurrency } from './utils/privacyStore';
 
 const SummaryCards = lazy(() => import('./components/SummaryCards').then((module) => ({ default: module.SummaryCards })));
+const MetricDetailsModal = lazy(() => import('./components/MetricDetailsModal').then((module) => ({ default: module.MetricDetailsModal })));
 const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard').then((module) => ({ default: module.CustomizableDashboard })));
 const AccountsSection = lazy(() => import('./components/AccountsSection').then((module) => ({ default: module.AccountsSection })));
 const RecurringSection = lazy(() => import('./components/RecurringSection').then((module) => ({ default: module.RecurringSection })));
@@ -85,6 +88,10 @@ export const App: React.FC = () => {
   const [isTimeMachineModalOpen, setIsTimeMachineModalOpen] = useState<boolean>(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | Partial<Transaction> | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [showMobileInsights, setShowMobileInsights] = useState(false);
+  const [showMobileSummaryDetails, setShowMobileSummaryDetails] = useState(false);
+  const [mobileMetricDetails, setMobileMetricDetails] = useState<MetricType | null>(null);
   const [ledgerMonth, setLedgerMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -359,6 +366,17 @@ export const App: React.FC = () => {
     { id: 'financial-hub', label: 'Money Lab', caption: 'Automation & review', icon: FlaskConical, color: 'cyan' },
     { id: 'ai', label: 'Ask FinTrack', caption: 'Personal money guide', icon: Sparkles, color: 'fuchsia' },
   ];
+  const mobilePrimaryItems = navigationItems.filter((item) => ['overview', 'transactions', 'smart-guidance', 'ai'].includes(item.id));
+  const mobileMoreItems = navigationItems.filter((item) => !['overview', 'transactions', 'smart-guidance', 'ai'].includes(item.id));
+  const navigateMobile = (tab: DashboardTab) => {
+    setActiveTab(tab);
+    setIsMoreMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const activeMobilePrimary = mobilePrimaryItems.some((item) => item.id === activeTab);
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
+    .slice(0, 3);
   if (authChecking) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center space-y-4">
@@ -401,7 +419,7 @@ export const App: React.FC = () => {
         </main>
       )}>
       <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-1.5 sm:px-4 lg:px-8 py-2 sm:py-6 md:py-8 pb-20 sm:pb-32 md:pb-8 space-y-2 sm:space-y-8">
-        <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-3 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
+        <section className={`hero-banner relative hidden overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-3 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7 md:block ${activeTab === 'overview' ? '' : 'md:block'}`}>
           <div className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl sm:-right-16 sm:-top-20 sm:h-56 sm:w-56" />
           <div className="pointer-events-none absolute -bottom-16 -left-8 h-48 w-48 rounded-full bg-gradient-to-tr from-orange-400/25 to-transparent blur-2xl sm:-bottom-24 sm:-left-14 sm:h-64 sm:w-64" />
 
@@ -468,8 +486,89 @@ export const App: React.FC = () => {
           </div>
         ) : dashboardData ? (
           <div className="space-y-6">
+            {activeTab === 'overview' && (
+              <section className="space-y-4 md:hidden" aria-label="Home overview">
+                <div className="px-2 pt-1">
+                  <p className="text-xs text-slate-400">{todayLabel}</p>
+                  <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-white">{dayGreeting}, {displayName}</h1>
+                </div>
+
+                <section className="rounded-2xl border border-slate-800 bg-slate-900/85 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Available balance</p>
+                      <p className="mt-1 text-2xl font-semibold tracking-tight text-white">{formatCurrency(dashboardData.summary.totalBalance)}</p>
+                    </div>
+                    <div className="rounded-xl bg-cyan-400/10 p-2.5 text-cyan-300"><WalletCards className="h-5 w-5" /></div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-800 pt-3">
+                    <button onClick={() => setMobileMetricDetails('EXPENSE')} className="text-left"><p className="text-[10px] uppercase tracking-wide text-slate-500">Spent this month</p><p className="mt-1 text-sm font-semibold text-rose-300">{formatCurrency(dashboardData.summary.spendingThisMonth)}</p></button>
+                    <button onClick={() => setMobileMetricDetails('SAVINGS')} className="text-left"><p className="text-[10px] uppercase tracking-wide text-slate-500">Saved this month</p><p className="mt-1 text-sm font-semibold text-emerald-300">{formatCurrency(dashboardData.summary.savingsThisMonth)}</p></button>
+                  </div>
+                  <button onClick={() => setShowMobileSummaryDetails((current) => !current)} className="mt-3 flex w-full items-center justify-between border-t border-slate-800 pt-3 text-xs font-semibold text-cyan-300" aria-expanded={showMobileSummaryDetails}>
+                    More summary details
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showMobileSummaryDetails ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showMobileSummaryDetails && <div className="mt-3 divide-y divide-slate-800 rounded-xl bg-slate-950/45 px-3">
+                    {[
+                      { label: 'Previous month saved', value: dashboardData.summary.previousMonthSavings, tone: 'text-teal-300' },
+                      { label: 'Income this month', value: dashboardData.summary.incomeThisMonth, tone: 'text-emerald-300', metric: 'INCOME' as MetricType },
+                      { label: 'Expenses this month', value: dashboardData.summary.spendingThisMonth, tone: 'text-rose-300', metric: 'EXPENSE' as MetricType },
+                      { label: 'Credit outstanding', value: dashboardData.summary.creditOutstanding, tone: 'text-amber-300' },
+                      { label: 'Pocket allowance', value: dashboardData.summary.pocketAllowanceBalance, tone: 'text-violet-300' },
+                    ].map((item) => <button key={item.label} disabled={!item.metric} onClick={() => item.metric && setMobileMetricDetails(item.metric)} className="flex w-full items-center justify-between gap-3 py-3 text-left disabled:cursor-default">
+                      <span className="text-xs text-slate-400">{item.label}</span><span className={`text-sm font-semibold ${item.tone}`}>{formatCurrency(item.value || 0)}</span>
+                    </button>)}
+                  </div>}
+                </section>
+
+                <button
+                  onClick={() => navigateMobile(dueTimelineCount > 0 ? 'reminders' : 'smart-guidance')}
+                  className="flex w-full items-center gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-3.5 text-left"
+                >
+                  <div className="rounded-xl bg-amber-400/15 p-2 text-amber-300"><BellRing className="h-5 w-5" /></div>
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-amber-100">{dueTimelineCount > 0 ? `${dueTimelineCount} item${dueTimelineCount === 1 ? '' : 's'} need attention` : 'Your next best step'}</span><span className="mt-0.5 block text-xs text-amber-200/70">{dueTimelineCount > 0 ? 'Review upcoming bills and payments' : 'See your personalized money guidance'}</span></span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-amber-300" />
+                </button>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Add', icon: Plus, action: () => handleOpenAddModal() },
+                    { label: 'Activity', icon: ReceiptText, action: () => navigateMobile('transactions') },
+                    { label: 'Budgets', icon: PieChart, action: () => navigateMobile('budgets') },
+                  ].map(({ label, icon: Icon, action }) => (
+                    <button key={label} onClick={action} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-2xl border border-slate-800 bg-slate-900 px-1 text-slate-200">
+                      <Icon className="h-4 w-4 text-cyan-300" /><span className="text-[11px] font-semibold">{label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <section className="rounded-2xl border border-slate-800 bg-slate-900/85 p-4">
+                  <div className="flex items-center justify-between"><h2 className="text-sm font-semibold text-white">Recent activity</h2><button onClick={() => navigateMobile('transactions')} className="text-xs font-semibold text-cyan-300">See all</button></div>
+                  <div className="mt-3 divide-y divide-slate-800">
+                    {recentTransactions.length ? recentTransactions.map((transaction) => (
+                      <button key={transaction.id} onClick={() => navigateMobile('transactions')} className="flex w-full items-center gap-3 py-3 text-left first:pt-0 last:pb-0">
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${transaction.type === 'INCOME' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-rose-400/10 text-rose-300'}`}><ReceiptText className="h-4 w-4" /></span>
+                        <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-100">{transaction.merchant || transaction.description || transaction.category?.name || 'Transaction'}</span><span className="block text-[11px] text-slate-500">{new Date(transaction.transactionDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span></span>
+                        <span className={`text-sm font-semibold ${transaction.type === 'INCOME' ? 'text-emerald-300' : 'text-slate-100'}`}>{transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}</span>
+                      </button>
+                    )) : <p className="py-3 text-sm text-slate-400">No transactions yet. Add your first one to start tracking.</p>}
+                  </div>
+                </section>
+
+                <button
+                  onClick={() => setShowMobileInsights((current) => !current)}
+                  className="flex w-full items-center justify-between rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3.5 text-left"
+                  aria-expanded={showMobileInsights}
+                >
+                  <span><span className="block text-sm font-semibold text-white">Explore all insights</span><span className="mt-0.5 block text-xs text-slate-400">Spending, dues, daily activity, trends and planning tools</span></span>
+                  <ChevronDown className={`h-5 w-5 shrink-0 text-cyan-300 transition-transform ${showMobileInsights ? 'rotate-180' : ''}`} />
+                </button>
+              </section>
+            )}
             {/* 1. TOP SUMMARY CARDS (Accordion Section) */}
             <AccordionSection
+              className="hidden md:block"
               title="Financial Pulse & Summary"
               subtitle="Liquid bank balances, monthly savings & total active credit debt"
               icon={LayoutDashboard}
@@ -482,6 +581,14 @@ export const App: React.FC = () => {
                 isColumn={false}
               />
             </AccordionSection>
+
+            {activeTab !== 'overview' && (
+              <section className="mobile-page-context md:hidden rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">FinTrack</p>
+                <h2 className="mt-1 text-lg font-semibold text-white">{navigationItems.find((item) => item.id === activeTab)?.label}</h2>
+                <p className="mt-0.5 text-xs text-slate-400">{navigationItems.find((item) => item.id === activeTab)?.caption}</p>
+              </section>
+            )}
 
             {/* 2. MONEY COCKPIT NAVIGATION */}
             <section
@@ -560,7 +667,7 @@ export const App: React.FC = () => {
 
             {/* 1. OVERVIEW TAB */}
             {activeTab === 'overview' && (
-              <CustomizableDashboard
+              <div className={`${showMobileInsights ? 'block' : 'hidden'} md:hidden`}><CustomizableDashboard
                 dashboardData={dashboardData}
                 transactions={transactions}
                 onAddTransactionForDate={(dateStr) => {
@@ -570,7 +677,20 @@ export const App: React.FC = () => {
                 onPayCreditCard={handlePayCreditCard}
                 onPaySubscription={() => setActiveTab('subscriptions')}
                 onPayDebt={() => setActiveTab('debts')}
-              />
+              /></div>
+            )}
+            {activeTab === 'overview' && (
+              <div className="hidden md:block"><CustomizableDashboard
+                dashboardData={dashboardData}
+                transactions={transactions}
+                onAddTransactionForDate={(dateStr) => {
+                  setEditingTransaction({ transactionDate: dateStr, type: 'EXPENSE' });
+                  setIsModalOpen(true);
+                }}
+                onPayCreditCard={handlePayCreditCard}
+                onPaySubscription={() => setActiveTab('subscriptions')}
+                onPayDebt={() => setActiveTab('debts')}
+              /></div>
             )}
 
             {/* 1B. SMART GUIDANCE TAB */}
@@ -726,20 +846,46 @@ export const App: React.FC = () => {
       </Suspense>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-xs text-slate-500 backdrop-blur-sm">
+      <footer className="hidden border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-xs text-slate-500 backdrop-blur-sm md:block">
         <p>FinTrack Personal Financial System — Developed by Hamzah</p>
       </footer>
 
+      {isMoreMenuOpen && (
+        <div className="fixed inset-0 z-[55] md:hidden" role="dialog" aria-modal="true" aria-labelledby="more-menu-title">
+          <button className="absolute inset-0 bg-slate-950/70" aria-label="Close more menu" onClick={() => setIsMoreMenuOpen(false)} />
+          <section className="absolute inset-x-2 bottom-20 rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl shadow-slate-950/60">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">More tools</p>
+                <h2 id="more-menu-title" className="text-lg font-semibold text-white">Manage your money</h2>
+              </div>
+              <button onClick={() => setIsMoreMenuOpen(false)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close more menu"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {mobileMoreItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return <button key={item.id} onClick={() => navigateMobile(item.id)} className={`relative flex min-h-[72px] items-center gap-3 rounded-2xl border px-3 text-left transition-colors ${isActive ? 'border-cyan-400/50 bg-cyan-400/15 text-white' : 'border-slate-800 bg-slate-950/50 text-slate-200 hover:bg-slate-800'}`}>
+                  <Icon className="h-5 w-5 shrink-0 text-cyan-300" />
+                  <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">{item.label}</span><span className="mt-1 block text-[10px] text-slate-400">{item.caption}</span></span>
+                  {item.badge ? <span className="absolute right-2 top-2 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-emerald-950">{item.badge}</span> : null}
+                </button>;
+              })}
+            </div>
+          </section>
+        </div>
+      )}
+
       <nav className="mobile-tabbar fixed inset-x-2 bottom-2 z-50 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-1.5 py-1.5 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5 gap-0.5">
-          {navigationItems.slice(0, 5).map((item) => {
+          {mobilePrimaryItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
 
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => navigateMobile(item.id)}
                 className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${
                   isActive ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'
                 }`}
@@ -747,38 +893,32 @@ export const App: React.FC = () => {
                 aria-pressed={isActive}
               >
                 <Icon className="h-[18px] w-[18px]" />
-                <span className="text-[11px] font-semibold leading-none">{item.label.split(' ')[0]}</span>
+                <span className="text-[11px] font-semibold leading-none">{item.id === 'overview' ? 'Home' : item.id === 'transactions' ? 'Activity' : item.id === 'smart-guidance' ? 'Plan' : 'Ask AI'}</span>
                 {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
           })}
-        </div>
-
-        <div className="mt-1 grid grid-cols-6 gap-0.5">
-          {navigationItems.slice(5).map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-2 text-[10px] font-semibold transition-colors ${
-                  isActive ? 'bg-sky-400/20 text-sky-200' : 'text-slate-400 hover:bg-slate-800/80'
-                }`}
-                aria-label={item.label}
-                aria-pressed={isActive}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="w-full truncate text-center leading-none">{item.label.split(' ')[0]}</span>
-                {item.badge ? <span className="absolute right-0.5 top-0.5 rounded-full bg-emerald-400 px-1 py-0.5 text-[8px] font-bold text-emerald-950">{item.badge}</span> : null}
-              </button>
-            );
-          })}
+          <button
+            onClick={() => setIsMoreMenuOpen(true)}
+            className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${!activeMobilePrimary ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'}`}
+            aria-label="More destinations"
+            aria-expanded={isMoreMenuOpen}
+          >
+            <Menu className="h-[18px] w-[18px]" />
+            <span className="text-[11px] font-semibold leading-none">More</span>
+          </button>
         </div>
       </nav>
 
       <Suspense fallback={null}>
+      {dashboardData && <MetricDetailsModal
+        isOpen={mobileMetricDetails !== null}
+        onClose={() => setMobileMetricDetails(null)}
+        type={mobileMetricDetails}
+        summary={dashboardData.summary}
+        monthlyTrends={dashboardData.monthlyTrends || []}
+        transactions={transactions}
+      />}
       {/* Add / Edit Transaction Modal */}
       {isModalOpen && <AddTransactionModal
         isOpen={isModalOpen}
