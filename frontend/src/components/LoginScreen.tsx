@@ -73,7 +73,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 font-medium text-xs text-center animate-in fade-in duration-200">
+              <div className="p-3.5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-medium text-xs text-center animate-in fade-in duration-200">
                 {error}
               </div>
             )}

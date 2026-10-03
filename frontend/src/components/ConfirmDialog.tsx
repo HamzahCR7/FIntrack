@@ -31,7 +31,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-sm shadow-2xl animate-in scale-in-95 duration-200">
         {/* Header */}
         <div className="flex items-start gap-3 p-5 border-b border-slate-800 bg-slate-900/50">
-          <div className={`p-2 rounded-xl ${isDangerous ? 'bg-rose-500/10' : 'bg-blue-500/10'}`}>
+          <div className={`p-2 rounded-xl ${isDangerous ? 'bg-rose-500/20' : 'bg-blue-500/10'}`}>
             <AlertCircle className={`h-5 w-5 ${isDangerous ? 'text-rose-400' : 'text-blue-400'}`} />
           </div>
           <div className="flex-1">

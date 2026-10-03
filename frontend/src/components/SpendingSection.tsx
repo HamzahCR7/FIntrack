@@ -499,7 +499,7 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
             <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg border ${
               periodSavings >= 0
                 ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
-                : 'bg-rose-500/10 text-rose-300 border-rose-500/20'
+                : 'bg-rose-500/20 text-rose-400 border-rose-500/40'
             }`}>
               {periodSavings >= 0 ? `+${formatCurrency(periodSavings)} Saved` : `-${formatCurrency(Math.abs(periodSavings))} Deficit`}
             </span>
@@ -531,9 +531,9 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                   : '0%'}
               </p>
             </div>
-            <div className="p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl">
+            <div className="p-3 bg-rose-500/20 border border-rose-500/40 rounded-xl">
               <span className="text-xs text-rose-400 font-medium">Expense Ratio</span>
-              <p className="text-sm font-bold text-rose-300 mt-0.5">
+              <p className="text-sm font-bold text-rose-400 mt-0.5">
                 {periodIncome + periodExpenses > 0
                   ? `${((periodExpenses / (periodIncome + periodExpenses)) * 100).toFixed(1)}%`
                   : '0%'}

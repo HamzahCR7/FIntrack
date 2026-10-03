@@ -643,7 +643,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                             isIncome
                               ? 'bg-emerald-500/10 text-emerald-400'
                               : isExpense
-                              ? 'bg-rose-500/10 text-rose-400'
+                              ? 'bg-rose-500/20 text-rose-400'
                               : 'bg-blue-500/10 text-blue-400'
                           }`}
                         >
@@ -679,7 +679,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                           isIncome
                             ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                             : isExpense
-                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
                             : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         }`}
                       >
@@ -745,7 +745,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
                           <button
                             onClick={() => setDeleteConfirmDialog({ isOpen: true, transactionId: tx.id })}
                             disabled={tx.id.startsWith('offline-')}
-                            className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+                            className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/20 text-rose-400 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                             title={tx.id.startsWith('offline-') ? 'Available after this transaction syncs' : 'Delete Transaction'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -771,7 +771,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-slate-400">Expense total</span>
-              <span className="text-sm font-bold text-rose-400">-{formatCurrency(filteredExpenseTotal)}</span>
+              <span className="rounded-lg bg-rose-500/20 px-2 py-1 text-sm font-extrabold text-rose-400 ring-1 ring-rose-500/30">-{formatCurrency(filteredExpenseTotal)}</span>
             </div>
           </div>
         </div>

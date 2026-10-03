@@ -222,7 +222,7 @@ export const CanIAffordThisModal: React.FC<CanIAffordThisModalProps> = ({ isOpen
                 ? 'bg-emerald-500/10 border-emerald-500/30'
                 : evaluatedResult.verdict === 'CAUTION'
                 ? 'bg-amber-500/10 border-amber-500/30'
-                : 'bg-rose-500/10 border-rose-500/30'
+                : 'bg-rose-500/20 border-rose-500/40'
             }`}
           >
             <div className="flex items-center gap-2.5">
@@ -235,7 +235,7 @@ export const CanIAffordThisModal: React.FC<CanIAffordThisModalProps> = ({ isOpen
                     ? 'text-emerald-300'
                     : evaluatedResult.verdict === 'CAUTION'
                     ? 'text-amber-300'
-                    : 'text-rose-300'
+                    : 'text-rose-400'
                 }`}
               >
                 {evaluatedResult.title}

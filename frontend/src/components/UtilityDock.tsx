@@ -427,7 +427,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
     splitInsightLine2 = `Savings at ${savingsPctValue.toFixed(1)}% gives better cushion for goals and emergencies.`;
     splitInsightLine3 = 'Keep Wants disciplined and direct any surplus to savings or debt reduction.';
   } else if (hasHighWants) {
-    splitInsightContainerClass = 'rounded-xl border border-rose-500/20 bg-rose-500/10 p-3 text-[10px] text-rose-100 space-y-1.5';
+    splitInsightContainerClass = 'rounded-xl border border-rose-500/40 bg-rose-500/20 p-3 text-[10px] text-rose-100 space-y-1.5';
     splitInsightHeadingClass = 'flex items-center gap-1.5 font-semibold text-rose-200';
     splitInsightLine1 = `Wants are currently ${wantsPctValue.toFixed(1)}%, which may increase month-end pressure.`;
     splitInsightLine2 = 'Consider shifting 5% to 10% from Wants into Savings to reduce stress later in the month.';
@@ -452,7 +452,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
 
   let healthVerdict = { label: 'Optimal Buffer', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20', icon: ShieldCheck };
   if (runwayMonths < 3) {
-    healthVerdict = { label: 'Vulnerable', color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20', icon: ShieldAlert };
+    healthVerdict = { label: 'Vulnerable', color: 'text-rose-400', bg: 'bg-rose-500/20 border-rose-500/40', icon: ShieldAlert };
   } else if (runwayMonths < 6) {
     healthVerdict = { label: 'Moderate Buffer', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20', icon: AlertCircle };
   }
@@ -651,7 +651,7 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
               <div className="p-3 grid grid-cols-4 gap-2 text-xs font-semibold">
                 <button
                   onClick={handleClear}
-                  className="py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-xl transition-colors font-bold"
+                  className="py-2.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-400 rounded-xl transition-colors font-bold"
                 >
                   C
                 </button>
@@ -1252,11 +1252,11 @@ export const UtilityDock: React.FC<UtilityDockProps> = ({ dashboardData, categor
                         <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500">
                           {item.price != null && <span className="font-semibold text-amber-300">{formatCurrency(item.price)}</span>}
                           {item.category && <span className="rounded bg-slate-700 px-1.5 py-0.5">{item.category}</span>}
-                          {item.priority !== 'NORMAL' && <span className={item.priority === 'HIGH' ? 'rounded bg-rose-500/15 px-1.5 py-0.5 text-rose-300' : 'rounded bg-slate-700 px-1.5 py-0.5'}>{item.priority}</span>}
+                          {item.priority !== 'NORMAL' && <span className={item.priority === 'HIGH' ? 'rounded bg-rose-500/15 px-1.5 py-0.5 text-rose-400' : 'rounded bg-slate-700 px-1.5 py-0.5'}>{item.priority}</span>}
                           {item.dueDate && <span className="flex items-center gap-1"><CalendarDays className="h-3 w-3" />{new Date(item.dueDate).toLocaleDateString()}</span>}
                         </div>
                       </div>
-                      <button onClick={() => void handleDeleteQuickItem(item.id)} className="rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-rose-500/10 hover:text-rose-400 group-hover:opacity-100" title="Delete this quick item" aria-label="Delete this quick item">
+                      <button onClick={() => void handleDeleteQuickItem(item.id)} className="rounded p-1 text-slate-600 opacity-0 transition-opacity hover:bg-rose-500/20 hover:text-rose-400 group-hover:opacity-100" title="Delete this quick item" aria-label="Delete this quick item">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     </div>

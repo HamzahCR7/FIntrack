@@ -155,10 +155,10 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
 
       {/* Alerts banner if any budget is nearing or exceeding limit */}
       {alertBudgets.length > 0 && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
+        <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
           <div className="text-xs">
-            <h4 className="font-bold text-rose-300">Budget Warning</h4>
+            <h4 className="font-bold text-rose-400">Budget Warning</h4>
             <ul className="mt-1 space-y-1 text-rose-200">
               {alertBudgets.map((b) => (
                 <li key={b.id}>
@@ -176,7 +176,7 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
           Loading budgets...
         </div>
       ) : error ? (
-        <div className="p-4 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-2xl">
+        <div className="p-4 text-xs text-rose-400 bg-rose-500/20 border border-rose-500/40 rounded-2xl">
           {error}
         </div>
       ) : budgets.length === 0 ? (

@@ -122,13 +122,13 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
                 Expenses (This Month)
               </span>
             </div>
-            <div className="p-1.5 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 group-hover:bg-rose-500/20 group-hover:scale-105 transition-all flex items-center gap-1">
+            <div className="p-1.5 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 group-hover:bg-rose-500/30 group-hover:scale-105 transition-all flex items-center gap-1">
               <TrendingDown className="w-4 h-4" />
               <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
             </div>
           </div>
           <div className="mt-2">
-            <h3 className={`${headingSize} font-bold text-rose-400 tracking-tight`}>
+            <h3 className={`${headingSize} font-extrabold text-rose-400 tracking-tight drop-shadow-[0_0_10px_rgba(251,113,133,0.18)]`}>
               {formatCurrency(summary.spendingThisMonth)}
             </h3>
             <p className="text-[11px] text-rose-500/90 mt-0.5 flex items-center gap-1">

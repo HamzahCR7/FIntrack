@@ -9,7 +9,7 @@ interface ExportPeriodModalProps {
   transactions: Transaction[];
   onClose: () => void;
   onExportCSV: (transactions: Transaction[], periodLabel: string) => void;
-  onExportPDF: (transactions: Transaction[], periodLabel: string) => void;
+  onExportPDF: (transactions: Transaction[], periodLabel: string, password: string) => Promise<void>;
   onEmailPDF: (input: { email: string; startDate: string; endDate: string; periodLabel: string; enableMonthly: boolean }) => Promise<void>;
 }
 
@@ -43,6 +43,9 @@ const ExportPeriodModal: React.FC<ExportPeriodModalProps> = ({
   const [enableMonthly, setEnableMonthly] = useState(false);
   const [sending, setSending] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [pdfPassword, setPdfPassword] = useState('');
+  const [openingPdf, setOpeningPdf] = useState(false);
+  const [pdfError, setPdfError] = useState('');
 
   useEffect(() => {
     api.getReportSettings()
@@ -93,11 +96,25 @@ const ExportPeriodModal: React.FC<ExportPeriodModalProps> = ({
     return { label, transactions: filteredTransactions, validRange, start: effectiveStart, end: effectiveEnd };
   }, [transactions, period, month, weekDate, startDate, endDate, today]);
 
-  const handleExport = (format: 'csv' | 'pdf') => {
+  const handleExport = async (format: 'csv' | 'pdf') => {
     if (!selection.transactions.length) return;
-    if (format === 'csv') onExportCSV(selection.transactions, selection.label);
-    else onExportPDF(selection.transactions, selection.label);
-    onClose();
+    if (format === 'csv') {
+      onExportCSV(selection.transactions, selection.label);
+      onClose();
+      return;
+    }
+
+    if (!pdfPassword) return;
+    setOpeningPdf(true);
+    setPdfError('');
+    try {
+      await onExportPDF(selection.transactions, selection.label, pdfPassword);
+      onClose();
+    } catch (error) {
+      setPdfError(error instanceof Error ? error.message : 'Unable to verify your password.');
+    } finally {
+      setOpeningPdf(false);
+    }
   };
 
   const handleEmail = async () => {
@@ -182,7 +199,7 @@ const ExportPeriodModal: React.FC<ExportPeriodModalProps> = ({
             </div>
           )}
 
-          <div className={`text-xs ${selection.validRange ? 'text-slate-400' : 'text-rose-300'}`}>
+          <div className={`text-xs ${selection.validRange ? 'text-slate-400' : 'text-rose-400'}`}>
             {!selection.validRange
               ? 'The start date must be on or before the end date.'
               : `${selection.transactions.length} transaction${selection.transactions.length === 1 ? '' : 's'} selected · ${selection.label}`}
@@ -202,7 +219,27 @@ const ExportPeriodModal: React.FC<ExportPeriodModalProps> = ({
               <input type="checkbox" checked={enableMonthly} onChange={(event) => setEnableMonthly(event.target.checked)} className="mt-0.5" />
               Automatically email the previous month's PDF at the start of each month
             </label>
-            {emailError && <p className="text-xs text-rose-300">{emailError}</p>}
+            {emailError && <p className="text-xs text-rose-400">{emailError}</p>}
+          </div>
+
+          <div className="space-y-2 rounded-xl border border-indigo-500/20 bg-indigo-950/20 p-3">
+            <label htmlFor="pdf-password" className="block text-xs font-semibold text-slate-300">Password required to open PDF</label>
+            <input
+              id="pdf-password"
+              type="password"
+              value={pdfPassword}
+              onChange={(event) => {
+                setPdfPassword(event.target.value);
+                setPdfError('');
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && pdfPassword && !openingPdf) void handleExport('pdf');
+              }}
+              autoComplete="current-password"
+              placeholder="Enter your FinTrack password"
+              className="fintrack-input p-2.5 text-sm"
+            />
+            {pdfError && <p className="text-xs text-rose-400">{pdfError}</p>}
           </div>
 
           <div className="flex flex-wrap justify-end gap-2 border-t border-slate-800 pt-4">
@@ -219,7 +256,7 @@ const ExportPeriodModal: React.FC<ExportPeriodModalProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => handleExport('csv')}
+              onClick={() => void handleExport('csv')}
               disabled={!selection.validRange || selection.transactions.length === 0}
               className="flex items-center gap-1.5 rounded-xl border border-blue-500/30 bg-blue-600/20 px-3 py-2 text-xs font-semibold text-blue-200 transition-colors hover:bg-blue-600/30 disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -227,11 +264,11 @@ const ExportPeriodModal: React.FC<ExportPeriodModalProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => handleExport('pdf')}
-              disabled={!selection.validRange || selection.transactions.length === 0}
+              onClick={() => void handleExport('pdf')}
+              disabled={!selection.validRange || selection.transactions.length === 0 || !pdfPassword || openingPdf}
               className="flex items-center gap-1.5 rounded-xl border border-indigo-500/30 bg-indigo-600/20 px-3 py-2 text-xs font-semibold text-indigo-200 transition-colors hover:bg-indigo-600/30 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <Printer className="h-3.5 w-3.5" /> PDF
+              <Printer className="h-3.5 w-3.5" /> {openingPdf ? 'Verifying...' : 'PDF'}
             </button>
           </div>
         </div>

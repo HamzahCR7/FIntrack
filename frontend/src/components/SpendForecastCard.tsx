@@ -53,7 +53,7 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
   const weeklyTrendToneClass = forecast.currentMonthWeeklyTrend.direction === 'IMPROVING'
     ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
     : forecast.currentMonthWeeklyTrend.direction === 'DECLINING'
-      ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+      ? 'border-rose-500/40 bg-rose-500/20 text-rose-400'
       : 'border-slate-600/50 bg-slate-700/30 text-slate-300';
 
   const currentWeekPoint = forecast.currentMonthWeeklyTrend.points[forecast.currentMonthWeeklyTrend.points.length - 1];
@@ -65,7 +65,7 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
     <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 hover:border-slate-600 transition-all shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-xl border ${forecast.willOverspend ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+          <div className={`p-1.5 rounded-xl border ${forecast.willOverspend ? 'bg-rose-500/20 text-rose-400 border-rose-500/40' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
             <Gauge className="w-4 h-4" />
           </div>
           <span className="text-sm font-bold text-white">Month-End Spend Forecast</span>
@@ -114,7 +114,7 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
 
       <div className={`mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs ${
         forecast.willOverspend
-          ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+          ? 'border-rose-500/40 bg-rose-500/20 text-rose-400'
           : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
       }`}
       >

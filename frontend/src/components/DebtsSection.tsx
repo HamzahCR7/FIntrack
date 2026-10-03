@@ -255,7 +255,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
             onClick={() => handleDebtTabChange('I_OWE')}
             className={`border-b-2 px-3 py-2 text-xs font-semibold transition-colors ${
               activeDebtTab === 'I_OWE'
-                ? 'border-rose-400 text-rose-300'
+                ? 'border-rose-400 text-rose-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -297,7 +297,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                         ? 'border-amber-500/30 bg-slate-900/60 hover:border-amber-500/60'
                         : isOwedToMe
                         ? 'border-emerald-500/30 bg-slate-900/60 hover:border-emerald-500/60'
-                        : 'border-rose-500/30 bg-slate-900/60 hover:border-rose-500/60'
+                        : 'border-rose-500/40 bg-slate-900/60 hover:border-rose-500/60'
                     }`}
                   >
                     <button
@@ -315,7 +315,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                                 ? 'border-amber-500/30 bg-amber-500/20 text-amber-300'
                                 : isOwedToMe
                                 ? 'border-emerald-500/30 bg-emerald-500/20 text-emerald-300'
-                                : 'border-rose-500/30 bg-rose-500/20 text-rose-300'
+                                : 'border-rose-500/40 bg-rose-500/20 text-rose-400'
                             }`}
                           >
                             {isLoan ? `${debt.loanCategory || 'Loan'} Loan` : isOwedToMe ? 'Lent' : 'Borrowed'}
@@ -479,7 +479,7 @@ type SummaryColor = 'emerald' | 'rose' | 'blue' | 'amber';
 
 const summaryCardColors: Record<SummaryColor, { container: string; label: string; amount: string; icon: string }> = {
   emerald: { container: 'border-emerald-500/20 bg-emerald-500/10', label: 'text-emerald-400', amount: 'text-emerald-300', icon: 'bg-emerald-500/20 text-emerald-300' },
-  rose: { container: 'border-rose-500/20 bg-rose-500/10', label: 'text-rose-400', amount: 'text-rose-300', icon: 'bg-rose-500/20 text-rose-300' },
+  rose: { container: 'border-rose-500/40 bg-rose-500/20', label: 'text-rose-400', amount: 'text-rose-400', icon: 'bg-rose-500/20 text-rose-400' },
   blue: { container: 'border-blue-500/20 bg-blue-500/10', label: 'text-blue-400', amount: 'text-blue-300', icon: 'bg-blue-500/20 text-blue-300' },
   amber: { container: 'border-amber-500/20 bg-amber-500/10', label: 'text-amber-400', amount: 'text-amber-300', icon: 'bg-amber-500/20 text-amber-300' },
 };
@@ -556,10 +556,10 @@ const ModalActions = ({ onCancel, isSubmitting, submitLabel }: { onCancel: () =>
   </div>
 );
 
-const ErrorMessage = ({ message }: { message: string }) => <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 font-medium text-rose-400">{message}</div>;
+const ErrorMessage = ({ message }: { message: string }) => <div className="rounded-xl border border-rose-500/40 bg-rose-500/20 p-3 font-medium text-rose-400">{message}</div>;
 
 const IconButton = ({ title, onClick, icon, danger = false }: { title: string; onClick: () => void; icon: React.ReactNode; danger?: boolean }) => (
-  <button type="button" onClick={onClick} title={title} className={`rounded-lg p-1.5 transition-colors ${danger ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}>{icon}</button>
+  <button type="button" onClick={onClick} title={title} className={`rounded-lg p-1.5 transition-colors ${danger ? 'bg-rose-500/20 text-rose-400 hover:bg-rose-500/20' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'}`}>{icon}</button>
 );
 
 const PageButton = ({ title, disabled, onClick, icon }: { title: string; disabled: boolean; onClick: () => void; icon: React.ReactNode }) => (

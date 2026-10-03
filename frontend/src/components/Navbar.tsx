@@ -91,8 +91,9 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={onRefresh}
             disabled={isLoading}
-            className="hidden shrink-0 rounded-xl border border-slate-700/60 bg-slate-800 p-2.5 text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-white disabled:opacity-50 md:block"
-            title="Refresh Financial Data"
+            className="block shrink-0 rounded-xl border border-slate-700/60 bg-slate-800 p-2.5 text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-white disabled:opacity-50"
+            title="Sync financial data"
+            aria-label="Sync financial data"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-400' : ''}`} />
           </button>
@@ -133,7 +134,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               )}
               <button
                 onClick={onLogout}
-                className="p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 text-rose-400 hover:text-rose-300 transition-colors"
+                className="p-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/20 border border-rose-500/40 text-rose-400 hover:text-rose-400 transition-colors"
                 title="Sign Out"
               >
                 <LogOut className="w-4 h-4" />

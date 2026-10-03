@@ -463,7 +463,7 @@ export const App: React.FC = () => {
 
         {/* Error Banner */}
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-sm flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
               <span>{error}</span>
@@ -502,7 +502,7 @@ export const App: React.FC = () => {
                     <div className="rounded-xl bg-cyan-400/10 p-2.5 text-cyan-300"><WalletCards className="h-5 w-5" /></div>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-800 pt-3">
-                    <button onClick={() => setMobileMetricDetails('EXPENSE')} className="text-left"><p className="text-[10px] uppercase tracking-wide text-slate-500">Spent this month</p><p className="mt-1 text-sm font-semibold text-rose-300">{formatCurrency(dashboardData.summary.spendingThisMonth)}</p></button>
+                    <button onClick={() => setMobileMetricDetails('EXPENSE')} className="rounded-lg bg-rose-500/15 px-2 py-1.5 text-left"><p className="text-[10px] font-semibold uppercase tracking-wide text-rose-400">Spent this month</p><p className="mt-1 text-sm font-bold text-rose-400">{formatCurrency(dashboardData.summary.spendingThisMonth)}</p></button>
                     <button onClick={() => setMobileMetricDetails('SAVINGS')} className="text-left"><p className="text-[10px] uppercase tracking-wide text-slate-500">Saved this month</p><p className="mt-1 text-sm font-semibold text-emerald-300">{formatCurrency(dashboardData.summary.savingsThisMonth)}</p></button>
                   </div>
                   <button onClick={() => setShowMobileSummaryDetails((current) => !current)} className="mt-3 flex w-full items-center justify-between border-t border-slate-800 pt-3 text-xs font-semibold text-cyan-300" aria-expanded={showMobileSummaryDetails}>
@@ -513,7 +513,7 @@ export const App: React.FC = () => {
                     {[
                       { label: 'Previous month saved', value: dashboardData.summary.previousMonthSavings, tone: 'text-teal-300' },
                       { label: 'Income this month', value: dashboardData.summary.incomeThisMonth, tone: 'text-emerald-300', metric: 'INCOME' as MetricType },
-                      { label: 'Expenses this month', value: dashboardData.summary.spendingThisMonth, tone: 'text-rose-300', metric: 'EXPENSE' as MetricType },
+                      { label: 'Expenses this month', value: dashboardData.summary.spendingThisMonth, tone: 'text-rose-400', metric: 'EXPENSE' as MetricType },
                       { label: 'Credit outstanding', value: dashboardData.summary.creditOutstanding, tone: 'text-amber-300' },
                       { label: 'Pocket allowance', value: dashboardData.summary.pocketAllowanceBalance, tone: 'text-violet-300' },
                     ].map((item) => <button key={item.label} disabled={!item.metric} onClick={() => item.metric && setMobileMetricDetails(item.metric)} className="flex w-full items-center justify-between gap-3 py-3 text-left disabled:cursor-default">
@@ -548,7 +548,7 @@ export const App: React.FC = () => {
                   <div className="mt-3 divide-y divide-slate-800">
                     {recentTransactions.length ? recentTransactions.map((transaction) => (
                       <button key={transaction.id} onClick={() => navigateMobile('transactions')} className="flex w-full items-center gap-3 py-3 text-left first:pt-0 last:pb-0">
-                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${transaction.type === 'INCOME' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-rose-400/10 text-rose-300'}`}><ReceiptText className="h-4 w-4" /></span>
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${transaction.type === 'INCOME' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/30'}`}><ReceiptText className="h-4 w-4" /></span>
                         <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-100">{transaction.merchant || transaction.description || transaction.category?.name || 'Transaction'}</span><span className="block text-[11px] text-slate-500">{new Date(transaction.transactionDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span></span>
                         <span className={`text-sm font-semibold ${transaction.type === 'INCOME' ? 'text-emerald-300' : 'text-slate-100'}`}>{transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}</span>
                       </button>
@@ -982,7 +982,18 @@ export const App: React.FC = () => {
             const filenamePeriod = periodLabel.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');
             exportTransactionsToCSV(selectedTransactions, `FinTrack_Transactions_${filenamePeriod}.csv`);
           }}
-          onExportPDF={(selectedTransactions, periodLabel) => printPDFReport(selectedTransactions, periodLabel)}
+          onExportPDF={async (selectedTransactions, periodLabel, password) => {
+            if (!currentUser?.username) throw new Error('Your session has expired. Please sign in again.');
+            try {
+              await api.login({ username: currentUser.username, password });
+            } catch (error) {
+              const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || error.message
+                : 'Unable to verify your password.';
+              throw new Error(message);
+            }
+            printPDFReport(selectedTransactions, periodLabel);
+          }}
           onEmailPDF={async (input) => {
             try {
               await api.emailReport(input);
