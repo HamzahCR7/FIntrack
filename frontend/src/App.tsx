@@ -88,6 +88,7 @@ export const App: React.FC = () => {
   const [isTimeMachineModalOpen, setIsTimeMachineModalOpen] = useState<boolean>(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | Partial<Transaction> | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [mobileNavigationHistory, setMobileNavigationHistory] = useState<DashboardTab[]>([]);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [showMobileInsights, setShowMobileInsights] = useState(false);
   const [showMobileSummaryDetails, setShowMobileSummaryDetails] = useState(false);
@@ -366,11 +367,22 @@ export const App: React.FC = () => {
     { id: 'financial-hub', label: 'Money Lab', caption: 'Automation & review', icon: FlaskConical, color: 'cyan' },
     { id: 'ai', label: 'Ask FinTrack', caption: 'Personal money guide', icon: Sparkles, color: 'fuchsia' },
   ];
-  const mobilePrimaryItems = navigationItems.filter((item) => ['overview', 'transactions', 'smart-guidance', 'ai'].includes(item.id));
-  const mobileMoreItems = navigationItems.filter((item) => !['overview', 'transactions', 'smart-guidance', 'ai'].includes(item.id));
+  const mobilePrimaryItems = navigationItems.filter((item) => ['overview', 'goals', 'smart-guidance', 'ai'].includes(item.id));
+  const mobileMoreItems = navigationItems.filter((item) => !['overview', 'goals', 'smart-guidance', 'ai', 'budgets', 'forecast'].includes(item.id));
   const navigateMobile = (tab: DashboardTab) => {
+    if (tab === activeTab) {
+      setIsMoreMenuOpen(false);
+      return;
+    }
+    setMobileNavigationHistory((history) => tab === 'overview' ? [] : [...history, activeTab]);
     setActiveTab(tab);
     setIsMoreMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const closeMobilePage = () => {
+    const previousTab = mobileNavigationHistory.at(-1) || 'overview';
+    setMobileNavigationHistory((history) => history.slice(0, -1));
+    setActiveTab(previousTab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const activeMobilePrimary = mobilePrimaryItems.some((item) => item.id === activeTab);
@@ -534,8 +546,8 @@ export const App: React.FC = () => {
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { label: 'Add', icon: Plus, action: () => handleOpenAddModal() },
-                    { label: 'Activity', icon: ReceiptText, action: () => navigateMobile('transactions') },
-                    { label: 'Budgets', icon: PieChart, action: () => navigateMobile('budgets') },
+                    { label: 'Budget', icon: PieChart, action: () => navigateMobile('budgets') },
+                    { label: 'Forecast', icon: Gauge, action: () => navigateMobile('forecast') },
                   ].map(({ label, icon: Icon, action }) => (
                     <button key={label} onClick={action} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-2xl border border-slate-800 bg-slate-900 px-1 text-slate-200">
                       <Icon className="h-4 w-4 text-cyan-300" /><span className="text-[11px] font-semibold">{label}</span>
@@ -583,10 +595,15 @@ export const App: React.FC = () => {
             </AccordionSection>
 
             {activeTab !== 'overview' && (
-              <section className="mobile-page-context md:hidden rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">FinTrack</p>
-                <h2 className="mt-1 text-lg font-semibold text-white">{navigationItems.find((item) => item.id === activeTab)?.label}</h2>
-                <p className="mt-0.5 text-xs text-slate-400">{navigationItems.find((item) => item.id === activeTab)?.caption}</p>
+              <section className="mobile-page-context flex items-start justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 md:hidden">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">FinTrack</p>
+                  <h2 className="mt-1 text-lg font-semibold text-white">{navigationItems.find((item) => item.id === activeTab)?.label}</h2>
+                  <p className="mt-0.5 text-xs text-slate-400">{navigationItems.find((item) => item.id === activeTab)?.caption}</p>
+                </div>
+                <button onClick={closeMobilePage} className="shrink-0 rounded-xl border border-slate-700 bg-slate-800/80 p-2 text-slate-300 transition-colors hover:bg-slate-700 hover:text-white" aria-label="Close and return to previous page">
+                  <X className="h-5 w-5" />
+                </button>
               </section>
             )}
 
@@ -828,17 +845,19 @@ export const App: React.FC = () => {
 
             {/* 11. AI ASSISTANT TAB */}
             {activeTab === 'ai' && (
-              <AccordionSection
-                title="FinTrack AI Financial Guide"
-                subtitle="Instant answers, spending analysis & affordability checks"
-                icon={Sparkles}
-                defaultOpen={true}
-              >
-                <div className="space-y-6">
-                  <AIPersonalizationSection />
-                  <AIAssistantChat />
-                </div>
-              </AccordionSection>
+              <div className="space-y-4">
+                <AIAssistantChat />
+                <details className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-left [&::-webkit-details-marker]:hidden">
+                    <span>
+                      <span className="block text-sm font-semibold text-white">Personalization & insights</span>
+                      <span className="mt-0.5 block text-xs text-slate-400">Set your financial targets and review tailored guidance</span>
+                    </span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-cyan-300 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="border-t border-slate-800 p-4"><AIPersonalizationSection /></div>
+                </details>
+              </div>
             )}
           </div>
         ) : null}
@@ -862,6 +881,14 @@ export const App: React.FC = () => {
               <button onClick={() => setIsMoreMenuOpen(false)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close more menu"><X className="h-5 w-5" /></button>
             </div>
             <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => { setIsMoreMenuOpen(false); setIsAffordModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
+                <HelpCircle className="h-5 w-5 shrink-0 text-amber-300" />
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Can I afford this?</span><span className="mt-1 block text-[10px] text-slate-400">Check a purchase</span></span>
+              </button>
+              <button onClick={() => { setIsMoreMenuOpen(false); setIsTimeMachineModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
+                <History className="h-5 w-5 shrink-0 text-fuchsia-300" />
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Time machine</span><span className="mt-1 block text-[10px] text-slate-400">Explore scenarios</span></span>
+              </button>
               {mobileMoreItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -893,7 +920,7 @@ export const App: React.FC = () => {
                 aria-pressed={isActive}
               >
                 <Icon className="h-[18px] w-[18px]" />
-                <span className="text-[11px] font-semibold leading-none">{item.id === 'overview' ? 'Home' : item.id === 'transactions' ? 'Activity' : item.id === 'smart-guidance' ? 'Plan' : 'Ask AI'}</span>
+                <span className="text-[11px] font-semibold leading-none">{item.id === 'overview' ? 'Home' : item.id === 'goals' ? 'Goals' : item.id === 'smart-guidance' ? 'Plan' : 'Ask AI'}</span>
                 {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
