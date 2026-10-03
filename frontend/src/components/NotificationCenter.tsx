@@ -38,7 +38,7 @@ interface NotificationCenterProps {
 }
 
 const toneStyles: Record<NotificationTone, { icon: string; dot: string }> = {
-  danger: { icon: 'bg-rose-500/15 text-rose-300', dot: 'bg-rose-400' },
+  danger: { icon: 'bg-rose-500/15 text-rose-400', dot: 'bg-rose-400' },
   warning: { icon: 'bg-amber-500/15 text-amber-300', dot: 'bg-amber-400' },
   info: { icon: 'bg-blue-500/15 text-blue-300', dot: 'bg-blue-400' },
 };

@@ -122,7 +122,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-medium">
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-medium">
               {error}
             </div>
           )}

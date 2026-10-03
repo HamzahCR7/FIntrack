@@ -395,7 +395,7 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
 
       {/* Metrics Row (Includes Feature 1 Anomaly Badge & Feature 4 Projected EOM) */}
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-6">
-        <Metric label="Spent" value={formatCurrency(totalSpent)} color="text-rose-300" />
+        <Metric label="Spent" value={formatCurrency(totalSpent)} color="text-rose-400" />
         <Metric label="Income" value={formatCurrency(totalIncome)} color="text-emerald-300" />
         <Metric label="Highest Day" value={formatCurrency(highestSpend)} color="text-amber-300" />
         <Metric label="Avg Weekday" value={formatCurrency(avgWeekdaySpend)} color="text-cyan-300" />
@@ -410,7 +410,7 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
 
       {/* Anomaly / Spike Alert Banner (Feature 1) */}
       {spikeDaysCount > 0 && (
-        <div className="mt-3 flex items-center justify-between rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2 text-xs text-rose-300">
+        <div className="mt-3 flex items-center justify-between rounded-xl border border-rose-500/40 bg-rose-500/20 px-3.5 py-2 text-xs text-rose-400">
           <div className="flex items-center gap-2">
             <Zap className="h-4 w-4 shrink-0 text-rose-400 fill-rose-400/20" />
             <span>
@@ -566,7 +566,7 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
                 Activity on {new Date(year, month, selectedDay).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
               </h4>
               {selectedDayDatum?.isSpike && (
-                <span className="flex items-center gap-1 rounded bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-bold text-rose-300 border border-rose-500/30">
+                <span className="flex items-center gap-1 rounded bg-rose-500/15 px-1.5 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/40">
                   <Zap className="h-3 w-3 text-rose-400" />
                   Spike Day
                 </span>

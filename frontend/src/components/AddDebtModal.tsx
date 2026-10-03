@@ -106,7 +106,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
 
         <form onSubmit={handleAddDebt} className="space-y-4 text-xs">
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-medium">
+            <div className="p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-medium">
               {error}
             </div>
           )}

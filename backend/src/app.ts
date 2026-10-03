@@ -18,6 +18,7 @@ import { QuickItemController } from './controllers/quickItem.controller';
 import { BudgetController } from './controllers/budget.controller';
 import { GoalController } from './controllers/goal.controller';
 import { ReceiptController } from './controllers/receipt.controller';
+import { ReportController } from './controllers/report.controller';
 import { errorHandler } from './common/middleware/errorHandler';
 
 export function createApp(): Application {
@@ -84,6 +85,7 @@ export function createApp(): Application {
   const budgetController = new BudgetController();
   const goalController = new GoalController();
   const receiptController = new ReceiptController();
+  const reportController = new ReportController();
 
   app.use('/api/v1/auth', authController.router);
   app.use('/api/v1/accounts', accountController.router);
@@ -100,6 +102,7 @@ export function createApp(): Application {
   app.use('/api/v1/budgets', budgetController.router);
   app.use('/api/v1/goals', goalController.router);
   app.use('/api/v1/receipts', receiptController.router);
+  app.use('/api/v1/reports', reportController.router);
 
   // Serve the production PWA from the same origin as the API when it has been built.
   const frontendDist = path.resolve(__dirname, '../../frontend/dist');

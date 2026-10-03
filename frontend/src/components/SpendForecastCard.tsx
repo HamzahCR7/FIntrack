@@ -9,6 +9,8 @@ interface SpendForecastCardProps {
 }
 
 export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }) => {
+  const [selectedHistoryMonth, setSelectedHistoryMonth] = React.useState('');
+
   if (!forecast) return null;
 
   const weeklyPieColors = ['#0EA5E9', '#10B981', '#F59E0B', '#F97316', '#6366F1'];
@@ -19,7 +21,12 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
   const spendPercentOfIncome = forecast.incomeThisMonth > 0
     ? Math.min(999, Math.round((forecast.projectedMonthEndSpend / forecast.incomeThisMonth) * 100))
     : 0;
-  const budgetsAtRisk = forecast.budgetForecasts.filter((b) => b.willExceed);
+  const budgetsAtRisk = forecast.budgetForecasts.filter(
+    (b) => b.willExceed && b.budgetName.trim().toLowerCase() !== 'personal expenses',
+  );
+  const selectedHistoricalTrend = forecast.historicalMonthlyTrends.find(
+    (trend) => trend.monthKey === selectedHistoryMonth
+  );
 
   const currentMonthTrendLabel = forecast.currentMonthWeeklyTrend.direction === 'IMPROVING'
     ? 'Improving'
@@ -46,7 +53,7 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
   const weeklyTrendToneClass = forecast.currentMonthWeeklyTrend.direction === 'IMPROVING'
     ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
     : forecast.currentMonthWeeklyTrend.direction === 'DECLINING'
-      ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+      ? 'border-rose-500/40 bg-rose-500/20 text-rose-400'
       : 'border-slate-600/50 bg-slate-700/30 text-slate-300';
 
   const currentWeekPoint = forecast.currentMonthWeeklyTrend.points[forecast.currentMonthWeeklyTrend.points.length - 1];
@@ -58,7 +65,7 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
     <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 hover:border-slate-600 transition-all shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className={`p-1.5 rounded-xl border ${forecast.willOverspend ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+          <div className={`p-1.5 rounded-xl border ${forecast.willOverspend ? 'bg-rose-500/20 text-rose-400 border-rose-500/40' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
             <Gauge className="w-4 h-4" />
           </div>
           <span className="text-sm font-bold text-white">Month-End Spend Forecast</span>
@@ -107,7 +114,7 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
 
       <div className={`mt-4 flex items-start gap-2 rounded-xl border p-3 text-xs ${
         forecast.willOverspend
-          ? 'border-rose-500/20 bg-rose-500/10 text-rose-300'
+          ? 'border-rose-500/40 bg-rose-500/20 text-rose-400'
           : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
       }`}
       >
@@ -168,8 +175,9 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
                   </Pie>
                   <Tooltip
                     formatter={(value: number) => formatCurrency(Number(value))}
-                    contentStyle={{ background: '#0f172a', border: '1px solid #334155', borderRadius: 10 }}
+                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '10px', color: '#f8fafc' }}
                     labelStyle={{ color: '#cbd5e1' }}
+                    itemStyle={{ color: '#f8fafc' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -181,7 +189,35 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {forecast.currentMonthWeeklyTrend.points.map((point) => (
               <div key={point.weekLabel} className="rounded-lg border border-current/20 bg-black/10 px-2 py-1.5">
-                <p className="text-[10px] uppercase tracking-wide opacity-80">{point.weekLabel} ({point.daysCovered}d)</p>
+                <p className="text-[10px] uppercase tracking-wide opacity-80">{point.weekLabel} · {point.weekRangeLabel}</p>
+                <p className="text-[10px] opacity-80">{point.daysCovered} day(s) covered</p>
+                <p className="text-xs font-semibold">Spent: {formatCurrency(point.spent)}</p>
+                <p className="text-[10px] opacity-90">Burn/day: {formatCurrency(point.burnRate)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 rounded-xl border border-slate-600/50 bg-slate-700/20 p-3 text-xs text-slate-300">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-semibold uppercase tracking-wider">Past month weekly breakdown</p>
+          <select
+            value={selectedHistoryMonth}
+            onChange={(event) => setSelectedHistoryMonth(event.target.value)}
+            className="rounded-lg border border-slate-600 bg-slate-900 px-2 py-1 text-xs text-slate-200 outline-none focus:border-blue-500"
+          >
+            <option value="">Select a past month</option>
+            {forecast.historicalMonthlyTrends.map((trend) => (
+              <option key={trend.monthKey} value={trend.monthKey}>{trend.monthLabel}</option>
+            ))}
+          </select>
+        </div>
+        {selectedHistoricalTrend && (
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {selectedHistoricalTrend.points.map((point) => (
+              <div key={point.weekLabel} className="rounded-lg border border-slate-600/40 bg-black/10 px-2 py-1.5">
+                <p className="text-[10px] uppercase tracking-wide opacity-80">{point.weekLabel} · {point.weekRangeLabel}</p>
                 <p className="text-xs font-semibold">Spent: {formatCurrency(point.spent)}</p>
                 <p className="text-[10px] opacity-90">Burn/day: {formatCurrency(point.burnRate)}</p>
               </div>

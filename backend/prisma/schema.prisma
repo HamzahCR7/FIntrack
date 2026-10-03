@@ -147,6 +147,22 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+model ReportSettings {
+  id                     String   @id @default("default")
+  recipientEmail         String?
+  monthlyReportsEnabled  Boolean  @default(false)
+  updatedAt              DateTime @updatedAt
+}
+
+model ReportDelivery {
+  id             String   @id @default(uuid())
+  periodKey      String
+  recipientEmail String
+  sentAt         DateTime @default(now())
+
+  @@unique([periodKey, recipientEmail])
+}
+
 model QuickItem {
   id          String    @id @default(uuid())
   type        String    // NOTE, TODO, REMINDER

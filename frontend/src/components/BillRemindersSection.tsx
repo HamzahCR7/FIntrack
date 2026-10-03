@@ -175,7 +175,7 @@ export const BillRemindersSection: React.FC<BillRemindersSectionProps> = ({
     switch (status) {
       case 'OVERDUE':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40 animate-pulse">
             <AlertTriangle className="w-3 h-3" />
             Overdue by {Math.abs(days)} day{Math.abs(days) !== 1 ? 's' : ''}
           </span>

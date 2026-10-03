@@ -118,7 +118,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
       currentLabel: 'This Month Spending',
       prevLabel: 'Prev Month Spending',
       allTimeLabel: 'All-Time Total Expenses',
-      badgeColor: 'bg-rose-500/10 text-rose-300 border-rose-500/30',
+      badgeColor: 'bg-rose-500/20 text-rose-400 border-rose-500/40',
       themeColor: '#f43f5e',
       icon: <TrendingDown className="w-6 h-6 text-rose-400" />,
       txType: 'EXPENSE' as const,
@@ -478,7 +478,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-700/70 bg-slate-900/80 px-3 py-2 text-[11px] text-slate-400">
                   <span>Months: {sortedMonthlyTrends.length}</span>
                   <span className="text-emerald-300">Income: {formatCurrency(trendTotals.income)}</span>
-                  <span className="text-rose-300">Expense: {formatCurrency(trendTotals.expenses)}</span>
+                  <span className="text-rose-400">Expense: {formatCurrency(trendTotals.expenses)}</span>
                   <span className="font-semibold text-indigo-200">Net: {formatCurrency(trendTotals.savings)}</span>
                 </div>
               </div>
@@ -574,7 +574,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                 <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-2 border-t border-slate-700/70 bg-slate-900/95 px-3 py-2 text-[11px] text-slate-400">
                   <span>Rows: {sortedFilteredTransactions.length}</span>
                   <span className="text-emerald-300">Income: +{formatCurrency(txIncomeTotal)}</span>
-                  <span className="text-rose-300">Expense: -{formatCurrency(txExpenseTotal)}</span>
+                  <span className="text-rose-400">Expense: -{formatCurrency(txExpenseTotal)}</span>
                   <span className="font-semibold text-slate-200">Net: {formatCurrency(txIncomeTotal - txExpenseTotal)}</span>
                 </div>
               </div>

@@ -39,7 +39,7 @@ const GoalCard: React.FC<GoalCardProps> = ({
   const getPriorityBadge = (p: string) => {
     switch (p) {
       case 'HIGH':
-        return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
+        return 'bg-rose-500/15 text-rose-400 border-rose-500/40';
       case 'MEDIUM':
         return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
       case 'LOW':
@@ -67,7 +67,7 @@ const GoalCard: React.FC<GoalCardProps> = ({
         );
       case 'FAILED':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-500/15 text-rose-400 border border-rose-500/40">
             Failed
           </span>
         );
@@ -134,7 +134,7 @@ const GoalCard: React.FC<GoalCardProps> = ({
           </button>
           <button
             onClick={() => onDelete(id)}
-            className="p-1.5 px-3 text-xs font-medium bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 rounded-xl border border-rose-500/20 transition flex items-center gap-1.5"
+            className="p-1.5 px-3 text-xs font-medium bg-rose-500/20 hover:bg-rose-500/20 text-rose-400 rounded-xl border border-rose-500/40 transition flex items-center gap-1.5"
             title="Delete Goal"
           >
             <Trash2 className="w-3.5 h-3.5 text-rose-400" />

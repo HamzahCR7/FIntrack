@@ -15,14 +15,12 @@ export const AIAssistantChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'assistant',
-      text: 'Welcome to Ask My Money — your central AI financial hub! I am connected to your Financial Calculator Hub, "Can I Afford This?" Affordability Engine, and Financial Time Machine. Ask me any question or test scenarios!',
+      text: 'Hi! Ask me anything about your spending, savings, balances, or financial plans.',
       suggestedFollowUps: [
-        'Can I afford a new laptop for ₹65,000?',
-        'Time Machine: What if I reduce food spending by 20% for 1 year?',
-        'Calculate my EMI for 1 Lakh at 12% interest for 2 years',
         'Why did I spend more this month?',
         'How can I save more?',
         'How much money do people owe me?',
+        'Can I afford a new laptop for ₹65,000?',
       ],
     },
   ]);
@@ -69,32 +67,30 @@ export const AIAssistantChat: React.FC = () => {
   };
 
   return (
-    <div className="relative overflow-hidden bg-slate-900 border border-slate-700/80 rounded-2xl shadow-xl flex flex-col h-[650px]">
+    <div className="relative flex h-[calc(100dvh-13rem)] min-h-[32rem] flex-col overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 shadow-xl md:h-[650px]">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 border-b border-slate-800 bg-slate-900/90">
+      <div className="flex items-center justify-between gap-3 border-b border-slate-800 bg-slate-900/90 p-3.5 sm:p-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Bot className="w-5.5 h-5.5 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-white">Ask My Money — Central AI Experience</h2>
-              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
-                Intelligence Hub
-              </span>
+              <h2 className="text-base font-bold text-white">Ask FinTrack</h2>
+              <span className="hidden rounded-full border border-indigo-500/30 bg-indigo-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-indigo-300 sm:inline">AI guide</span>
             </div>
-            <p className="text-xs text-slate-400">Connected to Calculator Hub, Affordability Engine & Time Machine</p>
+            <p className="text-xs text-slate-400">Answers based on your financial data</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+        <div className="hidden items-center gap-2 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-3 py-1.5 text-xs text-indigo-300 sm:flex">
           <ShieldCheck className="w-4 h-4 text-indigo-400" />
-          <span>Strict Controlled Tool Execution</span>
+          <span>Private & secure</span>
         </div>
       </div>
 
       {/* Chat Messages Area */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-3.5 sm:p-5">
         {messages.map((msg, idx) => (
           <div
             key={idx}
@@ -107,7 +103,7 @@ export const AIAssistantChat: React.FC = () => {
             )}
 
             <div
-              className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 text-xs leading-relaxed space-y-2.5 ${
+              className={`max-w-[88%] rounded-2xl p-3 text-xs leading-relaxed space-y-2.5 sm:max-w-[75%] sm:p-4 ${
                 msg.sender === 'user'
                   ? 'bg-blue-600 text-white rounded-br-none shadow-md shadow-blue-600/20'
                   : 'bg-slate-800/90 text-slate-200 border border-slate-700/80 rounded-bl-none shadow-sm'
@@ -139,7 +135,7 @@ export const AIAssistantChat: React.FC = () => {
                         className="text-[11px] bg-slate-900/80 hover:bg-slate-700 border border-slate-700 text-indigo-300 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1"
                       >
                         <MessageSquare className="w-2.5 h-2.5" />
-                        <span>"{chip}"</span>
+                        <span>{chip}</span>
                       </button>
                     ))}
                   </div>
@@ -169,7 +165,7 @@ export const AIAssistantChat: React.FC = () => {
       </div>
 
       {/* Input Form Bar */}
-      <div className="p-4 border-t border-slate-800 bg-slate-900/90">
+      <div className="border-t border-slate-800 bg-slate-900/90 p-3 sm:p-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -181,7 +177,7 @@ export const AIAssistantChat: React.FC = () => {
             type="text"
             value={inputQuery}
             onChange={(e) => setInputQuery(e.target.value)}
-            placeholder="Ask FinTrack AI (e.g. 'How much did I spend on food using my credit card?')..."
+            placeholder="Ask about your money..."
             className="flex-1 bg-slate-950 border border-slate-700/80 rounded-xl pl-4 pr-12 py-3 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
           <button
