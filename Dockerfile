@@ -33,14 +33,16 @@ ENV NODE_ENV=production
 WORKDIR /app/backend
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends openssl \
+    && apt-get install -y --no-install-recommends openssl postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/backend/node_modules ./node_modules
 COPY --from=build /app/backend/dist ./dist
+COPY --from=build /app/backend/package.json ./package.json
+COPY --from=build /app/backend/scripts/run-ownership-migration.sh ./scripts/run-ownership-migration.sh
 COPY --from=build /app/backend/prisma ./prisma
 COPY --from=build /app/frontend/dist /app/frontend/dist
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma db push --schema prisma/schema.postgresql.prisma --skip-generate && exec node dist/main.js"]
+CMD ["node", "dist/main.js"]

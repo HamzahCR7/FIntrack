@@ -51,8 +51,9 @@ Supply these prompted environment variables:
 Render generates `SESSION_SECRET` automatically. Do not use the previous demo login.
 The Blueprint installs dependencies, builds both applications, generates the
 PostgreSQL Prisma client, and starts the API serving the frontend on the same URL.
-Startup applies safe schema changes with `prisma db push`; destructive changes fail
-instead of accepting data loss. For future complex schema changes, use reviewed migrations.
+The container starts the API without applying schema changes. Apply reviewed schema
+migrations as an explicit one-off operation before deploying a schema-dependent app
+version. Never use automatic `prisma db push` for the multi-user ownership rollout.
 
 ## 3. Verify the hosted app
 
@@ -73,6 +74,12 @@ This remains a single-owner tracker; the ledger is shared, with no per-user tena
 In production all API routes, including UPI ingestion, require the owner's Bearer
 session token. Existing webhook integrations must supply it (and their existing
 webhook secret), and renew it when it expires.
+
+## Northflank multi-user ownership rollout
+
+For the PostgreSQL ownership migration and the exact backup, one-off job, verification,
+and recovery procedure, follow [backend/prisma/OWNERSHIP_MIGRATION.md](backend/prisma/OWNERSHIP_MIGRATION.md).
+Keep production on the stable branch until both migration phases and their checks pass.
 Optional online AI requires separately configured provider keys and may incur costs;
 leave them unset for the free deterministic functionality.
 

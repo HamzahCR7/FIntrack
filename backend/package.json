@@ -13,7 +13,9 @@
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:generate:cloud": "prisma generate --schema prisma/schema.postgresql.prisma",
     "prisma:db:push": "prisma db push",
-    "ownership:backfill": "ts-node scripts/backfill-user-ownership.ts",
+    "ownership:phase1": "sh scripts/run-ownership-migration.sh phase1",
+    "ownership:verify": "sh scripts/run-ownership-migration.sh verify",
+    "ownership:phase2": "sh scripts/run-ownership-migration.sh phase2",
     "seed": "ts-node prisma/seed.ts",
     "test": "set \"DATABASE_URL=file:./test.db\"&& jest --runInBand",
     "test:watch": "jest --watch"
