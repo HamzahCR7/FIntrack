@@ -10,7 +10,7 @@ export class FinancialProfileRepository {
       profile = await this.db.financialProfile.create({
         data: {
           preferredSavingsRate: 20.0,
-        },
+        } as any,
       });
     }
     return profile;

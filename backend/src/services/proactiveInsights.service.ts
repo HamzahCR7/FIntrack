@@ -5,6 +5,7 @@ import { AnalyticsService } from './analytics.service';
 import { CreditCardService } from './creditCard.service';
 import { SubscriptionService } from './subscription.service';
 import { FinancialProfileService } from './financialProfile.service';
+import { currentUserId } from '../common/auth/requestContext';
 
 export interface ProactiveInsight {
   id: string;
@@ -145,9 +146,11 @@ export class ProactiveInsightsService {
   }
 
   async saveFeedback(insightId: string, isUseful: boolean) {
+    const userId = currentUserId();
+    if (!userId) throw new Error('Authenticated user required');
     return this.db.insightFeedback.upsert({
-      where: { insightId },
-      create: { insightId, isUseful },
+      where: { userId_insightId: { userId, insightId } },
+      create: { userId, insightId, isUseful },
       update: { isUseful },
     });
   }

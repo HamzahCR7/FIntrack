@@ -21,6 +21,7 @@ interface SummaryCardsProps {
     previousMonthExpenses?: number;
     pocketAllowanceBalance: number;
     pocketAllowanceThisMonth: number;
+    digitalWalletCount?: number;
   };
   monthlyTrends?: Array<{
     month: string;
@@ -183,10 +184,10 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
           </div>
         </div>
 
-        {/* 7. Pocket allowance */}
-        <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
+        {/* 7. User-configured digital wallets (opt-in) */}
+        {(summary.digitalWalletCount || 0) > 0 && <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Pocket Allowance</span>
+            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Digital Wallets</span>
             <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
               <Gift className="w-4 h-4" />
             </div>
@@ -199,7 +200,7 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
               {formatCurrency(summary.pocketAllowanceThisMonth)} received this month
             </p>
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Metric Breakdown & Multi-Month Details Modal */}

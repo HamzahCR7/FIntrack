@@ -1,63 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import axios from 'axios';
 import { Navbar } from './components/Navbar';
-import { SummaryCards } from './components/SummaryCards';
-import { SpendingSection } from './components/SpendingSection';
-import { DailySpendingSection } from './components/DailySpendingSection';
-import { TrendsSection } from './components/TrendsSection';
-import { RunwaySimulatorCard } from './components/RunwaySimulatorCard';
-import { AccountsSection } from './components/AccountsSection';
-import { RecurringSection } from './components/RecurringSection';
-import { DebtsSection } from './components/DebtsSection';
-import { TransactionsSection } from './components/TransactionsSection';
-import { AIInsightsPlaceholder } from './components/AIInsightsPlaceholder';
-import { AIAssistantChat } from './components/AIAssistantChat';
-import { AIPersonalizationSection } from './components/AIPersonalizationSection';
-import { AddTransactionModal } from './components/AddTransactionModal';
-import { AddDebtModal } from './components/AddDebtModal';
-import { AddSubscriptionModal } from './components/AddSubscriptionModal';
-import { BillRemindersSection } from './components/BillRemindersSection';
-import { CanIAffordThisModal } from './components/CanIAffordThisModal';
-import { TimeMachineModal } from './components/TimeMachineModal';
+import type { MetricType } from './components/MetricDetailsModal';
 import { UtilityDock } from './components/UtilityDock';
 import { LoginScreen } from './components/LoginScreen';
+import { OnboardingTour } from './components/OnboardingTour';
+import { FeatureGuide, GuideFeature } from './components/FeatureGuide';
 import { AccordionSection } from './components/AccordionSection';
 import { ToastContainer } from './components/ToastContainer';
-import { BudgetsSection } from './components/BudgetsSection';
-import { GoalsSection } from './components/GoalsSection';
-import { DashboardBudgetsAndGoals } from './components/DashboardBudgetsAndGoals';
-import { SpendForecastCard } from './components/SpendForecastCard';
-import { SmartGuidancePanel } from './components/SmartGuidancePanel';
+import ExportPeriodModal from './components/ExportPeriodModal';
 import { useToast } from './utils/toastStore';
+import {
+  createOutboxId,
+  enqueueTransactionOperation,
+  mergePendingTransactions,
+  removeTransactionOperation,
+  syncTransactionOutbox,
+} from './utils/transactionOutbox';
 import { api } from './api/client';
 import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from './utils/exportUtils';
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
-import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge } from 'lucide-react';
+import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical, Menu, X, Plus, ArrowRight, ChevronDown, WalletCards, Settings, User } from 'lucide-react';
+import { formatCurrency } from './utils/privacyStore';
 
-type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions' | 'accounts' | 'debts' | 'subscriptions' | 'budgets' | 'goals' | 'forecast' | 'ai';
+const SummaryCards = lazy(() => import('./components/SummaryCards').then((module) => ({ default: module.SummaryCards })));
+const MetricDetailsModal = lazy(() => import('./components/MetricDetailsModal').then((module) => ({ default: module.MetricDetailsModal })));
+const CustomizableDashboard = lazy(() => import('./components/CustomizableDashboard').then((module) => ({ default: module.CustomizableDashboard })));
+const AccountsSection = lazy(() => import('./components/AccountsSection').then((module) => ({ default: module.AccountsSection })));
+const RecurringSection = lazy(() => import('./components/RecurringSection').then((module) => ({ default: module.RecurringSection })));
+const DebtsSection = lazy(() => import('./components/DebtsSection').then((module) => ({ default: module.DebtsSection })));
+const TransactionsSection = lazy(() => import('./components/TransactionsSection').then((module) => ({ default: module.TransactionsSection })));
+const AIAssistantChat = lazy(() => import('./components/AIAssistantChat').then((module) => ({ default: module.AIAssistantChat })));
+const AIPersonalizationSection = lazy(() => import('./components/AIPersonalizationSection').then((module) => ({ default: module.AIPersonalizationSection })));
+const AddTransactionModal = lazy(() => import('./components/AddTransactionModal').then((module) => ({ default: module.AddTransactionModal })));
+const AddDebtModal = lazy(() => import('./components/AddDebtModal').then((module) => ({ default: module.AddDebtModal })));
+const AddSubscriptionModal = lazy(() => import('./components/AddSubscriptionModal').then((module) => ({ default: module.AddSubscriptionModal })));
+const BillRemindersSection = lazy(() => import('./components/BillRemindersSection').then((module) => ({ default: module.BillRemindersSection })));
+const CanIAffordThisModal = lazy(() => import('./components/CanIAffordThisModal').then((module) => ({ default: module.CanIAffordThisModal })));
+const TimeMachineModal = lazy(() => import('./components/TimeMachineModal').then((module) => ({ default: module.TimeMachineModal })));
+const BudgetsSection = lazy(() => import('./components/BudgetsSection'));
+const GoalsSection = lazy(() => import('./components/GoalsSection'));
+const SpendForecastCard = lazy(() => import('./components/SpendForecastCard').then((module) => ({ default: module.SpendForecastCard })));
+const SmartGuidancePanel = lazy(() => import('./components/SmartGuidancePanel').then((module) => ({ default: module.SmartGuidancePanel })));
+const FinancialIntelligenceHub = lazy(() => import('./components/FinancialIntelligenceHub').then((module) => ({ default: module.FinancialIntelligenceHub })));
+const DataSettingsSection = lazy(() => import('./components/DataSettingsSection').then((module) => ({ default: module.DataSettingsSection })));
+
+type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions' | 'accounts' | 'debts' | 'subscriptions' | 'budgets' | 'goals' | 'forecast' | 'financial-hub' | 'ai' | 'settings';
+
+const cacheKeyFor = (userId?: string) => userId ? `fintrack_app_data_cache_v2:${userId}` : null;
+
+type CachedAppData = {
+  dashboardData: DashboardData;
+  transactions: Transaction[];
+  categories: Category[];
+  accounts: Account[];
+  budgets: Budget[];
+  goals: Goal[];
+};
+
+const readCachedAppData = (): CachedAppData | null => {
+  try {
+    const user = JSON.parse(localStorage.getItem('fintrack_user') || 'null') as { id?: string } | null;
+    const key = cacheKeyFor(user?.id);
+    const value = key ? localStorage.getItem(key) : null;
+    return value ? JSON.parse(value) as CachedAppData : null;
+  } catch {
+    return null;
+  }
+};
 
 export const App: React.FC = () => {
+  const [cachedAppData] = useState(readCachedAppData);
   const { addToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authChecking, setAuthChecking] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<{ id: string; username: string; name?: string } | null>(null);
 
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [ledgerTransactions, setLedgerTransactions] = useState<Transaction[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(cachedAppData?.dashboardData ?? null);
+  const [transactions, setTransactions] = useState<Transaction[]>(cachedAppData?.transactions ?? []);
+  const [ledgerTransactions, setLedgerTransactions] = useState<Transaction[]>(cachedAppData?.transactions ?? []);
+  const [categories, setCategories] = useState<Category[]>(cachedAppData?.categories ?? []);
+  const [accounts, setAccounts] = useState<Account[]>(cachedAppData?.accounts ?? []);
+  const [budgets, setBudgets] = useState<Budget[]>(cachedAppData?.budgets ?? []);
+  const [goals, setGoals] = useState<Goal[]>(cachedAppData?.goals ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!cachedAppData);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isDebtModalOpen, setIsDebtModalOpen] = useState<boolean>(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
   const [isAffordModalOpen, setIsAffordModalOpen] = useState<boolean>(false);
   const [isTimeMachineModalOpen, setIsTimeMachineModalOpen] = useState<boolean>(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | Partial<Transaction> | null>(null);
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
+  const [mobileNavigationHistory, setMobileNavigationHistory] = useState<DashboardTab[]>([]);
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [activeFeatureGuide, setActiveFeatureGuide] = useState<GuideFeature | null>(null);
+  const [showMobileInsights, setShowMobileInsights] = useState(false);
+  const [showMobileSummaryDetails, setShowMobileSummaryDetails] = useState(false);
+  const [mobileMetricDetails, setMobileMetricDetails] = useState<MetricType | null>(null);
   const [ledgerMonth, setLedgerMonth] = useState(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -77,7 +119,7 @@ export const App: React.FC = () => {
     (dashboardData?.debts.activeDebts || []).filter((debt) => debt.type === 'I_OWE' && debt.remainingAmount > 0).length;
   const currentHour = new Date().getHours();
   const dayGreeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
-  const displayName = 'Hamzah';
+  const displayName = currentUser?.name || currentUser?.username || 'there';
   const todayLabel = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
     month: 'short',
@@ -89,6 +131,34 @@ export const App: React.FC = () => {
     localStorage.setItem('fintrack_theme_mode', 'dark');
   }, []);
 
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    setIsOnboardingOpen(localStorage.getItem(`fintrack_onboarding_complete:${currentUser.id}`) !== 'true');
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    if (!currentUser?.id || isOnboardingOpen || localStorage.getItem(`fintrack_onboarding_complete:${currentUser.id}`) !== 'true') return;
+    const key = `fintrack_feature_guide:${currentUser.id}:${activeTab}`;
+    setActiveFeatureGuide(localStorage.getItem(key) === 'true' ? null : activeTab);
+  }, [activeTab, currentUser?.id, isOnboardingOpen]);
+
+  const dismissFeatureGuide = () => {
+    if (currentUser?.id && activeFeatureGuide) localStorage.setItem(`fintrack_feature_guide:${currentUser.id}:${activeFeatureGuide}`, 'true');
+    setActiveFeatureGuide(null);
+  };
+
+  const clearLocalAppData = () => {
+    const key = cacheKeyFor(currentUser?.id);
+    if (key) localStorage.removeItem(key);
+    setDashboardData(null);
+    setTransactions([]);
+    setLedgerTransactions([]);
+    setCategories([]);
+    setAccounts([]);
+    setBudgets([]);
+    setGoals([]);
+  };
+
   // Verify stored session on mount
   useEffect(() => {
     const token = localStorage.getItem('fintrack_auth_token');
@@ -98,6 +168,9 @@ export const App: React.FC = () => {
       if (storedUser) {
         try {
           setCurrentUser(JSON.parse(storedUser));
+          setIsAuthenticated(true);
+          setAuthChecking(false);
+          void fetchAllData(undefined, JSON.parse(storedUser).id);
         } catch {}
       }
 
@@ -107,12 +180,13 @@ export const App: React.FC = () => {
           setCurrentUser(data.user);
           setIsAuthenticated(true);
           setAuthChecking(false);
-          fetchAllData();
+          if (!storedUser) void fetchAllData(undefined, data.user.id);
         })
         .catch((authError) => {
           if (axios.isAxiosError(authError) && authError.response?.status === 401) {
             localStorage.removeItem('fintrack_auth_token');
             localStorage.removeItem('fintrack_user');
+            clearLocalAppData();
             setCurrentUser(null);
             setIsAuthenticated(false);
           } else {
@@ -131,17 +205,19 @@ export const App: React.FC = () => {
   const handleLoginSuccess = (user: { id: string; username: string; name?: string }) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
-    fetchAllData();
+    clearLocalAppData();
+    fetchAllData(undefined, user.id);
   };
 
   const handleLogout = () => {
     localStorage.removeItem('fintrack_auth_token');
     localStorage.removeItem('fintrack_user');
+    clearLocalAppData();
     setIsAuthenticated(false);
     setCurrentUser(null);
   };
 
-  const fetchAllData = async (filters?: TransactionFilters) => {
+  const fetchAllData = async (filters?: TransactionFilters, userId = currentUser?.id) => {
     try {
       setIsLoading(true);
       setError(null);
@@ -156,13 +232,25 @@ export const App: React.FC = () => {
         api.getGoals(),
       ]);
 
+      const visibleTransactions = await mergePendingTransactions(txs);
+
       setDashboardData(dash);
-      setTransactions(txs);
-      setLedgerTransactions(txs);
+      setTransactions(visibleTransactions);
+      setLedgerTransactions(visibleTransactions);
       setCategories(cats);
       setAccounts(accs);
       setBudgets(budgetsData || []);
       setGoals(goalsData || []);
+
+      const cacheKey = cacheKeyFor(userId);
+      if (cacheKey) localStorage.setItem(cacheKey, JSON.stringify({
+        dashboardData: dash,
+        transactions: visibleTransactions,
+        categories: cats,
+        accounts: accs,
+        budgets: budgetsData || [],
+        goals: goalsData || [],
+      } satisfies CachedAppData));
 
       void api
         .getForecast()
@@ -179,6 +267,24 @@ export const App: React.FC = () => {
       setError(err.response?.data?.message || err.message || 'Failed to fetch financial data from server.');
     }
   };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const sync = () => {
+      void syncTransactionOutbox().then((changed) => {
+        if (changed) void fetchAllData();
+      });
+    };
+
+    sync();
+    window.addEventListener('online', sync);
+    const interval = window.setInterval(sync, 5 * 60 * 1000);
+    return () => {
+      window.removeEventListener('online', sync);
+      window.clearInterval(interval);
+    };
+  }, [isAuthenticated]);
 
   const handleFilterChange = (filters: TransactionFilters) => {
     api.getTransactions(filters).then(setLedgerTransactions).catch(console.error);
@@ -201,31 +307,63 @@ export const App: React.FC = () => {
   };
 
   const handleSaveTransaction = async (data: any, id?: string) => {
-    try {
-      if (id) {
-        await api.updateTransaction(id, data);
-        addToast('Transaction updated successfully', 'success');
-      } else {
-        await api.createTransaction(data);
-        addToast('Transaction saved successfully', 'success');
-      }
+    const operationId = createOutboxId();
+    const entityId = id || operationId;
+    await enqueueTransactionOperation({
+      id: operationId,
+      type: id ? 'update' : 'create',
+      entityId,
+      payload: data,
+      createdAt: Date.now(),
+    });
 
-      setEditingTransaction(null);
-      await fetchAllData();
-    } catch (error: any) {
-      addToast(error?.response?.data?.message || error?.message || 'Failed to save transaction', 'error');
-      throw error;
-    }
+    const optimisticTransaction = {
+      ...data,
+      id: entityId,
+      currency: data.currency || 'INR',
+      isSubscription: data.isSubscription || false,
+      category: categories.find((category) => category.id === data.categoryId),
+      subcategory: categories.find((category) => category.id === data.subcategoryId),
+      sourceAccount: accounts.find((account) => account.id === data.sourceAccountId),
+      destinationAccount: accounts.find((account) => account.id === data.destinationAccountId),
+      syncStatus: 'pending' as const,
+    } as Transaction;
+
+    const applyOptimisticSave = (current: Transaction[]) => id
+      ? current.map((transaction) => transaction.id === id ? { ...transaction, ...optimisticTransaction } : transaction)
+      : [optimisticTransaction, ...current];
+
+    setTransactions(applyOptimisticSave);
+    setLedgerTransactions(applyOptimisticSave);
+    setEditingTransaction(null);
+    addToast(id ? 'Update saved locally — syncing' : 'Transaction saved locally — syncing', 'success');
+
+    // A background sync may already have captured its work list before this save
+    // was queued. A second pass guarantees this new operation is included.
+    void syncTransactionOutbox()
+      .then((firstChanged) => syncTransactionOutbox().then((secondChanged) => firstChanged || secondChanged))
+      .then((changed) => { if (changed) void fetchAllData(); });
   };
 
   const handleDeleteTransaction = async (id: string) => {
     if (confirm('Are you sure you want to delete this transaction? Account balances will be reverted.')) {
-      try {
-        await api.deleteTransaction(id);
-        fetchAllData();
-      } catch (err) {
-        console.error(err);
+      const pendingCreate = transactions.find((transaction) => transaction.id === id)?.syncStatus === 'pending' && id.startsWith('offline-');
+      if (pendingCreate) {
+        await removeTransactionOperation(id);
+      } else {
+        await enqueueTransactionOperation({
+          id: createOutboxId(),
+          type: 'delete',
+          entityId: id,
+          createdAt: Date.now(),
+        });
       }
+      setTransactions((current) => current.filter((transaction) => transaction.id !== id));
+      setLedgerTransactions((current) => current.filter((transaction) => transaction.id !== id));
+      addToast('Transaction removed locally — syncing', 'success');
+      void syncTransactionOutbox().then((changed) => {
+        if (changed) void fetchAllData();
+      });
     }
   };
 
@@ -254,8 +392,32 @@ export const App: React.FC = () => {
     { id: 'budgets', label: 'Budgets', caption: 'Spending limits', icon: PieChart, color: 'green' },
     { id: 'goals', label: 'Goals', caption: 'Financial targets', icon: Target, color: 'purple' },
     { id: 'forecast', label: 'Forecast', caption: 'Spend projection', icon: Gauge, color: 'amber' },
+    { id: 'financial-hub', label: 'Money Lab', caption: 'Automation & review', icon: FlaskConical, color: 'cyan' },
     { id: 'ai', label: 'Ask FinTrack', caption: 'Personal money guide', icon: Sparkles, color: 'fuchsia' },
+    { id: 'settings', label: 'Manage', caption: 'Categories & profile', icon: Settings, color: 'slate' },
   ];
+  const mobilePrimaryItems = navigationItems.filter((item) => ['overview', 'goals', 'smart-guidance', 'ai'].includes(item.id));
+  const mobileMoreItems = navigationItems.filter((item) => !['overview', 'goals', 'smart-guidance', 'ai', 'budgets', 'forecast'].includes(item.id));
+  const navigateMobile = (tab: DashboardTab) => {
+    if (tab === activeTab) {
+      setIsMoreMenuOpen(false);
+      return;
+    }
+    setMobileNavigationHistory((history) => tab === 'overview' ? [] : [...history, activeTab]);
+    setActiveTab(tab);
+    setIsMoreMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const closeMobilePage = () => {
+    const previousTab = mobileNavigationHistory.at(-1) || 'overview';
+    setMobileNavigationHistory((history) => history.slice(0, -1));
+    setActiveTab(previousTab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  const activeMobilePrimary = mobilePrimaryItems.some((item) => item.id === activeTab);
+  const recentTransactions = [...transactions]
+    .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
+    .slice(0, 3);
   if (authChecking) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center space-y-4">
@@ -276,8 +438,8 @@ export const App: React.FC = () => {
         onAddTransaction={() => handleOpenAddModal()}
         onAddDebt={() => setIsDebtModalOpen(true)}
         onRefresh={() => fetchAllData()}
-        onExportCSV={() => exportTransactionsToCSV(transactions)}
-        onExportPDF={() => dashboardData && printPDFReport(dashboardData, transactions)}
+        onExportCSV={() => setIsExportModalOpen(true)}
+        onExportPDF={() => setIsExportModalOpen(true)}
         onExportPowerBI={() => exportPowerBIDataset(transactions, dashboardData)}
         onLogout={handleLogout}
         currentUser={currentUser}
@@ -286,11 +448,20 @@ export const App: React.FC = () => {
         goals={goals}
         onNavigate={setActiveTab}
         isLoading={isLoading}
+        onStartTour={() => setIsOnboardingOpen(true)}
       />
 
       {/* Main Content */}
+      <Suspense fallback={(
+        <main className="flex min-h-[28rem] flex-1 items-center justify-center">
+          <div className="flex items-center gap-3 text-sm font-medium text-slate-400">
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
+            Loading dashboard…
+          </div>
+        </main>
+      )}>
       <main className="dashboard-main dashboard-enter flex-1 max-w-[96rem] w-full mx-auto px-1.5 sm:px-4 lg:px-8 py-2 sm:py-6 md:py-8 pb-20 sm:pb-32 md:pb-8 space-y-2 sm:space-y-8">
-        <section className="hero-banner relative overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-3 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7">
+        <section className={`hero-banner relative hidden overflow-hidden rounded-[2rem] border border-slate-700/70 bg-slate-900/85 p-3 shadow-2xl shadow-slate-950/35 backdrop-blur-sm sm:p-7 md:block ${activeTab === 'overview' ? '' : 'md:block'}`}>
           <div className="pointer-events-none absolute -right-8 -top-10 h-40 w-40 rounded-full bg-gradient-to-br from-cyan-400/25 to-transparent blur-2xl sm:-right-16 sm:-top-20 sm:h-56 sm:w-56" />
           <div className="pointer-events-none absolute -bottom-16 -left-8 h-48 w-48 rounded-full bg-gradient-to-tr from-orange-400/25 to-transparent blur-2xl sm:-bottom-24 sm:-left-14 sm:h-64 sm:w-64" />
 
@@ -334,7 +505,7 @@ export const App: React.FC = () => {
 
         {/* Error Banner */}
         {error && (
-          <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 text-sm flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="w-5 h-5 text-rose-400 shrink-0" />
               <span>{error}</span>
@@ -357,8 +528,89 @@ export const App: React.FC = () => {
           </div>
         ) : dashboardData ? (
           <div className="space-y-6">
+            {activeTab === 'overview' && (
+              <section className="space-y-4 md:hidden" aria-label="Home overview">
+                <div className="px-2 pt-1">
+                  <p className="text-xs text-slate-400">{todayLabel}</p>
+                  <h1 className="mt-0.5 text-xl font-semibold tracking-tight text-white">{dayGreeting}, {displayName}</h1>
+                </div>
+
+                <section className="rounded-2xl border border-slate-800 bg-slate-900/85 p-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">Available balance</p>
+                      <p className="mt-1 text-2xl font-semibold tracking-tight text-white">{formatCurrency(dashboardData.summary.totalBalance)}</p>
+                    </div>
+                    <div className="rounded-xl bg-cyan-400/10 p-2.5 text-cyan-300"><WalletCards className="h-5 w-5" /></div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-800 pt-3">
+                    <button onClick={() => setMobileMetricDetails('EXPENSE')} className="rounded-lg bg-rose-500/15 px-2 py-1.5 text-left"><p className="text-[10px] font-semibold uppercase tracking-wide text-rose-400">Spent this month</p><p className="mt-1 text-sm font-bold text-rose-400">{formatCurrency(dashboardData.summary.spendingThisMonth)}</p></button>
+                    <button onClick={() => setMobileMetricDetails('SAVINGS')} className="text-left"><p className="text-[10px] uppercase tracking-wide text-slate-500">Saved this month</p><p className="mt-1 text-sm font-semibold text-emerald-300">{formatCurrency(dashboardData.summary.savingsThisMonth)}</p></button>
+                  </div>
+                  <button onClick={() => setShowMobileSummaryDetails((current) => !current)} className="mt-3 flex w-full items-center justify-between border-t border-slate-800 pt-3 text-xs font-semibold text-cyan-300" aria-expanded={showMobileSummaryDetails}>
+                    More summary details
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showMobileSummaryDetails ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showMobileSummaryDetails && <div className="mt-3 divide-y divide-slate-800 rounded-xl bg-slate-950/45 px-3">
+                    {[
+                      { label: 'Previous month saved', value: dashboardData.summary.previousMonthSavings, tone: 'text-teal-300' },
+                      { label: 'Income this month', value: dashboardData.summary.incomeThisMonth, tone: 'text-emerald-300', metric: 'INCOME' as MetricType },
+                      { label: 'Expenses this month', value: dashboardData.summary.spendingThisMonth, tone: 'text-rose-400', metric: 'EXPENSE' as MetricType },
+                      { label: 'Credit outstanding', value: dashboardData.summary.creditOutstanding, tone: 'text-amber-300' },
+                      ...(dashboardData.summary.digitalWalletCount ? [{ label: 'Digital wallets', value: dashboardData.summary.pocketAllowanceBalance, tone: 'text-violet-300' }] : []),
+                    ].map((item) => <button key={item.label} disabled={!item.metric} onClick={() => item.metric && setMobileMetricDetails(item.metric)} className="flex w-full items-center justify-between gap-3 py-3 text-left disabled:cursor-default">
+                      <span className="text-xs text-slate-400">{item.label}</span><span className={`text-sm font-semibold ${item.tone}`}>{formatCurrency(item.value || 0)}</span>
+                    </button>)}
+                  </div>}
+                </section>
+
+                <button
+                  onClick={() => navigateMobile(dueTimelineCount > 0 ? 'reminders' : 'smart-guidance')}
+                  className="flex w-full items-center gap-3 rounded-2xl border border-amber-400/25 bg-amber-400/10 p-3.5 text-left"
+                >
+                  <div className="rounded-xl bg-amber-400/15 p-2 text-amber-300"><BellRing className="h-5 w-5" /></div>
+                  <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-amber-100">{dueTimelineCount > 0 ? `${dueTimelineCount} item${dueTimelineCount === 1 ? '' : 's'} need attention` : 'Your next best step'}</span><span className="mt-0.5 block text-xs text-amber-200/70">{dueTimelineCount > 0 ? 'Review upcoming bills and payments' : 'See your personalized money guidance'}</span></span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-amber-300" />
+                </button>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Add', icon: Plus, action: () => handleOpenAddModal() },
+                    { label: 'Budget', icon: PieChart, action: () => navigateMobile('budgets') },
+                    { label: 'Forecast', icon: Gauge, action: () => navigateMobile('forecast') },
+                  ].map(({ label, icon: Icon, action }) => (
+                    <button key={label} onClick={action} className="flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-2xl border border-slate-800 bg-slate-900 px-1 text-slate-200">
+                      <Icon className="h-4 w-4 text-cyan-300" /><span className="text-[11px] font-semibold">{label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <section className="rounded-2xl border border-slate-800 bg-slate-900/85 p-4">
+                  <div className="flex items-center justify-between"><h2 className="text-sm font-semibold text-white">Recent activity</h2><button onClick={() => navigateMobile('transactions')} className="text-xs font-semibold text-cyan-300">See all</button></div>
+                  <div className="mt-3 divide-y divide-slate-800">
+                    {recentTransactions.length ? recentTransactions.map((transaction) => (
+                      <button key={transaction.id} onClick={() => navigateMobile('transactions')} className="flex w-full items-center gap-3 py-3 text-left first:pt-0 last:pb-0">
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${transaction.type === 'INCOME' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/30'}`}><ReceiptText className="h-4 w-4" /></span>
+                        <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-100">{transaction.merchant || transaction.description || transaction.category?.name || 'Transaction'}</span><span className="block text-[11px] text-slate-500">{new Date(transaction.transactionDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span></span>
+                        <span className={`text-sm font-semibold ${transaction.type === 'INCOME' ? 'text-emerald-300' : 'text-slate-100'}`}>{transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}</span>
+                      </button>
+                    )) : <p className="py-3 text-sm text-slate-400">No transactions yet. Add your first one to start tracking.</p>}
+                  </div>
+                </section>
+
+                <button
+                  onClick={() => setShowMobileInsights((current) => !current)}
+                  className="flex w-full items-center justify-between rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3.5 text-left"
+                  aria-expanded={showMobileInsights}
+                >
+                  <span><span className="block text-sm font-semibold text-white">Explore all insights</span><span className="mt-0.5 block text-xs text-slate-400">Spending, dues, daily activity, trends and planning tools</span></span>
+                  <ChevronDown className={`h-5 w-5 shrink-0 text-cyan-300 transition-transform ${showMobileInsights ? 'rotate-180' : ''}`} />
+                </button>
+              </section>
+            )}
             {/* 1. TOP SUMMARY CARDS (Accordion Section) */}
             <AccordionSection
+              className="hidden md:block"
               title="Financial Pulse & Summary"
               subtitle="Liquid bank balances, monthly savings & total active credit debt"
               icon={LayoutDashboard}
@@ -371,6 +623,19 @@ export const App: React.FC = () => {
                 isColumn={false}
               />
             </AccordionSection>
+
+            {activeTab !== 'overview' && (
+              <section className="mobile-page-context flex items-start justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 px-4 py-3 md:hidden">
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">FinTrack</p>
+                  <h2 className="mt-1 text-lg font-semibold text-white">{navigationItems.find((item) => item.id === activeTab)?.label}</h2>
+                  <p className="mt-0.5 text-xs text-slate-400">{navigationItems.find((item) => item.id === activeTab)?.caption}</p>
+                </div>
+                <button onClick={closeMobilePage} className="shrink-0 rounded-xl border border-slate-700 bg-slate-800/80 p-2 text-slate-300 transition-colors hover:bg-slate-700 hover:text-white" aria-label="Close and return to previous page">
+                  <X className="h-5 w-5" />
+                </button>
+              </section>
+            )}
 
             {/* 2. MONEY COCKPIT NAVIGATION */}
             <section
@@ -449,77 +714,30 @@ export const App: React.FC = () => {
 
             {/* 1. OVERVIEW TAB */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <AccordionSection
-                  title="Monthly Spending Analytics"
-                  subtitle="Category breakdown & payment method distribution"
-                  icon={ReceiptText}
-                  defaultOpen={true}
-                >
-                  <SpendingSection
-                    spendingThisMonth={dashboardData.summary.spendingThisMonth}
-                    spendingByCategory={dashboardData.spendingByCategory}
-                    spendingByPaymentMethod={dashboardData.spendingByPaymentMethod}
-                    totalIncome={dashboardData.summary.totalIncome}
-                    totalExpenses={dashboardData.summary.totalExpenses}
-                    incomeThisMonth={dashboardData.summary.incomeThisMonth}
-                    savingsThisMonth={dashboardData.summary.savingsThisMonth}
-                    monthlyTrends={dashboardData.monthlyTrends}
-                    transactions={transactions}
-                  />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="Upcoming Dues & Bill Reminders"
-                  subtitle="Credit cards, active debts & subscription renewals"
-                  icon={BellRing}
-                  badge={dashboardData.recurring.upcomingSubscriptions.length + dashboardData.debts.activeDebts.length}
-                  badgeColor="bg-amber-500/10 text-amber-300 border-amber-500/20"
-                  defaultOpen={true}
-                >
-                  <BillRemindersSection
-                    creditCards={dashboardData.accounts.breakdown.CREDIT_CARD}
-                    subscriptions={dashboardData.recurring.upcomingSubscriptions}
-                    debts={dashboardData.debts.activeDebts}
-                    onPayCreditCard={handlePayCreditCard}
-                    onPaySubscription={() => setActiveTab('subscriptions')}
-                    onPayDebt={() => setActiveTab('debts')}
-                  />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="Daily Spending Activity"
-                  subtitle="Day-by-day expenses for the selected month"
-                  icon={ReceiptText}
-                  defaultOpen={true}
-                >
-                  <DailySpendingSection
-                    transactions={transactions}
-                    onAddTransactionForDate={(dateStr) => {
-                      setEditingTransaction({ transactionDate: dateStr, type: 'EXPENSE' });
-                      setIsModalOpen(true);
-                    }}
-                  />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="6-Month Financial Trends"
-                  subtitle="Historical income vs expense vs net savings trends"
-                  icon={Sparkles}
-                  defaultOpen={true}
-                >
-                  <TrendsSection monthlyTrends={dashboardData.monthlyTrends} />
-                </AccordionSection>
-
-                <AccordionSection
-                  title="Cashflow Runway Simulator"
-                  subtitle="Model 3-24 month balance scenarios with salary, rent, and EMI changes"
-                  icon={Gauge}
-                  defaultOpen={false}
-                >
-                  <RunwaySimulatorCard />
-                </AccordionSection>
-              </div>
+              <div className={`${showMobileInsights ? 'block' : 'hidden'} md:hidden`}><CustomizableDashboard
+                dashboardData={dashboardData}
+                transactions={transactions}
+                onAddTransactionForDate={(dateStr) => {
+                  setEditingTransaction({ transactionDate: dateStr, type: 'EXPENSE' });
+                  setIsModalOpen(true);
+                }}
+                onPayCreditCard={handlePayCreditCard}
+                onPaySubscription={() => setActiveTab('subscriptions')}
+                onPayDebt={() => setActiveTab('debts')}
+              /></div>
+            )}
+            {activeTab === 'overview' && (
+              <div className="hidden md:block"><CustomizableDashboard
+                dashboardData={dashboardData}
+                transactions={transactions}
+                onAddTransactionForDate={(dateStr) => {
+                  setEditingTransaction({ transactionDate: dateStr, type: 'EXPENSE' });
+                  setIsModalOpen(true);
+                }}
+                onPayCreditCard={handlePayCreditCard}
+                onPaySubscription={() => setActiveTab('subscriptions')}
+                onPayDebt={() => setActiveTab('debts')}
+              /></div>
             )}
 
             {/* 1B. SMART GUIDANCE TAB */}
@@ -571,7 +789,8 @@ export const App: React.FC = () => {
                   onFilterChange={handleFilterChange}
                   onEditTransaction={(tx) => handleOpenAddModal(tx)}
                   onDeleteTransaction={handleDeleteTransaction}
-                  onExportPDF={() => dashboardData && printPDFReport(dashboardData, transactions)}
+                  onExportCSV={() => setIsExportModalOpen(true)}
+                  onExportPDF={() => setIsExportModalOpen(true)}
                 />
               </AccordionSection>
             )}
@@ -612,7 +831,9 @@ export const App: React.FC = () => {
               >
                 <RecurringSection
                   recurring={dashboardData.recurring}
+                  debts={dashboardData.debts.activeDebts}
                   onAddSubscription={() => setIsSubscriptionModalOpen(true)}
+                  onManageDebt={() => setActiveTab('debts')}
                   onRefresh={() => fetchAllData()}
                 />
               </AccordionSection>
@@ -648,38 +869,90 @@ export const App: React.FC = () => {
             )}
 
             {/* 10. AI ASSISTANT TAB */}
+            {activeTab === 'financial-hub' && (
+              <FinancialIntelligenceHub transactions={transactions} accounts={accounts} dashboardData={dashboardData} />
+            )}
+
+            {/* 11. AI ASSISTANT TAB */}
             {activeTab === 'ai' && (
-              <AccordionSection
-                title="FinTrack AI Financial Guide"
-                subtitle="Instant answers, spending analysis & affordability checks"
-                icon={Sparkles}
-                defaultOpen={true}
-              >
-                <div className="space-y-6">
-                  <AIPersonalizationSection />
-                  <AIAssistantChat />
-                </div>
+              <div className="space-y-4">
+                <AIAssistantChat />
+                <details className="group overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/60">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-left [&::-webkit-details-marker]:hidden">
+                    <span>
+                      <span className="block text-sm font-semibold text-white">Personalization & insights</span>
+                      <span className="mt-0.5 block text-xs text-slate-400">Set your financial targets and review tailored guidance</span>
+                    </span>
+                    <ChevronDown className="h-5 w-5 shrink-0 text-cyan-300 transition-transform group-open:rotate-180" />
+                  </summary>
+                  <div className="border-t border-slate-800 p-4"><AIPersonalizationSection /></div>
+                </details>
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <AccordionSection title="Manage your workspace" subtitle="Your private categories and account sources" icon={Settings} defaultOpen={true}>
+                <section className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-700/70 bg-slate-950/50 p-4">
+                  <div className="flex min-w-0 items-center gap-3"><div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-400/15 text-cyan-200"><User className="h-5 w-5" /></div><div className="min-w-0"><p className="truncate text-sm font-semibold text-white">{displayName}</p><p className="truncate text-xs text-slate-400">@{currentUser?.username} · Private workspace</p></div></div>
+                  <button onClick={() => setIsOnboardingOpen(true)} className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200"><HelpCircle className="h-4 w-4 text-cyan-300" />App tour</button>
+                </section>
+                <DataSettingsSection categories={categories} accounts={accounts} transactions={transactions} onRefresh={() => fetchAllData()} />
               </AccordionSection>
             )}
           </div>
         ) : null}
       </main>
+      </Suspense>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-xs text-slate-500 backdrop-blur-sm">
+      <footer className="hidden border-t border-slate-800/80 bg-slate-950/90 py-6 text-center text-xs text-slate-500 backdrop-blur-sm md:block">
         <p>FinTrack Personal Financial System — Developed by Hamzah</p>
       </footer>
 
+      {isMoreMenuOpen && (
+        <div className="fixed inset-0 z-[55] md:hidden" role="dialog" aria-modal="true" aria-labelledby="more-menu-title">
+          <button className="absolute inset-0 bg-slate-950/70" aria-label="Close more menu" onClick={() => setIsMoreMenuOpen(false)} />
+          <section className="absolute inset-x-2 bottom-20 rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl shadow-slate-950/60">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">More tools</p>
+                <h2 id="more-menu-title" className="text-lg font-semibold text-white">Manage your money</h2>
+              </div>
+              <button onClick={() => setIsMoreMenuOpen(false)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close more menu"><X className="h-5 w-5" /></button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => { setIsMoreMenuOpen(false); setIsAffordModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
+                <HelpCircle className="h-5 w-5 shrink-0 text-amber-300" />
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Can I afford this?</span><span className="mt-1 block text-[10px] text-slate-400">Check a purchase</span></span>
+              </button>
+              <button onClick={() => { setIsMoreMenuOpen(false); setIsTimeMachineModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
+                <History className="h-5 w-5 shrink-0 text-fuchsia-300" />
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Time machine</span><span className="mt-1 block text-[10px] text-slate-400">Explore scenarios</span></span>
+              </button>
+              {mobileMoreItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return <button key={item.id} onClick={() => navigateMobile(item.id)} className={`relative flex min-h-[72px] items-center gap-3 rounded-2xl border px-3 text-left transition-colors ${isActive ? 'border-cyan-400/50 bg-cyan-400/15 text-white' : 'border-slate-800 bg-slate-950/50 text-slate-200 hover:bg-slate-800'}`}>
+                  <Icon className="h-5 w-5 shrink-0 text-cyan-300" />
+                  <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">{item.label}</span><span className="mt-1 block text-[10px] text-slate-400">{item.caption}</span></span>
+                  {item.badge ? <span className="absolute right-2 top-2 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-emerald-950">{item.badge}</span> : null}
+                </button>;
+              })}
+            </div>
+          </section>
+        </div>
+      )}
+
       <nav className="mobile-tabbar fixed inset-x-2 bottom-2 z-50 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-1.5 py-1.5 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:hidden">
         <div className="grid grid-cols-5 gap-0.5">
-          {navigationItems.slice(0, 5).map((item) => {
+          {mobilePrimaryItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
 
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => navigateMobile(item.id)}
                 className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${
                   isActive ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'
                 }`}
@@ -687,83 +960,79 @@ export const App: React.FC = () => {
                 aria-pressed={isActive}
               >
                 <Icon className="h-[18px] w-[18px]" />
-                <span className="text-[11px] font-semibold leading-none">{item.label.split(' ')[0]}</span>
+                <span className="text-[11px] font-semibold leading-none">{item.id === 'overview' ? 'Home' : item.id === 'goals' ? 'Goals' : item.id === 'smart-guidance' ? 'Plan' : 'Ask AI'}</span>
                 {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
               </button>
             );
           })}
-        </div>
-
-        <div className="mt-1 grid grid-cols-6 gap-0.5">
-          {navigationItems.slice(5).map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg px-0.5 py-2 text-[10px] font-semibold transition-colors ${
-                  isActive ? 'bg-sky-400/20 text-sky-200' : 'text-slate-400 hover:bg-slate-800/80'
-                }`}
-                aria-label={item.label}
-                aria-pressed={isActive}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="w-full truncate text-center leading-none">{item.label.split(' ')[0]}</span>
-                {item.badge ? <span className="absolute right-0.5 top-0.5 rounded-full bg-emerald-400 px-1 py-0.5 text-[8px] font-bold text-emerald-950">{item.badge}</span> : null}
-              </button>
-            );
-          })}
+          <button
+            onClick={() => setIsMoreMenuOpen(true)}
+            className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${!activeMobilePrimary ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'}`}
+            aria-label="More destinations"
+            aria-expanded={isMoreMenuOpen}
+          >
+            <Menu className="h-[18px] w-[18px]" />
+            <span className="text-[11px] font-semibold leading-none">More</span>
+          </button>
         </div>
       </nav>
 
+      <Suspense fallback={null}>
+      {dashboardData && <MetricDetailsModal
+        isOpen={mobileMetricDetails !== null}
+        onClose={() => setMobileMetricDetails(null)}
+        type={mobileMetricDetails}
+        summary={dashboardData.summary}
+        monthlyTrends={dashboardData.monthlyTrends || []}
+        transactions={transactions}
+      />}
       {/* Add / Edit Transaction Modal */}
-      <AddTransactionModal
+      {isModalOpen && <AddTransactionModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setEditingTransaction(null);
         }}
-        onSuccess={() => fetchAllData()}
+        onSuccess={() => undefined}
         accounts={accounts}
         categories={categories}
         transactions={transactions}
         onSubmitTransaction={handleSaveTransaction}
         onOpenDebtModal={() => setIsDebtModalOpen(true)}
         editingTransaction={editingTransaction}
-      />
+      />}
 
       {/* Add Debt / Loan Modal */}
-      <AddDebtModal
+      {isDebtModalOpen && <AddDebtModal
         isOpen={isDebtModalOpen}
         onClose={() => setIsDebtModalOpen(false)}
         onSuccess={() => fetchAllData()}
         accounts={accounts}
-      />
+      />}
 
       {/* Add Subscription Modal */}
-      <AddSubscriptionModal
+      {isSubscriptionModalOpen && <AddSubscriptionModal
         isOpen={isSubscriptionModalOpen}
         onClose={() => setIsSubscriptionModalOpen(false)}
         onSuccess={() => fetchAllData()}
         accounts={accounts}
         categories={categories}
-      />
+      />}
 
       {/* "Can I Afford This?" Affordability Modal */}
-      <CanIAffordThisModal
+      {isAffordModalOpen && <CanIAffordThisModal
         isOpen={isAffordModalOpen}
         onClose={() => setIsAffordModalOpen(false)}
         dashboardData={dashboardData}
-      />
+      />}
 
       {/* Financial Time Machine Future Simulator Modal */}
-      <TimeMachineModal
+      {isTimeMachineModalOpen && <TimeMachineModal
         isOpen={isTimeMachineModalOpen}
         onClose={() => setIsTimeMachineModalOpen(false)}
         dashboardData={dashboardData}
-      />
+      />}
+      </Suspense>
 
       {/* Right-Side Utility Dock (Calculator, Privacy Shield, Daily Cap, Runway, Power BI Hub) */}
       <UtilityDock
@@ -772,8 +1041,45 @@ export const App: React.FC = () => {
         onExportPowerBI={() => exportPowerBIDataset(transactions, dashboardData)}
       />
 
+      {isExportModalOpen && (
+        <ExportPeriodModal
+          transactions={transactions}
+          onClose={() => setIsExportModalOpen(false)}
+          onExportCSV={(selectedTransactions, periodLabel) => {
+            const filenamePeriod = periodLabel.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');
+            exportTransactionsToCSV(selectedTransactions, `FinTrack_Transactions_${filenamePeriod}.csv`);
+          }}
+          onExportPDF={async (selectedTransactions, periodLabel, password) => {
+            if (!currentUser?.username) throw new Error('Your session has expired. Please sign in again.');
+            try {
+              await api.login({ username: currentUser.username, password });
+            } catch (error) {
+              const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || error.message
+                : 'Unable to verify your password.';
+              throw new Error(message);
+            }
+            printPDFReport(selectedTransactions, periodLabel);
+          }}
+          onEmailPDF={async (input) => {
+            try {
+              await api.emailReport(input);
+              addToast(`PDF report sent to ${input.email}`, 'success');
+            } catch (error) {
+              const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || error.message
+                : 'Unable to send the PDF report.';
+              addToast(message, 'error');
+              throw new Error(message);
+            }
+          }}
+        />
+      )}
+
       {/* Global Toast Container */}
       <ToastContainer />
+      {isOnboardingOpen && currentUser && <OnboardingTour userId={currentUser.id} onClose={() => setIsOnboardingOpen(false)} onNavigate={(tab) => { setActiveTab(tab); setIsMoreMenuOpen(false); }} />}
+      {activeFeatureGuide && !isOnboardingOpen && <FeatureGuide feature={activeFeatureGuide} onDismiss={dismissFeatureGuide} />}
     </div>
   );
 };

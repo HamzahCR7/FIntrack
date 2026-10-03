@@ -28,8 +28,8 @@ export class DebtRepository {
     });
   }
 
-  async create(data: Prisma.DebtCreateInput): Promise<Debt> {
-    return this.db.debt.create({ data });
+  async create(data: Omit<Prisma.DebtUncheckedCreateInput, 'userId'>): Promise<Debt> {
+    return this.db.debt.create({ data: data as any });
   }
 
   async update(id: string, data: Prisma.DebtUpdateInput): Promise<Debt> {

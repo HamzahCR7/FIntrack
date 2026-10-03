@@ -21,8 +21,8 @@ export class AnalyticsService {
     let cashBalances = 0;
     let upiBalances = 0;
     let creditOutstanding = 0;
-    let pocketAllowanceBalance = 0;
-    const pocketAccountIds: string[] = [];
+    let digitalWalletBalance = 0;
+    const digitalWalletAccountIds: string[] = [];
 
     const accountBreakdown: Record<string, any[]> = {
       BANK_ACCOUNT: [],
@@ -33,9 +33,9 @@ export class AnalyticsService {
     };
 
     for (const acc of accounts) {
-      if (acc.name === 'Pocket APP ICICI') {
-        pocketAllowanceBalance += acc.currentBalance;
-        pocketAccountIds.push(acc.id);
+      if (acc.type === AccountType.UPI || acc.type === AccountType.AMAZON_PAY) {
+        digitalWalletBalance += acc.currentBalance;
+        digitalWalletAccountIds.push(acc.id);
       }
 
       if (acc.type === AccountType.CREDIT_CARD) {
@@ -61,7 +61,7 @@ export class AnalyticsService {
     const totalLiquidBalance = bankBalances + cashBalances + upiBalances;
 
     // 2. All-Time Aggregates
-    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
+    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, digitalWalletIncomeAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
       this.db.transaction.aggregate({
         _sum: { amount: true },
         where: { type: TransactionType.INCOME },
@@ -88,7 +88,7 @@ export class AnalyticsService {
         _sum: { amount: true },
         where: {
           type: TransactionType.INCOME,
-          destinationAccountId: { in: pocketAccountIds },
+          destinationAccountId: { in: digitalWalletAccountIds },
           transactionDate: { gte: startOfMonth, lte: endOfMonth },
         },
       }),
@@ -139,7 +139,7 @@ export class AnalyticsService {
     const incomeThisMonth = monthIncomeAgg._sum.amount || 0;
     const savingsThisMonth = incomeThisMonth - spendingThisMonth;
 
-    const pocketAllowanceThisMonth = pocketAllowanceAgg._sum.amount || 0;
+    const digitalWalletIncomeThisMonth = digitalWalletIncomeAgg._sum.amount || 0;
 
     const previousMonthIncome = prevMonthIncomeAgg._sum.amount || 0;
     const previousMonthExpenses = prevMonthExpensesAgg._sum.amount || 0;
@@ -254,8 +254,10 @@ export class AnalyticsService {
         previousMonthSavings: Number(previousMonthSavings.toFixed(2)),
         previousMonthIncome: Number(previousMonthIncome.toFixed(2)),
         previousMonthExpenses: Number(previousMonthExpenses.toFixed(2)),
-        pocketAllowanceBalance: Number(pocketAllowanceBalance.toFixed(2)),
-        pocketAllowanceThisMonth: Number(pocketAllowanceThisMonth.toFixed(2)),
+        // Kept as response aliases for compatibility with existing clients.
+        pocketAllowanceBalance: Number(digitalWalletBalance.toFixed(2)),
+        pocketAllowanceThisMonth: Number(digitalWalletIncomeThisMonth.toFixed(2)),
+        digitalWalletCount: digitalWalletAccountIds.length,
       },
       spendingByCategory,
       spendingByPaymentMethod,

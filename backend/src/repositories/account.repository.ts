@@ -18,8 +18,8 @@ export class AccountRepository {
     });
   }
 
-  async create(data: Prisma.AccountCreateInput): Promise<Account> {
-    return this.db.account.create({ data });
+  async create(data: Omit<Prisma.AccountUncheckedCreateInput, 'userId'>): Promise<Account> {
+    return this.db.account.create({ data: data as any });
   }
 
   async update(id: string, data: Prisma.AccountUpdateInput, tx?: Prisma.TransactionClient): Promise<Account> {

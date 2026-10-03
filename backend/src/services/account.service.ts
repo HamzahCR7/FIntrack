@@ -24,6 +24,7 @@ export class AccountService {
       type: dto.type,
       institution: dto.institution,
       currentBalance: dto.initialBalance ?? 0.0,
+      includeInTotalBalance: dto.includeInTotalBalance ?? true,
       creditLimit: dto.creditLimit,
       lastFourDigits: dto.lastFourDigits,
       statementCycleDay: dto.statementCycleDay,
@@ -35,7 +36,8 @@ export class AccountService {
 
   async updateAccount(id: string, dto: UpdateAccountDto): Promise<Account> {
     await this.getAccountById(id);
-    return this.accountRepo.update(id, dto);
+    const { initialBalance: _initialBalance, ...updates } = dto;
+    return this.accountRepo.update(id, updates);
   }
 
   async deleteAccount(id: string): Promise<Account> {

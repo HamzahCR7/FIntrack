@@ -1,6 +1,6 @@
 export type AccountType = 'BANK_ACCOUNT' | 'CREDIT_CARD' | 'CASH' | 'UPI' | 'AMAZON_PAY';
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER';
-export type PaymentMethod = 'BANK_TRANSFER' | 'CREDIT_CARD' | 'CASH' | 'UPI';
+export type PaymentMethod = string;
 export type BillingCycle = 'WEEKLY' | 'EVERY_28_DAYS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
 export type SubscriptionStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
 export type DebtType = 'OWED_TO_ME' | 'I_OWE';
@@ -47,6 +47,7 @@ export interface Account {
   type: AccountType;
   institution?: string;
   currentBalance: number;
+  includeInTotalBalance?: boolean;
   creditLimit?: number;
   lastFourDigits?: string;
   statementCycleDay?: number;
@@ -65,6 +66,7 @@ export interface Category {
   icon?: string;
   color?: string;
   isSystem: boolean;
+  isArchived?: boolean;
   parentId?: string;
   parent?: Category;
   children?: Category[];
@@ -91,6 +93,7 @@ export interface Transaction {
   subcategory?: Category;
   sourceAccount?: Account;
   destinationAccount?: Account;
+  syncStatus?: 'pending';
 }
 
 export interface BudgetSpentTransaction {
@@ -181,6 +184,7 @@ export interface DashboardData {
     previousMonthExpenses?: number;
     pocketAllowanceBalance: number;
     pocketAllowanceThisMonth: number;
+    digitalWalletCount?: number;
   };
   spendingByCategory: Array<{
     id: string;
@@ -242,11 +246,24 @@ export interface SpendForecast {
     points: Array<{
       weekNumber: number;
       weekLabel: string;
+      weekRangeLabel: string;
       spent: number;
       daysCovered: number;
       burnRate: number;
     }>;
   };
+  historicalMonthlyTrends: Array<{
+    monthKey: string;
+    monthLabel: string;
+    points: Array<{
+      weekNumber: number;
+      weekLabel: string;
+      weekRangeLabel: string;
+      spent: number;
+      daysCovered: number;
+      burnRate: number;
+    }>;
+  }>;
   budgetForecasts: Array<{
     budgetId: string;
     budgetName: string;

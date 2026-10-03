@@ -83,7 +83,7 @@ export const SmartGuidancePanel: React.FC<SmartGuidancePanelProps> = ({ dashboar
 
     // 2) Category drift alerts (current month vs previous month)
     const monthCategorySpend: Record<string, Record<string, number>> = {};
-    const monthPocketSpend: Record<string, number> = {};
+    const monthWalletSpend: Record<string, number> = {};
     for (const tx of expenseTransactions) {
       const d = new Date(tx.transactionDate);
       const mKey = toMonthKey(d);
@@ -95,14 +95,11 @@ export const SmartGuidancePanel: React.FC<SmartGuidancePanelProps> = ({ dashboar
     for (const tx of expenseTransactions) {
       const d = new Date(tx.transactionDate);
       const mKey = toMonthKey(d);
-      const sourceAccountName = tx.sourceAccount?.name?.toLowerCase() || '';
-      const destinationAccountName = tx.destinationAccount?.name?.toLowerCase() || '';
-      const sourceIsPocketApp = sourceAccountName.includes('pocket app');
-      const destinationIsPocketApp = destinationAccountName.includes('pocket app');
-      const isPocketAppUsage = sourceIsPocketApp || destinationIsPocketApp;
+      const walletTypes = ['UPI', 'AMAZON_PAY'];
+      const isWalletUsage = walletTypes.includes(tx.sourceAccount?.type || '') || walletTypes.includes(tx.destinationAccount?.type || '');
 
-      if (isPocketAppUsage) {
-        monthPocketSpend[mKey] = (monthPocketSpend[mKey] || 0) + tx.amount;
+      if (isWalletUsage) {
+        monthWalletSpend[mKey] = (monthWalletSpend[mKey] || 0) + tx.amount;
       }
     }
 
@@ -112,11 +109,11 @@ export const SmartGuidancePanel: React.FC<SmartGuidancePanelProps> = ({ dashboar
     const currentCategorySpend = { ...(monthCategorySpend[currentMonthKey] || {}) };
     const previousMonthCategorySpend = { ...(monthCategorySpend[previousMonthKey] || {}) };
 
-    const currentPocketAllowance = monthPocketSpend[currentMonthKey] || 0;
-    const previousPocketAllowance = monthPocketSpend[previousMonthKey] || 0;
-    if (currentPocketAllowance > 0 || previousPocketAllowance > 0) {
-      currentCategorySpend['Pocket Allowance'] = Number(currentPocketAllowance.toFixed(2));
-      previousMonthCategorySpend['Pocket Allowance'] = Number(previousPocketAllowance.toFixed(2));
+    const currentWalletSpend = monthWalletSpend[currentMonthKey] || 0;
+    const previousWalletSpend = monthWalletSpend[previousMonthKey] || 0;
+    if (currentWalletSpend > 0 || previousWalletSpend > 0) {
+      currentCategorySpend['Digital Wallets'] = Number(currentWalletSpend.toFixed(2));
+      previousMonthCategorySpend['Digital Wallets'] = Number(previousWalletSpend.toFixed(2));
     }
     const topCurrentMonthEntry = Object.entries(currentCategorySpend)
       .sort((a, b) => b[1] - a[1])[0];
@@ -152,9 +149,9 @@ export const SmartGuidancePanel: React.FC<SmartGuidancePanelProps> = ({ dashboar
       .sort((a, b) => Math.abs(b.deltaPercent) - Math.abs(a.deltaPercent));
 
     let categoryDrifts: CategoryDrift[] = allCategoryDrifts.slice(0, 5);
-    const pocketDrift = allCategoryDrifts.find((item) => item.categoryName === 'Pocket Allowance');
-    if (pocketDrift && !categoryDrifts.some((item) => item.categoryName === 'Pocket Allowance')) {
-      categoryDrifts = [...categoryDrifts, pocketDrift];
+    const walletDrift = allCategoryDrifts.find((item) => item.categoryName === 'Digital Wallets');
+    if (walletDrift && !categoryDrifts.some((item) => item.categoryName === 'Digital Wallets')) {
+      categoryDrifts = [...categoryDrifts, walletDrift];
     }
 
     const priorityCategoryKeywords = ['rent', 'housing', 'house'];

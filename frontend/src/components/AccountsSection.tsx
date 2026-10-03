@@ -267,8 +267,8 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
           </div>
         </div>
 
-        {/* 4. UPI Wallets */}
-        <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-sm space-y-4">
+        {/* 4. User-configured UPI wallets */}
+        {upiAccounts.length > 0 && <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-sm space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-700/60">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
@@ -307,7 +307,7 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
               })
             )}
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

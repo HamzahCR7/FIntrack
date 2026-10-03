@@ -3,6 +3,7 @@ import { Account, Category, Transaction } from '../types';
 import { X, ArrowUpRight, ArrowDownRight, ArrowRightLeft, HandCoins, ChevronDown, Check } from 'lucide-react';
 import { DatePicker } from './DatePicker';
 import { api } from '../api/client';
+import { DEFAULT_PAYMENT_METHODS, getCustomPaymentMethods, paymentMethodLabel, paymentMethodValue } from '../utils/paymentMethods';
 
 interface FancySelectOption {
   value: string;
@@ -222,6 +223,20 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     };
   }, [frequentTextValues, type]);
 
+  const paymentMethodSuggestions = useMemo(() => {
+    const values = [
+      ...DEFAULT_PAYMENT_METHODS.map(paymentMethodValue),
+      ...getCustomPaymentMethods(),
+      ...transactions.map((transaction) => transaction.paymentMethod),
+    ];
+    return Array.from(new Set(values.filter(Boolean)));
+  }, [transactions, isOpen]);
+  const isCustomPaymentMethod = !paymentMethodSuggestions.includes(paymentMethod);
+  const accountOptions = useMemo(() => accounts.map((account) => ({
+    value: account.id,
+    label: [account.name, account.institution, account.type.replace(/_/g, ' ')].filter(Boolean).join(' · '),
+  })), [accounts]);
+
   useEffect(() => {
     if (isOpen) {
       setError(null);
@@ -304,15 +319,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const handleDestinationAccountChange = (accountId: string) => {
     setDestinationAccountId(accountId);
-
-    if (type === 'INCOME') {
-      const selectedAccount = accounts.find((account) => account.id === accountId);
-      const allowanceCategory = categories.find((category) => category.name === 'Pocket Allowance');
-
-      if (selectedAccount?.name === 'Pocket APP ICICI' && allowanceCategory) {
-        setCategoryId(allowanceCategory.id);
-      }
-    }
   };
 
   const mainCategories = useMemo(() => {
@@ -372,6 +378,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
       setError('Please enter a valid positive amount.');
+      return;
+    }
+
+    if (!paymentMethod.trim()) {
+      setError('Please select or enter a Payment Method.');
       return;
     }
 
@@ -739,7 +750,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <FancySelect
                 value={sourceAccountId}
                 placeholder="Select Source Account"
-                options={accounts.map((account) => ({ value: account.id, label: `${account.name} (${account.type})` }))}
+                options={accountOptions}
                 onChange={setSourceAccountId}
               />
               {accounts.length === 0 && (
@@ -757,7 +768,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <FancySelect
                 value={destinationAccountId}
                 placeholder="Select Destination Account"
-                options={accounts.map((account) => ({ value: account.id, label: `${account.name} (${account.type})` }))}
+                options={accountOptions}
                 onChange={handleDestinationAccountChange}
               />
               {accounts.length === 0 && (
@@ -770,17 +781,26 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           <div>
             <label className="text-slate-300 font-semibold block mb-1">Payment Method</label>
             <FancySelect
-              value={paymentMethod}
+              value={isCustomPaymentMethod ? '__CUSTOM__' : paymentMethod}
               placeholder="Select Payment Method"
               defaultValue="BANK_TRANSFER"
               options={[
-                { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-                { value: 'CREDIT_CARD', label: 'Credit Card' },
-                { value: 'CASH', label: 'Cash' },
-                { value: 'UPI', label: 'UPI' },
+                ...paymentMethodSuggestions.map((method) => ({ value: method, label: paymentMethodLabel(method) })),
+                { value: '__CUSTOM__', label: 'Custom method…' },
               ]}
-              onChange={setPaymentMethod}
+              onChange={(value) => setPaymentMethod(value === '__CUSTOM__' ? '' : value)}
             />
+            {isCustomPaymentMethod && (
+              <FancyInput
+                type="text"
+                autoFocus
+                value={paymentMethodLabel(paymentMethod)}
+                placeholder="e.g. Visa debit, Apple Pay, Cheque"
+                onChange={(event) => setPaymentMethod(paymentMethodValue(event.target.value))}
+                className="mt-2 p-2.5 text-xs"
+              />
+            )}
+            <p className="mt-1 text-[10px] text-slate-500">Choose a saved method or select Custom method to create one.</p>
           </div>
 
           {/* Merchant & Description */}

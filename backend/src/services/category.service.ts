@@ -40,4 +40,18 @@ export class CategoryService {
       isSystem: false,
     });
   }
+
+  async updateCategory(id: string, dto: Partial<CreateCategoryDto>): Promise<Category> {
+    await this.getCategoryById(id);
+    if (dto.name) {
+      const duplicate = await this.categoryRepo.findByName(dto.name);
+      if (duplicate && duplicate.id !== id) throw new BadRequestError(`Category with name '${dto.name}' already exists`);
+    }
+    return this.categoryRepo.update(id, dto);
+  }
+
+  async archiveCategory(id: string): Promise<Category> {
+    await this.getCategoryById(id);
+    return this.categoryRepo.archive(id);
+  }
 }

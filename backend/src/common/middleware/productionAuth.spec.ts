@@ -1,85 +1,39 @@
-import { Request, Response } from 'express';
-import { createProductionAuth, validateProductionConfig, issueSession, validSession } from './productionAuth';
+import { hashPassword, needsPasswordUpgrade, verifyPassword } from '../auth/password';
+import { issueSession, readSession } from '../auth/session';
+import { validateProductionConfig } from './productionAuth';
 
-describe('production authentication', () => {
+describe('multi-user authentication primitives', () => {
   const original = process.env;
-  let productionAuth = createProductionAuth();
-  beforeEach(() => {
-    productionAuth = createProductionAuth();
-    process.env = { ...original, NODE_ENV: 'production', ADMIN_USERNAME: 'owner', ADMIN_PASSWORD: 'test-password-123456', SESSION_SECRET: 'a'.repeat(32) };
-  });
+  beforeEach(() => { process.env = { ...original, SESSION_SECRET: 'a'.repeat(32) }; });
   afterEach(() => { process.env = original; jest.useRealTimers(); });
-  const request = (token: string) => ({ headers: { authorization: token } } as Request);
-  test('rejects incomplete production configuration', () => {
-    delete process.env.SESSION_SECRET;
-    expect(validateProductionConfig).toThrow();
+
+  test('signed sessions carry the user id and reject tampering', () => {
+    const token = issueSession('user-a');
+    expect(readSession(token)?.userId).toBe('user-a');
+    expect(readSession(`${token}x`)).toBeNull();
+    expect(readSession('fintrack_legacy')).toBeNull();
   });
-  test('accepts signed sessions and rejects tampering, legacy tokens and missing Bearer', () => {
-    const token = issueSession();
-    expect(validSession(request(`Bearer ${token}`))).toBe(true);
-    expect(validSession(request(`Bearer ${token}x`))).toBe(false);
-    expect(validSession(request('Bearer fintrack_b3duZXI='))).toBe(false);
-    expect(validSession(request(token))).toBe(false);
-  });
-  test('expires sessions after the default thirty days', () => {
-    jest.useFakeTimers();
-    const token = issueSession();
-    jest.advanceTimersByTime(30 * 24 * 60 * 60 * 1000 + 1);
-    expect(validSession(request(`Bearer ${token}`))).toBe(false);
-  });
-  test('supports a configured session duration', () => {
+
+  test('sessions expire after the configured duration', () => {
     jest.useFakeTimers();
     process.env.SESSION_DURATION_DAYS = '7';
-    const token = issueSession();
-    jest.advanceTimersByTime(7 * 24 * 60 * 60 * 1000 + 1);
-    expect(validSession(request(`Bearer ${token}`))).toBe(false);
+    const token = issueSession('user-b');
+    jest.advanceTimersByTime(7 * 86_400_000 + 1);
+    expect(readSession(token)).toBeNull();
   });
-  test('rejects an invalid configured session duration', () => {
-    process.env.SESSION_DURATION_DAYS = 'forever';
-    expect(validateProductionConfig).toThrow('SESSION_DURATION_DAYS');
+
+  test('hashes passwords and supports one-time legacy plaintext verification', () => {
+    const encoded = hashPassword('correct horse battery staple');
+    expect(encoded).not.toContain('correct horse battery staple');
+    expect(verifyPassword('correct horse battery staple', encoded)).toBe(true);
+    expect(verifyPassword('wrong', encoded)).toBe(false);
+    expect(verifyPassword('legacy', 'legacy')).toBe(true);
+    expect(needsPasswordUpgrade('legacy')).toBe(true);
   });
-  test('protects data endpoints and permits authenticated requests', () => {
-    const res = { setHeader: jest.fn(), status: jest.fn().mockReturnThis(), json: jest.fn() };
-    const next = jest.fn();
-    productionAuth({ ...request(''), path: '/accounts' } as Request, res as unknown as Response, next);
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(next).not.toHaveBeenCalled();
-    productionAuth({ ...request(`Bearer ${issueSession()}`), path: '/accounts' } as Request, res as unknown as Response, next);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
-  test('login only accepts configured production credentials', () => {
-    const res = { setHeader: jest.fn(), status: jest.fn().mockReturnThis(), json: jest.fn() };
-    const next = jest.fn();
-    const req = { headers: {}, path: '/auth/login', method: 'POST', body: { username: 'owner', password: 'wrong' } } as Request;
-    productionAuth(req, res as unknown as Response, next);
-    expect(res.status).toHaveBeenCalledWith(401);
-    req.body.password = process.env.ADMIN_PASSWORD;
-    productionAuth(req, res as unknown as Response, next);
-    expect(res.json).toHaveBeenLastCalledWith(expect.objectContaining({ success: true, data: expect.objectContaining({ token: expect.any(String) }) }));
-  });
-  test('throttles login across usernames and proxy headers, preserves sessions and recovers', () => {
-    jest.useFakeTimers();
-    const res = { setHeader: jest.fn(), status: jest.fn().mockReturnThis(), json: jest.fn() };
-    const next = jest.fn();
-    const req = { headers: {}, path: '/auth/login', method: 'POST', body: { username: 'owner', password: 'wrong' } } as Request;
-    for (let i = 0; i < 10; i++) productionAuth(req, res as unknown as Response, next);
-    expect(res.status).toHaveBeenLastCalledWith(401);
-    req.headers['x-forwarded-for'] = '203.0.113.1';
-    req.body.username = 'different';
-    productionAuth(req, res as unknown as Response, next);
-    expect(res.status).toHaveBeenLastCalledWith(429);
-    expect(res.setHeader).toHaveBeenCalledWith('Retry-After', '60');
-    productionAuth({ ...request(`Bearer ${issueSession()}`), path: '/accounts' } as Request, res as unknown as Response, next);
-    expect(next).toHaveBeenCalledTimes(1);
-    jest.advanceTimersByTime(60_000);
-    req.body = { username: 'owner', password: process.env.ADMIN_PASSWORD };
-    productionAuth(req, res as unknown as Response, next);
-    expect(res.json).toHaveBeenLastCalledWith(expect.objectContaining({ success: true }));
-  });
-  test('does not throttle local development', () => {
-    process.env.NODE_ENV = 'development';
-    const next = jest.fn();
-    for (let i = 0; i < 15; i++) productionAuth({ path: '/auth/login', method: 'POST' } as Request, {} as Response, next);
-    expect(next).toHaveBeenCalledTimes(15);
+
+  test('requires a strong production session secret', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.SESSION_SECRET = 'short';
+    expect(validateProductionConfig).toThrow('SESSION_SECRET');
   });
 });

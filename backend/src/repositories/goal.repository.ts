@@ -47,8 +47,8 @@ export class GoalRepository {
     });
   }
 
-  async create(data: Prisma.GoalCreateInput): Promise<Goal> {
-    return this.db.goal.create({ data });
+  async create(data: Omit<Prisma.GoalUncheckedCreateInput, 'userId'>): Promise<Goal> {
+    return this.db.goal.create({ data: data as any });
   }
 
   async update(id: string, data: Prisma.GoalUpdateInput): Promise<Goal> {

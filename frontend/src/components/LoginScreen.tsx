@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Wallet, Lock, User, Eye, EyeOff, LogIn } from 'lucide-react';
 import { api } from '../api/client';
 
@@ -13,6 +13,45 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    // Start a cold backend before the user submits the form. Failure is harmless;
+    // the real login request will still surface a useful error.
+    void api.warmUp().catch(() => undefined);
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+    const initialize = () => {
+      const google = (window as any).google;
+      if (!google?.accounts?.id) return;
+      google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async ({ credential }: { credential: string }) => {
+          try {
+            setError(null);
+            setIsLoading(true);
+            const res = await api.googleLogin(credential);
+            localStorage.setItem('fintrack_auth_token', res.token);
+            localStorage.setItem('fintrack_user', JSON.stringify(res.user));
+            onLoginSuccess(res.user);
+          } catch (err: any) {
+            setError(err.response?.data?.message || 'Google sign-in failed.');
+            setIsLoading(false);
+          }
+        },
+      });
+      const target = document.getElementById('google-sign-in');
+      if (target) google.accounts.id.renderButton(target, { theme: 'filled_black', size: 'large', width: 352, text: 'continue_with' });
+    };
+    const existing = document.querySelector<HTMLScriptElement>('script[data-fintrack-google]');
+    if (existing) { initialize(); return; }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.dataset.fintrackGoogle = 'true';
+    script.onload = initialize;
+    document.head.appendChild(script);
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -24,6 +63,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
     try {
       setIsLoading(true);
+      console.log('FinTrack Login target:', (window as any).location?.origin || 'native-app', 'resolved API base:', (import.meta as any).env?.VITE_API_URL || 'fallback');
       const res = await api.login({ username, password });
       localStorage.setItem('fintrack_auth_token', res.token);
       localStorage.setItem('fintrack_user', JSON.stringify(res.user));
@@ -66,7 +106,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             {error && (
-              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 font-medium text-xs text-center animate-in fade-in duration-200">
+              <div className="p-3.5 rounded-2xl bg-rose-500/20 border border-rose-500/40 text-rose-400 font-medium text-xs text-center animate-in fade-in duration-200">
                 {error}
               </div>
             )}
@@ -117,7 +157,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs shadow-lg shadow-blue-600/30 transition-all transform active:scale-98 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Opening your dashboard…</span>
+                </>
               ) : (
                 <>
                   <LogIn className="w-4 h-4" />
@@ -126,6 +169,13 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
               )}
             </button>
           </form>
+          {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 text-[11px] text-slate-500"><span className="h-px flex-1 bg-slate-800" /><span>or</span><span className="h-px flex-1 bg-slate-800" /></div>
+              <div id="google-sign-in" className="flex justify-center min-h-[44px]" />
+              <p className="text-center text-[11px] text-slate-500">New users receive a private, separate workspace.</p>
+            </div>
+          )}
         </div>
 
         {/* Footer */}

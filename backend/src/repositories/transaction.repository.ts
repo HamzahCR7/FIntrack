@@ -76,10 +76,10 @@ export class TransactionRepository {
     });
   }
 
-  async create(data: Prisma.TransactionCreateInput, tx?: Prisma.TransactionClient): Promise<Transaction> {
+  async create(data: Omit<Prisma.TransactionCreateInput, 'user'>, tx?: Prisma.TransactionClient): Promise<Transaction> {
     const client = tx || this.db;
     return client.transaction.create({
-      data,
+      data: data as any,
       include: {
         category: true,
         subcategory: true,

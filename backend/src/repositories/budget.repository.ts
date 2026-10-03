@@ -38,9 +38,9 @@ export class BudgetRepository {
     });
   }
 
-  async create(data: Prisma.BudgetCreateInput): Promise<Budget> {
+  async create(data: Omit<Prisma.BudgetUncheckedCreateInput, 'userId'>): Promise<Budget> {
     return this.db.budget.create({
-      data,
+      data: data as any,
       include: { category: true },
     });
   }

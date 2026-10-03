@@ -1,15 +1,18 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/common/auth/password";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  let owner = await prisma.user.findUnique({ where: { username: "Hamzah" } });
+  if (!owner) owner = await prisma.user.create({ data: { username: "Hamzah", password: hashPassword(process.env.ADMIN_PASSWORD || "Hamzah987"), name: "Hamzah" } });
   console.log("Seeding database categories...");
 
   const legacyFruitsCategory = await prisma.category.findUnique({
-    where: { name: "Food & Dining > Fruits" },
+    where: { userId_name: { userId: owner.id, name: "Food & Dining > Fruits" } },
   });
   const fruitsCategory = await prisma.category.findUnique({
-    where: { name: "Fruits" },
+    where: { userId_name: { userId: owner.id, name: "Fruits" } },
   });
   if (legacyFruitsCategory && !fruitsCategory) {
     await prisma.category.update({
@@ -19,10 +22,10 @@ async function main() {
   }
 
   const legacyMetroBusCategory = await prisma.category.findUnique({
-    where: { name: "Transport > Metro / Bus" },
+    where: { userId_name: { userId: owner.id, name: "Transport > Metro / Bus" } },
   });
   const busCategory = await prisma.category.findUnique({
-    where: { name: "Transport > Bus" },
+    where: { userId_name: { userId: owner.id, name: "Transport > Bus" } },
   });
   if (legacyMetroBusCategory && !busCategory) {
     await prisma.category.update({
@@ -86,9 +89,9 @@ async function main() {
 
   for (const cat of systemCategories) {
     await prisma.category.upsert({
-      where: { name: cat.name },
+      where: { userId_name: { userId: owner.id, name: cat.name } },
       update: {},
-      create: cat,
+      create: { ...cat, userId: owner.id },
     });
   }
 
@@ -274,14 +277,14 @@ async function main() {
   ];
 
   for (const subcategory of subcategories) {
-    const parent = await prisma.category.findUnique({ where: { name: subcategory.parentName } });
+    const parent = await prisma.category.findUnique({ where: { userId_name: { userId: owner.id, name: subcategory.parentName } } });
     if (!parent) continue;
     const { parentName, ...categoryData } = subcategory;
 
     await prisma.category.upsert({
-      where: { name: categoryData.name },
+      where: { userId_name: { userId: owner.id, name: categoryData.name } },
       update: { parentId: parent.id },
-      create: { ...categoryData, parentId: parent.id, isSystem: true },
+      create: { ...categoryData, parentId: parent.id, isSystem: true, userId: owner.id },
     });
   }
 
@@ -337,35 +340,16 @@ async function main() {
 
   for (const acc of defaultAccounts) {
     const existing = await prisma.account.findFirst({
-      where: { name: acc.name },
+      where: { name: acc.name, userId: owner.id },
     });
     if (!existing) {
-      await prisma.account.create({ data: acc });
+      await prisma.account.create({ data: { ...acc, userId: owner.id } });
     } else if (acc.name === "Pocket APP ICICI") {
       await prisma.account.update({
         where: { id: existing.id },
         data: { includeInTotalBalance: false },
       });
     }
-  }
-
-  console.log("Seeding default user...");
-  const existingUser = await prisma.user.findFirst({
-    where: { username: "Hamzah" },
-  });
-  if (!existingUser) {
-    await prisma.user.create({
-      data: {
-        username: "Hamzah",
-        password: "Hamzah987",
-        name: "Hamzah",
-      },
-    });
-  } else {
-    await prisma.user.update({
-      where: { id: existingUser.id },
-      data: { password: "Hamzah987", name: "Hamzah" },
-    });
   }
 
   console.log("Database seeded successfully.");

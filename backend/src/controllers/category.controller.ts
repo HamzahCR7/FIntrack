@@ -15,6 +15,8 @@ export class CategoryController {
     this.router.get('/', this.getAllCategories);
     this.router.get('/:id', this.getCategoryById);
     this.router.post('/', validateBody(CreateCategorySchema), this.createCategory);
+    this.router.patch('/:id', this.updateCategory);
+    this.router.delete('/:id', this.archiveCategory);
   }
 
   private getAllCategories = async (_req: Request, res: Response, next: NextFunction) => {
@@ -42,5 +44,19 @@ export class CategoryController {
     } catch (err) {
       next(err);
     }
+  };
+
+  private updateCategory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const category = await this.categoryService.updateCategory(req.params.id, req.body);
+      res.status(200).json({ status: 'success', data: category });
+    } catch (err) { next(err); }
+  };
+
+  private archiveCategory = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const category = await this.categoryService.archiveCategory(req.params.id);
+      res.status(200).json({ status: 'success', data: category });
+    } catch (err) { next(err); }
   };
 }

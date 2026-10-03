@@ -8,6 +8,7 @@ export const CreateAccountSchema = z.object({
   }),
   institution: z.string().optional(),
   initialBalance: z.number().optional().default(0.0),
+  includeInTotalBalance: z.boolean().optional().default(true),
   creditLimit: z.number().optional(),
   lastFourDigits: z.string().length(4).optional(),
   statementCycleDay: z.number().min(1).max(31).optional(),

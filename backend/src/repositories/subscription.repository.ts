@@ -49,10 +49,10 @@ export class SubscriptionRepository {
     });
   }
 
-  async create(data: Prisma.SubscriptionCreateInput, tx?: Prisma.TransactionClient): Promise<Subscription> {
+  async create(data: Omit<Prisma.SubscriptionCreateInput, 'user'>, tx?: Prisma.TransactionClient): Promise<Subscription> {
     const client = tx || this.db;
     return client.subscription.create({
-      data,
+      data: data as any,
       include: {
         sourceAccount: true,
         category: true,

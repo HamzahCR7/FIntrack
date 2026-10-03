@@ -33,7 +33,7 @@ export class QuickItemController {
           category: req.body.category || null,
           priority: req.body.priority || 'NORMAL',
           dueDate: req.body.dueDate ? new Date(req.body.dueDate) : null,
-        },
+        } as any,
       });
       res.status(201).json({ status: 'success', data: item });
     } catch (err) {

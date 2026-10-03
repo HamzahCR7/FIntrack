@@ -19,6 +19,7 @@ import { BudgetController } from './controllers/budget.controller';
 import { GoalController } from './controllers/goal.controller';
 import { ReceiptController } from './controllers/receipt.controller';
 import { errorHandler } from './common/middleware/errorHandler';
+import { userContext } from './common/auth/requestContext';
 
 export function createApp(): Application {
   validateProductionConfig();
@@ -33,6 +34,7 @@ export function createApp(): Application {
   });
 
   app.use('/api/v1', createProductionAuth());
+  app.use('/api/v1', userContext);
 
   // API V1 Routes
   const accountController = new AccountController();

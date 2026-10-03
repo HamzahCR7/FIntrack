@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { TransactionType, PaymentMethod } from '../types/enums';
+import { TransactionType } from '../types/enums';
 
 export const CreateTransactionSchema = z
   .object({
@@ -12,9 +12,7 @@ export const CreateTransactionSchema = z
     subcategoryId: z.string().optional(),
     sourceAccountId: z.string().optional(),
     destinationAccountId: z.string().optional(),
-    paymentMethod: z.nativeEnum(PaymentMethod, {
-      errorMap: () => ({ message: 'Invalid payment method' }),
-    }),
+    paymentMethod: z.string().trim().min(1, 'Payment method is required').max(60, 'Payment method is too long'),
     merchant: z.string().optional(),
     description: z.string().optional(),
     itemTag: z.string().optional(),
@@ -78,7 +76,7 @@ export const QueryTransactionSchema = z.object({
   categoryId: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-  paymentMethod: z.nativeEnum(PaymentMethod).optional(),
+  paymentMethod: z.string().trim().min(1).max(60).optional(),
 });
 
 export type CreateTransactionDto = z.output<typeof CreateTransactionSchema>;
