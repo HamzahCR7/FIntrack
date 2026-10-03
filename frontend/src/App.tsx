@@ -5,6 +5,7 @@ import { UtilityDock } from './components/UtilityDock';
 import { LoginScreen } from './components/LoginScreen';
 import { AccordionSection } from './components/AccordionSection';
 import { ToastContainer } from './components/ToastContainer';
+import ExportPeriodModal from './components/ExportPeriodModal';
 import { useToast } from './utils/toastStore';
 import {
   createOutboxId,
@@ -77,6 +78,7 @@ export const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(!cachedAppData);
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
   const [isDebtModalOpen, setIsDebtModalOpen] = useState<boolean>(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
   const [isAffordModalOpen, setIsAffordModalOpen] = useState<boolean>(false);
@@ -377,8 +379,8 @@ export const App: React.FC = () => {
         onAddTransaction={() => handleOpenAddModal()}
         onAddDebt={() => setIsDebtModalOpen(true)}
         onRefresh={() => fetchAllData()}
-        onExportCSV={() => exportTransactionsToCSV(transactions)}
-        onExportPDF={() => dashboardData && printPDFReport(dashboardData, transactions)}
+        onExportCSV={() => setIsExportModalOpen(true)}
+        onExportPDF={() => setIsExportModalOpen(true)}
         onExportPowerBI={() => exportPowerBIDataset(transactions, dashboardData)}
         onLogout={handleLogout}
         currentUser={currentUser}
@@ -620,7 +622,8 @@ export const App: React.FC = () => {
                   onFilterChange={handleFilterChange}
                   onEditTransaction={(tx) => handleOpenAddModal(tx)}
                   onDeleteTransaction={handleDeleteTransaction}
-                  onExportPDF={() => dashboardData && printPDFReport(dashboardData, transactions)}
+                  onExportCSV={() => setIsExportModalOpen(true)}
+                  onExportPDF={() => setIsExportModalOpen(true)}
                 />
               </AccordionSection>
             )}
@@ -830,6 +833,30 @@ export const App: React.FC = () => {
         categories={categories}
         onExportPowerBI={() => exportPowerBIDataset(transactions, dashboardData)}
       />
+
+      {isExportModalOpen && (
+        <ExportPeriodModal
+          transactions={transactions}
+          onClose={() => setIsExportModalOpen(false)}
+          onExportCSV={(selectedTransactions, periodLabel) => {
+            const filenamePeriod = periodLabel.replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');
+            exportTransactionsToCSV(selectedTransactions, `FinTrack_Transactions_${filenamePeriod}.csv`);
+          }}
+          onExportPDF={(selectedTransactions, periodLabel) => printPDFReport(selectedTransactions, periodLabel)}
+          onEmailPDF={async (input) => {
+            try {
+              await api.emailReport(input);
+              addToast(`PDF report sent to ${input.email}`, 'success');
+            } catch (error) {
+              const message = axios.isAxiosError(error)
+                ? error.response?.data?.message || error.message
+                : 'Unable to send the PDF report.';
+              addToast(message, 'error');
+              throw new Error(message);
+            }
+          }}
+        />
+      )}
 
       {/* Global Toast Container */}
       <ToastContainer />

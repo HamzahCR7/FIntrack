@@ -7,7 +7,6 @@ import { usePrivacyMode } from '../utils/privacyStore';
 import { useToast } from '../utils/toastStore';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Search, Filter, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Calendar, Tag, CreditCard, X, Pencil, Trash2, Download, Printer, ChevronLeft, ChevronRight, ChevronDown, Check, Clock, Loader } from 'lucide-react';
-import { exportTransactionsToCSV } from '../utils/exportUtils';
 import { matchesLedgerSearch } from '../utils/ledgerSearch';
 
 interface FancySelectOption {
@@ -144,6 +143,7 @@ interface TransactionsSectionProps {
   onFilterChange: (filters: any) => void;
   onEditTransaction?: (transaction: Transaction) => void;
   onDeleteTransaction?: (id: string) => void;
+  onExportCSV?: () => void;
   onExportPDF?: () => void;
 }
 
@@ -159,6 +159,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   onFilterChange,
   onEditTransaction,
   onDeleteTransaction,
+  onExportCSV,
   onExportPDF,
 }) => {
   usePrivacyMode();
@@ -423,9 +424,10 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
 
           {/* CSV Export Button */}
           <button
-            onClick={() => exportTransactionsToCSV(filteredTransactions)}
+            onClick={onExportCSV}
+            disabled={!onExportCSV}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 text-xs font-semibold transition-colors"
-            title="Export currently filtered transactions to CSV file"
+            title="Choose a period and export transactions to CSV"
           >
             <Download className="w-3.5 h-3.5 text-blue-400" />
             <span>Export CSV</span>

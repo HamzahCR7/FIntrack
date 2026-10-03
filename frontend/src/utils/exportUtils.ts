@@ -125,8 +125,11 @@ export const exportPowerBIDataset = (transactions: Transaction[], dashboardData?
 };
 
 // Generate & Print Printable PDF Financial Summary Report
-export const printPDFReport = (dashboardData: DashboardData, transactions: Transaction[]) => {
-  if (!dashboardData) return;
+export const printPDFReport = (transactions: Transaction[], periodLabel = 'All transactions') => {
+  if (!transactions.length) {
+    alert('No transactions available to export.');
+    return;
+  }
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -140,24 +143,36 @@ export const printPDFReport = (dashboardData: DashboardData, transactions: Trans
     year: 'numeric',
   });
 
-  const categoryRows = (dashboardData.spendingByCategory || [])
-    .map(
-      (cat) => `
+  const totalIncome = transactions
+    .filter((transaction) => transaction.type === 'INCOME')
+    .reduce((total, transaction) => total + Number(transaction.amount), 0);
+  const totalExpenses = transactions
+    .filter((transaction) => transaction.type === 'EXPENSE')
+    .reduce((total, transaction) => total + Number(transaction.amount), 0);
+  const categoryTotals = transactions.reduce((totals, transaction) => {
+    if (transaction.type !== 'EXPENSE') return totals;
+    const name = transaction.category?.name || 'Unassigned';
+    totals.set(name, (totals.get(name) || 0) + Number(transaction.amount));
+    return totals;
+  }, new Map<string, number>());
+  const categoryRows = Array.from(categoryTotals.entries())
+    .sort((first, second) => second[1] - first[1])
+    .map(([name, amount]) => `
       <tr>
-        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${cat.name}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">${formatCurrency(cat.amount)}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">${cat.percentage}%</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${name}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">${formatCurrency(amount)}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right;">${totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(1) : 0}%</td>
       </tr>
-    `
-    )
+    `)
     .join('');
 
-  const recentTxRows = (transactions || []).slice(0, 15)
+  const recentTxRows = transactions
     .map(
       (tx) => `
       <tr>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${new Date(tx.transactionDate).toLocaleDateString('en-IN')}</td>
-        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${tx.merchant || tx.description || 'Transaction'}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${tx.merchant || '—'}</td>
+        <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${tx.description || '—'}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${tx.type}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${tx.category?.name || '—'}</td>
         <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: bold; color: ${
@@ -172,7 +187,7 @@ export const printPDFReport = (dashboardData: DashboardData, transactions: Trans
     <!DOCTYPE html>
     <html>
       <head>
-        <title>FinTrack Financial Summary Report - ${dateStr}</title>
+        <title>FinTrack Financial Summary Report - ${periodLabel}</title>
         <style>
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b; padding: 30px; line-height: 1.5; }
           .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 15px; margin-bottom: 25px; }
@@ -202,27 +217,27 @@ export const printPDFReport = (dashboardData: DashboardData, transactions: Trans
         <div class="header">
           <div class="logo">Fin<span>Track</span> Ledger Report</div>
           <div style="text-align: right; font-size: 12px; color: #64748b;">
+            <div><strong>Period:</strong> ${periodLabel}</div>
             <div><strong>Generated:</strong> ${dateStr}</div>
-            <div>Phase 4 Financial Statement</div>
           </div>
         </div>
 
-        <div class="summary-grid">
+        <p style="margin: -10px 0 24px; color: #64748b; font-size: 12px; max-width: 760px;">
+          A clear overview of your income, spending, net position, and transaction activity for the selected period. Use this report to review your financial progress and make informed decisions.
+        </p>
+
+        <div class="summary-grid" style="grid-template-columns: repeat(3, 1fr);">
           <div class="card">
-            <div class="card-title">Total Balance</div>
-            <div class="card-val" style="color: #3b82f6;">${formatCurrency(dashboardData.summary.totalBalance)}</div>
+            <div class="card-title">Income in Period</div>
+            <div class="card-val" style="color: #10b981;">${formatCurrency(totalIncome)}</div>
           </div>
           <div class="card">
-            <div class="card-title">Total Income</div>
-            <div class="card-val" style="color: #10b981;">${formatCurrency(dashboardData.summary.totalIncome)}</div>
+            <div class="card-title">Expenses in Period</div>
+            <div class="card-val" style="color: #f43f5e;">${formatCurrency(totalExpenses)}</div>
           </div>
           <div class="card">
-            <div class="card-title">Total Expenses</div>
-            <div class="card-val" style="color: #f43f5e;">${formatCurrency(dashboardData.summary.totalExpenses)}</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Net Savings</div>
-            <div class="card-val" style="color: #06b6d4;">${formatCurrency(dashboardData.summary.savings)}</div>
+            <div class="card-title">Net in Period</div>
+            <div class="card-val" style="color: #06b6d4;">${formatCurrency(totalIncome - totalExpenses)}</div>
           </div>
         </div>
 
@@ -240,19 +255,20 @@ export const printPDFReport = (dashboardData: DashboardData, transactions: Trans
           </tbody>
         </table>
 
-        <div class="section-title">Recent Ledger Transactions</div>
+        <div class="section-title">Ledger Transactions (${transactions.length})</div>
         <table>
           <thead>
             <tr>
               <th>Date</th>
               <th>Merchant / Payee</th>
+              <th>Description</th>
               <th>Type</th>
               <th>Category</th>
               <th style="text-align: right;">Amount</th>
             </tr>
           </thead>
           <tbody>
-            ${recentTxRows || '<tr><td colSpan="5">No transactions recorded.</td></tr>'}
+            ${recentTxRows || '<tr><td colSpan="6">No transactions recorded.</td></tr>'}
           </tbody>
         </table>
 

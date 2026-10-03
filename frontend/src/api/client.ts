@@ -58,6 +58,22 @@ export const api = {
     return res.data.data;
   },
 
+  getReportSettings: async (): Promise<{ recipientEmail: string | null; monthlyReportsEnabled: boolean }> => {
+    const res = await apiClient.get(`${API_BASE}/reports/settings`);
+    return res.data.data;
+  },
+
+  emailReport: async (data: {
+    email: string;
+    startDate: string;
+    endDate: string;
+    periodLabel: string;
+    enableMonthly: boolean;
+  }) => {
+    const res = await apiClient.post(`${API_BASE}/reports/email`, data);
+    return res.data.data;
+  },
+
   // Quick notes, todos, and reminders
   getQuickItems: async (): Promise<QuickItem[]> => {
     const res = await apiClient.get(`${API_BASE}/quick-items`);
