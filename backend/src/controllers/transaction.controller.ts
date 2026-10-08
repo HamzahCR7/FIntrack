@@ -89,7 +89,7 @@ export class TransactionController {
   private deleteTransaction = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const transaction = await this.transactionService.deleteTransaction(req.params.id);
-      res.status(200).json({ status: 'success', message: 'Transaction deleted and account balances reverted', data: transaction });
+      res.status(200).json({ status: 'success', message: 'Transaction deleted, account balances reverted, and any recurring due date restored', data: transaction });
     } catch (err) {
       next(err);
     }

@@ -5,7 +5,7 @@ import { AccountRepository } from '../repositories/account.repository';
 import { CategoryRepository } from '../repositories/category.repository';
 import { CreateTransactionDto, CreateTransactionInputDto, CreateTransactionSchema, QueryTransactionDto } from '../dtos/transaction.dto';
 import { BadRequestError, NotFoundError } from '../common/errors';
-import { TransactionType, AccountType } from '../types/enums';
+import { TransactionType, AccountType, SubscriptionStatus } from '../types/enums';
 
 export class TransactionService {
   private readonly prismaTransactionOptions = {
@@ -243,6 +243,17 @@ export class TransactionService {
 
       if (destinationAccount && destDelta !== 0) {
         await this.accountRepo.updateBalance(destinationAccount.id, -destDelta, tx);
+      }
+
+      // Deleting a recorded recurring payment reopens that billing cycle everywhere.
+      if (transaction.isSubscription && transaction.subscriptionId) {
+        await tx.subscription.update({
+          where: { id: transaction.subscriptionId },
+          data: {
+            nextBillingDate: transaction.transactionDate,
+            status: SubscriptionStatus.ACTIVE,
+          },
+        });
       }
 
       return this.transactionRepo.delete(id, tx);
