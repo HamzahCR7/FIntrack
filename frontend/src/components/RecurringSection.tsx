@@ -5,6 +5,15 @@ import { usePrivacyMode } from '../utils/privacyStore';
 import { Calendar, Repeat, Plus, Play, X } from 'lucide-react';
 import axios from 'axios';
 import { api } from '../api/client';
+import { DatePicker } from './DatePicker';
+
+const toDateInputValue = (value: string) => {
+  const date = new Date(value);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 interface RecurringSectionProps {
   recurring: {
@@ -22,6 +31,7 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
   usePrivacyMode();
   const [paymentSubscription, setPaymentSubscription] = useState<Subscription | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentBillingDate, setPaymentBillingDate] = useState('');
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const recurringLoans = debts.filter((debt) => debt.recordKind === 'LOAN' && debt.type === 'I_OWE' && debt.status !== 'SETTLED');
@@ -29,6 +39,7 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
   const openPayment = (subscription: Subscription) => {
     setPaymentSubscription(subscription);
     setPaymentAmount(subscription.amount.toString());
+    setPaymentBillingDate(toDateInputValue(subscription.nextBillingDate));
     setPaymentError(null);
   };
 
@@ -41,12 +52,20 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
       setPaymentError('Please enter a valid positive amount.');
       return;
     }
+    if (!paymentBillingDate) {
+      setPaymentError('Please select the billing date.');
+      return;
+    }
 
     try {
       setIsProcessingPayment(true);
       setPaymentError(null);
-      if (amount !== paymentSubscription.amount) {
-        await api.updateSubscription(paymentSubscription.id, { amount });
+      const currentBillingDate = toDateInputValue(paymentSubscription.nextBillingDate);
+      if (amount !== paymentSubscription.amount || paymentBillingDate !== currentBillingDate) {
+        await api.updateSubscription(paymentSubscription.id, {
+          amount,
+          nextBillingDate: new Date(`${paymentBillingDate}T12:00:00`).toISOString(),
+        });
       }
       await api.processSubscriptionPayment(paymentSubscription.id);
       setPaymentSubscription(null);
@@ -180,7 +199,11 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
               Payment amount (₹)
               <input autoFocus type="number" min="0.01" step="0.01" required value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-sm text-white outline-none focus:border-indigo-500" />
             </label>
-            <p className="text-[11px] text-slate-400">Changing the amount updates this recurring bill for future payments too.</p>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-slate-300">Billing date</label>
+              <DatePicker value={paymentBillingDate} onChange={setPaymentBillingDate} required accent="indigo" />
+            </div>
+            <p className="text-[11px] text-slate-400">Changing the amount updates future payments. The next cycle is calculated from the billing date selected here.</p>
             <div className="flex justify-end gap-2 border-t border-slate-800 pt-3">
               <button type="button" onClick={() => setPaymentSubscription(null)} className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700">Cancel</button>
               <button type="submit" disabled={isProcessingPayment} className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">{isProcessingPayment ? 'Processing...' : 'Confirm payment'}</button>
