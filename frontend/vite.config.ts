@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       disable: mode === 'native',
+      workbox: {
+        importScripts: ['push-handler.js'],
+      },
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {

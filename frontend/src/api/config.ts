@@ -1,15 +1,9 @@
 export const DEFAULT_NATIVE_API_URL = 'https://p01--financetrack--ydkd8hhsbwn4.code.run';
 
-function isMobileNativeWebView(userAgent?: string) {
-  const ua = userAgent ?? (typeof navigator !== 'undefined' ? navigator.userAgent || '' : '');
-  const hasCapacitor = typeof window !== 'undefined' && typeof (window as any)?.Capacitor !== 'undefined';
-  return /Android|iPhone|iPad|iPod/i.test(ua) || hasCapacitor;
-}
-
 function isNativeCapacitorApp(userAgent?: string) {
   const ua = userAgent ?? (typeof navigator !== 'undefined' ? navigator.userAgent || '' : '');
-  const hasCapacitor = typeof window !== 'undefined' && typeof (window as any)?.Capacitor !== 'undefined';
-  return /Capacitor|PhoneGap/i.test(ua) || hasCapacitor;
+  const capacitor = typeof window !== 'undefined' ? (window as any)?.Capacitor : undefined;
+  return /Capacitor|PhoneGap/i.test(ua) || capacitor?.isNativePlatform?.() === true;
 }
 
 export function resolveApiOrigin(options: {
@@ -32,9 +26,8 @@ export function resolveApiOrigin(options: {
 
   const location = options.location ?? (typeof window !== 'undefined' ? window.location : undefined);
   const nativeApp = isNativeCapacitorApp(options.userAgent);
-  const mobileNativeWebView = location && ((location.origin === 'https://localhost' || location.origin === 'http://localhost' || location.origin === 'capacitor://localhost') && isMobileNativeWebView(options.userAgent));
 
-  if (nativeApp || mobileNativeWebView) {
+  if (nativeApp) {
     return defaultOrigin;
   }
 

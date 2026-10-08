@@ -58,6 +58,20 @@ export const api = {
     return res.data.data;
   },
 
+  getVapidPublicKey: async (): Promise<string | null> => {
+    const res = await apiClient.get(`${API_BASE}/notifications/vapid-public-key`);
+    return res.data.data.publicKey;
+  },
+  saveWebPushSubscription: async (subscription: PushSubscriptionJSON): Promise<void> => {
+    await apiClient.post(`${API_BASE}/notifications/web-subscriptions`, subscription);
+  },
+  saveNativePushToken: async (token: string, platform: 'android' | 'ios'): Promise<void> => {
+    await apiClient.post(`${API_BASE}/notifications/native-tokens`, { token, platform });
+  },
+  removePushSubscription: async (endpoint: string): Promise<void> => {
+    await apiClient.delete(`${API_BASE}/notifications/subscriptions`, { data: { endpoint } });
+  },
+
   getReportSettings: async (): Promise<{ recipientEmail: string | null; monthlyReportsEnabled: boolean }> => {
     const res = await apiClient.get(`${API_BASE}/reports/settings`);
     return res.data.data;

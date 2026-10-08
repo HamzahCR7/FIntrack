@@ -21,8 +21,19 @@ test('keeps the hosted backend for Capacitor webviews reporting localhost', () =
     resolveApiOrigin({
       env: {},
       location: { origin: 'https://localhost', protocol: 'https:', hostname: 'localhost' },
-      userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36',
+      userAgent: 'Mozilla/5.0 Capacitor',
     }),
     'https://p01--financetrack--ydkd8hhsbwn4.code.run'
+  );
+});
+
+test('uses the local backend for a mobile browser on localhost', () => {
+  assert.equal(
+    resolveApiOrigin({
+      env: {},
+      location: { origin: 'http://localhost:3000', protocol: 'http:', hostname: 'localhost' },
+      userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36',
+    }),
+    'http://localhost:3000'
   );
 });

@@ -17,7 +17,7 @@ export class CategoryRepository {
   }
 
   async findByName(name: string): Promise<Category | null> {
-    return this.db.category.findUnique({
+    return this.db.category.findFirst({
       where: { name },
     });
   }

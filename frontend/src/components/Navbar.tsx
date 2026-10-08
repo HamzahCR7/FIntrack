@@ -2,6 +2,7 @@ import React from 'react';
 import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3 } from 'lucide-react';
 import { DashboardData, Budget, Goal } from '../types';
 import { NotificationCenter } from './NotificationCenter';
+import { PushNotificationSettings } from './PushNotificationSettings';
 
 interface NavbarProps {
   onAddTransaction: () => void;
@@ -104,6 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             goals={goals}
             onNavigate={onNavigate}
           />
+          <PushNotificationSettings />
 
           <div className="flex items-center gap-1.5 md:gap-2.5">
             <button

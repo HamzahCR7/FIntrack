@@ -94,4 +94,5 @@ export class TransactionController {
       next(err);
     }
   };
+
 }
