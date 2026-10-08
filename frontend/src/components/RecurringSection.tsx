@@ -83,6 +83,39 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
     }
   };
 
+  const handleSaveChanges = async () => {
+    if (!paymentSubscription) return;
+
+    const amount = Number(paymentAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPaymentError('Please enter a valid positive amount.');
+      return;
+    }
+    if (!paymentBillingDate) {
+      setPaymentError('Please select the billing date.');
+      return;
+    }
+
+    try {
+      setIsProcessingPayment(true);
+      setPaymentError(null);
+      await api.updateSubscription(paymentSubscription.id, {
+        amount,
+        nextBillingDate: new Date(`${paymentBillingDate}T12:00:00`).toISOString(),
+        status: 'ACTIVE',
+      });
+      setPaymentSubscription(null);
+      onRefresh?.();
+    } catch (err) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message || err.message
+        : err instanceof Error ? err.message : 'Failed to update recurring payment';
+      setPaymentError(message);
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
   return (
     <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-700/60 gap-4">
@@ -209,6 +242,7 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
             <p className="text-[11px] text-slate-400">Changing the amount updates future payments. The next cycle is calculated from the billing date selected here.</p>
             <div className="flex justify-end gap-2 border-t border-slate-800 pt-3">
               <button type="button" onClick={() => setPaymentSubscription(null)} className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700">Cancel</button>
+              <button type="button" onClick={handleSaveChanges} disabled={isProcessingPayment} className="rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-xs font-semibold text-indigo-200 hover:bg-indigo-500/20 disabled:opacity-50">Save changes</button>
               <button type="submit" disabled={isProcessingPayment} className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">{isProcessingPayment ? 'Processing...' : 'Confirm payment'}</button>
             </div>
           </form>
