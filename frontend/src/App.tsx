@@ -322,6 +322,18 @@ export const App: React.FC = () => {
       const pendingCreate = transactions.find((transaction) => transaction.id === id)?.syncStatus === 'pending' && id.startsWith('offline-');
       if (pendingCreate) {
         await removeTransactionOperation(id);
+      } else if (navigator.onLine) {
+        try {
+          await api.deleteTransaction(id);
+        } catch {
+          await enqueueTransactionOperation({
+            id: createOutboxId(),
+            type: 'delete',
+            entityId: id,
+            createdAt: Date.now(),
+          });
+          addToast('Deletion queued — due status will update after sync', 'info');
+        }
       } else {
         await enqueueTransactionOperation({
           id: createOutboxId(),
@@ -332,10 +344,9 @@ export const App: React.FC = () => {
       }
       setTransactions((current) => current.filter((transaction) => transaction.id !== id));
       setLedgerTransactions((current) => current.filter((transaction) => transaction.id !== id));
-      addToast('Transaction removed locally — syncing', 'success');
-      void syncTransactionOutbox().then((changed) => {
-        if (changed) void fetchAllData();
-      });
+      addToast(navigator.onLine ? 'Transaction deleted and due status refreshed' : 'Transaction removed locally — syncing', 'success');
+      await syncTransactionOutbox();
+      await fetchAllData();
     }
   };
 
