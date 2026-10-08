@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Debt, Subscription } from '../types';
 import { formatCurrency } from './SummaryCards';
 import { usePrivacyMode } from '../utils/privacyStore';
-import { Calendar, Repeat, Plus, Play } from 'lucide-react';
+import { Calendar, Repeat, Plus, Play, X } from 'lucide-react';
 import axios from 'axios';
+import { api } from '../api/client';
 
 interface RecurringSectionProps {
   recurring: {
@@ -19,16 +20,44 @@ interface RecurringSectionProps {
 
 export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, debts = [], onAddSubscription, onManageDebt, onRefresh }) => {
   usePrivacyMode();
+  const [paymentSubscription, setPaymentSubscription] = useState<Subscription | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const recurringLoans = debts.filter((debt) => debt.recordKind === 'LOAN' && debt.type === 'I_OWE' && debt.status !== 'SETTLED');
   const monthlyLoanCost = recurringLoans.reduce((sum, debt) => sum + (debt.emiAmount || debt.remainingAmount), 0);
-  const handleProcessPayment = async (id: string, name: string) => {
-    if (confirm(`Process recurring payment for '${name}'? This will record an expense and advance the next billing date.`)) {
-      try {
-        await axios.post(`/api/v1/subscriptions/${id}/process-payment`);
-        if (onRefresh) onRefresh();
-      } catch (err: any) {
-        alert(err.response?.data?.message || err.message || 'Failed to process payment');
+  const openPayment = (subscription: Subscription) => {
+    setPaymentSubscription(subscription);
+    setPaymentAmount(subscription.amount.toString());
+    setPaymentError(null);
+  };
+
+  const handleProcessPayment = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!paymentSubscription) return;
+
+    const amount = Number(paymentAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setPaymentError('Please enter a valid positive amount.');
+      return;
+    }
+
+    try {
+      setIsProcessingPayment(true);
+      setPaymentError(null);
+      if (amount !== paymentSubscription.amount) {
+        await api.updateSubscription(paymentSubscription.id, { amount });
       }
+      await api.processSubscriptionPayment(paymentSubscription.id);
+      setPaymentSubscription(null);
+      onRefresh?.();
+    } catch (err) {
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message || err.message
+        : err instanceof Error ? err.message : 'Failed to process payment';
+      setPaymentError(message);
+    } finally {
+      setIsProcessingPayment(false);
     }
   };
 
@@ -121,7 +150,7 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
                   <div className="text-right space-y-1.5">
                     <span className="text-sm font-bold text-white block">{formatCurrency(sub.amount)}</span>
                     <button
-                      onClick={() => handleProcessPayment(sub.id, sub.name)}
+                      onClick={() => openPayment(sub)}
                       className="px-2 py-1 bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 rounded-lg text-[10px] font-semibold flex items-center gap-1 ml-auto"
                       title="Process recurring payment now"
                     >
@@ -135,6 +164,30 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
           </div>
         )}
       </div>
+
+      {paymentSubscription && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <form onSubmit={handleProcessPayment} className="w-full max-w-sm space-y-4 rounded-2xl border border-slate-700/80 bg-slate-900 p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <div>
+                <h3 className="text-base font-bold text-white">Pay {paymentSubscription.name}</h3>
+                <p className="text-xs text-slate-400">Record this payment and advance its next billing date.</p>
+              </div>
+              <button type="button" onClick={() => setPaymentSubscription(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close payment dialog"><X className="h-5 w-5" /></button>
+            </div>
+            {paymentError && <div className="rounded-xl border border-rose-500/40 bg-rose-500/20 p-3 text-xs font-medium text-rose-400">{paymentError}</div>}
+            <label className="block text-xs font-semibold text-slate-300">
+              Payment amount (₹)
+              <input autoFocus type="number" min="0.01" step="0.01" required value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-sm text-white outline-none focus:border-indigo-500" />
+            </label>
+            <p className="text-[11px] text-slate-400">Changing the amount updates this recurring bill for future payments too.</p>
+            <div className="flex justify-end gap-2 border-t border-slate-800 pt-3">
+              <button type="button" onClick={() => setPaymentSubscription(null)} className="rounded-xl bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700">Cancel</button>
+              <button type="submit" disabled={isProcessingPayment} className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 disabled:opacity-50">{isProcessingPayment ? 'Processing...' : 'Confirm payment'}</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

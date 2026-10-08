@@ -159,6 +159,15 @@ export const api = {
     return res.data.data;
   },
 
+  updateSubscription: async (id: string, data: Partial<Subscription>): Promise<Subscription> => {
+    const res = await apiClient.patch(`${API_BASE}/subscriptions/${id}`, data);
+    return res.data.data;
+  },
+
+  processSubscriptionPayment: async (id: string): Promise<void> => {
+    await apiClient.post(`${API_BASE}/subscriptions/${id}/process-payment`);
+  },
+
   // Debts (Owed to me / I owe)
   getDebts: async (): Promise<Debt[]> => {
     const res = await apiClient.get(`${API_BASE}/debts`);

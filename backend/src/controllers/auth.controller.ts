@@ -1,5 +1,24 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { createHash, scrypt as scryptCallback, timingSafeEqual } from 'crypto';
+import { promisify } from 'util';
 import { prisma } from '../config/prisma';
+
+const scrypt = promisify(scryptCallback);
+
+export async function verifyPassword(storedPassword: string | null, suppliedPassword: string): Promise<boolean> {
+  if (!storedPassword) return false;
+
+  const [scheme, salt, expectedHex] = storedPassword.split('$');
+  if (scheme === 'scrypt' && salt && expectedHex && /^[a-f\d]+$/i.test(expectedHex) && expectedHex.length % 2 === 0) {
+    const expected = Buffer.from(expectedHex, 'hex');
+    const actual = await scrypt(suppliedPassword, salt, expected.length) as Buffer;
+    return expected.length === actual.length && timingSafeEqual(expected, actual);
+  }
+
+  const storedDigest = createHash('sha256').update(storedPassword).digest();
+  const suppliedDigest = createHash('sha256').update(suppliedPassword).digest();
+  return timingSafeEqual(storedDigest, suppliedDigest);
+}
 
 export class AuthController {
   public router: Router;
@@ -28,11 +47,8 @@ export class AuthController {
 
       // Find user (case-insensitive check)
       const inputUsername = username.trim();
-      let user = await prisma.user.findFirst({
-        where: {
-          username: inputUsername,
-        },
-      });
+      const users = await prisma.user.findMany();
+      let user = users.find((candidate) => candidate.username.toLowerCase() === inputUsername.toLowerCase()) || null;
 
       // Fallback: If DB does not have Hamzah yet, ensure default user exists
       if (!user && (inputUsername.toLowerCase() === 'hamzah' || (await prisma.user.count()) === 0)) {
@@ -52,7 +68,7 @@ export class AuthController {
         });
       }
 
-      if (user.password !== password) {
+      if (!(await verifyPassword(user.password, password))) {
         return res.status(401).json({
           success: false,
           message: 'Invalid username or password',
