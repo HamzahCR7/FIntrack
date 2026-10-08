@@ -5,6 +5,7 @@ import {
   CreateSubscriptionSchema,
   UpdateSubscriptionSchema,
   QuerySubscriptionSchema,
+  ProcessSubscriptionPaymentSchema,
 } from '../dtos/subscription.dto';
 import { SubscriptionStatus } from '../types/enums';
 
@@ -25,7 +26,7 @@ export class SubscriptionController {
     this.router.patch('/:id', validateBody(UpdateSubscriptionSchema), this.updateSubscription);
     this.router.post('/:id/cancel', this.cancelSubscription);
     this.router.post('/:id/status', this.toggleStatus);
-    this.router.post('/:id/process-payment', this.processPayment);
+    this.router.post('/:id/process-payment', validateBody(ProcessSubscriptionPaymentSchema), this.processPayment);
   }
 
   private getAllSubscriptions = async (req: Request, res: Response, next: NextFunction) => {
@@ -104,7 +105,7 @@ export class SubscriptionController {
 
   private processPayment = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const result = await this.subscriptionService.processPayment(req.params.id);
+      const result = await this.subscriptionService.processPayment(req.params.id, req.body.paymentDate);
       res.status(200).json({ status: 'success', data: result });
     } catch (err) {
       next(err);

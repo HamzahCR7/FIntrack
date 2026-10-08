@@ -164,8 +164,8 @@ export const api = {
     return res.data.data;
   },
 
-  processSubscriptionPayment: async (id: string): Promise<void> => {
-    await apiClient.post(`${API_BASE}/subscriptions/${id}/process-payment`);
+  processSubscriptionPayment: async (id: string, paymentDate?: string): Promise<void> => {
+    await apiClient.post(`${API_BASE}/subscriptions/${id}/process-payment`, { paymentDate });
   },
 
   // Debts (Owed to me / I owe)

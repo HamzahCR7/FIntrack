@@ -49,8 +49,16 @@ export const QuerySubscriptionSchema = z.object({
   billingCycle: z.nativeEnum(BillingCycle).optional(),
 });
 
+export const ProcessSubscriptionPaymentSchema = z.object({
+  paymentDate: z
+    .union([z.string(), z.date()])
+    .optional()
+    .transform((val) => (val ? new Date(val) : undefined)),
+});
+
 export type CreateSubscriptionDto = z.output<typeof CreateSubscriptionSchema>;
 export type CreateSubscriptionInputDto = z.input<typeof CreateSubscriptionSchema>;
 export type UpdateSubscriptionDto = z.output<typeof UpdateSubscriptionSchema>;
 export type UpdateSubscriptionInputDto = z.input<typeof UpdateSubscriptionSchema>;
 export type QuerySubscriptionDto = z.infer<typeof QuerySubscriptionSchema>;
+export type ProcessSubscriptionPaymentDto = z.output<typeof ProcessSubscriptionPaymentSchema>;

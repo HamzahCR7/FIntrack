@@ -193,7 +193,7 @@ export class SubscriptionService {
     return this.updateSubscription(id, { status });
   }
 
-  async processPayment(id: string) {
+  async processPayment(id: string, paymentDate: Date = new Date()) {
     const sub = await this.getSubscriptionById(id);
 
     if (sub.status !== SubscriptionStatus.ACTIVE) {
@@ -221,7 +221,7 @@ export class SubscriptionService {
       merchant: sub.name,
       isSubscription: true,
       subscriptionId: sub.id,
-      transactionDate: new Date(),
+      transactionDate: paymentDate,
     });
 
     // 2. Advance Next Billing Date

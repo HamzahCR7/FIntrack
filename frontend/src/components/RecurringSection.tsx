@@ -67,7 +67,10 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
           nextBillingDate: new Date(`${paymentBillingDate}T12:00:00`).toISOString(),
         });
       }
-      await api.processSubscriptionPayment(paymentSubscription.id);
+      await api.processSubscriptionPayment(
+        paymentSubscription.id,
+        new Date(`${paymentBillingDate}T12:00:00`).toISOString()
+      );
       setPaymentSubscription(null);
       onRefresh?.();
     } catch (err) {
