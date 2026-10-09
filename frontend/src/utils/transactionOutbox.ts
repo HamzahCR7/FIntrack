@@ -85,7 +85,6 @@ export function syncTransactionOutbox(): Promise<boolean> {
   if (syncPromise) return syncPromise;
 
   syncPromise = (async () => {
-    if (!navigator.onLine) return false;
     const operations = (await getTransactionOutbox()).sort((a, b) => a.createdAt - b.createdAt);
     let changed = false;
 
