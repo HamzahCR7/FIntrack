@@ -39,4 +39,4 @@ COPY --from=build /app/frontend/dist /app/frontend/dist
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma db push --schema prisma/schema.postgresql.prisma --skip-generate && exec node dist/main.js"]
+CMD ["sh", "-c", "npx prisma db push --schema prisma/schema.postgresql.prisma --skip-generate --accept-data-loss && exec node dist/main.js"]
