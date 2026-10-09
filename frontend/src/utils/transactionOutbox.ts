@@ -104,12 +104,15 @@ export function syncTransactionOutbox(): Promise<boolean> {
         await removeTransactionOperation(operation.id);
         changed = true;
       } catch (error) {
+        const message = (error as any)?.response?.data?.message
+          || (error instanceof Error ? error.message : 'Sync failed');
         await enqueueTransactionOperation({
           ...operation,
           status: 'failed',
           attempts: (operation.attempts || 0) + 1,
-          lastError: error instanceof Error ? error.message : 'Sync failed',
+          lastError: message,
         });
+        window.dispatchEvent(new CustomEvent('fintrack-sync-failed', { detail: { message } }));
         // Preserve ordering and retry after reconnect or on the next timer.
         break;
       }

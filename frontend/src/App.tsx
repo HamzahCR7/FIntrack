@@ -260,6 +260,15 @@ export const App: React.FC = () => {
     };
   }, [isAuthenticated]);
 
+  useEffect(() => {
+    const notifySyncFailure = (event: Event) => {
+      const message = (event as CustomEvent<{ message?: string }>).detail?.message;
+      addToast(message ? `Transaction sync failed: ${message}` : 'Transaction sync failed. Open Money Lab to retry.', 'error');
+    };
+    window.addEventListener('fintrack-sync-failed', notifySyncFailure);
+    return () => window.removeEventListener('fintrack-sync-failed', notifySyncFailure);
+  }, [addToast]);
+
   const handleFilterChange = (filters: TransactionFilters) => {
     api.getTransactions(filters).then(setLedgerTransactions).catch(console.error);
   };

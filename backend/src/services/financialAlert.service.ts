@@ -17,7 +17,12 @@ export class FinancialAlertService {
     let sent = 0;
     let evaluated = 0;
     for (const { userId } of subscribers) {
-      const alerts = await this.collectAlerts(now, userId);
+      // Production authentication currently represents the single owner as
+      // "owner", while existing ledger rows predate user scoping and have a
+      // null userId. Evaluate that legacy ledger, but deliver to the owner's
+      // registered push subscriptions.
+      const ledgerUserId = process.env.NODE_ENV === 'production' && userId === 'owner' ? null : userId;
+      const alerts = await this.collectAlerts(now, ledgerUserId);
       evaluated += alerts.length;
       for (const alert of alerts) {
         try {

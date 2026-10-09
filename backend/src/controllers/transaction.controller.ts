@@ -5,11 +5,15 @@ import { CreateTransactionSchema, QueryTransactionSchema } from '../dtos/transac
 import { AutoUpiIngestSchema } from '../dtos/upiAutoIngest.dto';
 import { UnauthorizedError, BadRequestError } from '../common/errors';
 import { UpiAutoIngestService } from '../services/upiAutoIngest.service';
+import { FinancialAlertService } from '../services/financialAlert.service';
+import { PushNotificationService } from '../services/pushNotification.service';
 
 export class TransactionController {
   public router = Router();
   private transactionService = new TransactionService();
   private upiAutoIngestService = new UpiAutoIngestService();
+  private financialAlertService = new FinancialAlertService();
+  private pushNotificationService = new PushNotificationService();
 
   constructor() {
     this.initRoutes();
@@ -38,6 +42,17 @@ export class TransactionController {
       }
 
       const result = await this.upiAutoIngestService.ingestFromMessage(req.body);
+
+      if (result.created) {
+        const transaction = result.transaction;
+        void this.pushNotificationService.send({
+          title: 'Transaction imported',
+          body: `${transaction.type === 'INCOME' ? 'Income' : 'Expense'} of ₹${transaction.amount.toLocaleString('en-IN')} was added${transaction.merchant ? ` for ${transaction.merchant}` : ''}.`,
+          data: { tab: 'transactions' },
+        }, process.env.NODE_ENV === 'production' ? 'owner' : undefined)
+          .catch((error) => console.error('Imported transaction push failed:', error));
+        this.evaluateFinancialAlerts();
+      }
 
       res.status(result.created ? 201 : 200).json({
         status: 'success',
@@ -72,6 +87,7 @@ export class TransactionController {
     try {
       const transaction = await this.transactionService.createTransaction(req.body);
       res.status(201).json({ status: 'success', data: transaction });
+      this.evaluateFinancialAlerts();
     } catch (err) {
       next(err);
     }
@@ -81,6 +97,7 @@ export class TransactionController {
     try {
       const transaction = await this.transactionService.updateTransaction(req.params.id, req.body);
       res.status(200).json({ status: 'success', data: transaction });
+      this.evaluateFinancialAlerts();
     } catch (err) {
       next(err);
     }
@@ -94,5 +111,10 @@ export class TransactionController {
       next(err);
     }
   };
+
+  private evaluateFinancialAlerts() {
+    void this.financialAlertService.sendDailyAlerts()
+      .catch((error) => console.error('Post-transaction financial alert check failed:', error));
+  }
 
 }
