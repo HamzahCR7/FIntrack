@@ -47,6 +47,44 @@ type DashboardTab = 'overview' | 'smart-guidance' | 'reminders' | 'transactions'
 
 const APP_DATA_CACHE_KEY = 'fintrack_app_data_cache_v1';
 
+const withCashFlowSavings = (
+  dashboard: DashboardData,
+  transactions: Transaction[],
+  accounts: Account[],
+): DashboardData => {
+  const now = new Date();
+  const creditCardIds = new Set(
+    accounts.filter((account) => account.type === 'CREDIT_CARD').map((account) => account.id),
+  );
+  const isCurrentMonth = (transaction: Transaction) => {
+    const date = new Date(transaction.transactionDate);
+    return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+  };
+
+  const cashOutflow = transactions.reduce((total, transaction) => {
+    if (!isCurrentMonth(transaction)) return total;
+
+    if (transaction.type === 'EXPENSE') {
+      const isCreditPurchase = transaction.paymentMethod === 'CREDIT_CARD'
+        || (transaction.sourceAccountId ? creditCardIds.has(transaction.sourceAccountId) : false);
+      return isCreditPurchase ? total : total + transaction.amount;
+    }
+
+    const isCardPayment = transaction.type === 'TRANSFER'
+      && Boolean(transaction.destinationAccountId && creditCardIds.has(transaction.destinationAccountId))
+      && !Boolean(transaction.sourceAccountId && creditCardIds.has(transaction.sourceAccountId));
+    return isCardPayment ? total + transaction.amount : total;
+  }, 0);
+
+  return {
+    ...dashboard,
+    summary: {
+      ...dashboard.summary,
+      savingsThisMonth: Number((dashboard.summary.incomeThisMonth - cashOutflow).toFixed(2)),
+    },
+  };
+};
+
 type CachedAppData = {
   dashboardData: DashboardData;
   transactions: Transaction[];
@@ -205,8 +243,9 @@ export const App: React.FC = () => {
       ]);
 
       const visibleTransactions = await mergePendingTransactions(txs);
+      const normalizedDashboard = withCashFlowSavings(dash, visibleTransactions, accs);
 
-      setDashboardData(dash);
+      setDashboardData(normalizedDashboard);
       setTransactions(visibleTransactions);
       setLedgerTransactions(visibleTransactions);
       setCategories(cats);
@@ -215,7 +254,7 @@ export const App: React.FC = () => {
       setGoals(goalsData || []);
 
       localStorage.setItem(APP_DATA_CACHE_KEY, JSON.stringify({
-        dashboardData: dash,
+        dashboardData: normalizedDashboard,
         transactions: visibleTransactions,
         categories: cats,
         accounts: accs,
@@ -226,7 +265,7 @@ export const App: React.FC = () => {
       void api
         .getForecast()
         .then((forecast) => {
-          setDashboardData((current) => (current ? { ...current, forecast } : { ...dash, forecast }));
+          setDashboardData((current) => (current ? { ...current, forecast } : { ...normalizedDashboard, forecast }));
         })
         .catch(() => {
           // Keep the dashboard usable even if the forecast request fails.
