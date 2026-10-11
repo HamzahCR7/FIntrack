@@ -10,13 +10,27 @@ import { ensureFinancialReferenceData } from './services/referenceData.service';
 const PORT = process.env.PORT || 3000;
 const app = createApp();
 
-// Safe and idempotent migration for repayments generated before the marker existed.
-void backfillDebtPaymentTransactions().catch((error) => console.error('Debt-payment transaction backfill failed:', error));
-void ensureFinancialReferenceData().catch((error) => console.error('Financial reference-data initialization failed:', error));
+async function startServer() {
+  try {
+    // A deployment is not ready until its built-in account and payment options
+    // have been applied to the active database.
+    await ensureFinancialReferenceData();
+    console.log('Financial reference data is up to date.');
+  } catch (error) {
+    console.error('Financial reference-data initialization failed; server will not start:', error);
+    process.exitCode = 1;
+    return;
+  }
 
-app.listen(PORT, () => {
-  console.log(`🚀 FinTrack Backend API running on http://localhost:${PORT}`);
-});
+  // Safe and idempotent migration for repayments generated before the marker existed.
+  void backfillDebtPaymentTransactions().catch((error) => console.error('Debt-payment transaction backfill failed:', error));
+
+  app.listen(PORT, () => {
+    console.log(`🚀 FinTrack Backend API running on http://localhost:${PORT}`);
+  });
+}
+
+void startServer();
 
 const runMonthlyReport = () => new ReportService().sendPreviousMonthIfDue()
   .catch((error) => console.error('Monthly report delivery failed:', error));

@@ -59,6 +59,7 @@ export class AnalyticsService {
     }
 
     const totalLiquidBalance = bankBalances + cashBalances + upiBalances;
+    const creditCardAccountIds = accountBreakdown.CREDIT_CARD.map((account) => account.id);
 
     // 2. All-Time Aggregates
     const cashOutflowWhere = (start: Date, end: Date) => ({
@@ -67,14 +68,15 @@ export class AnalyticsService {
         {
           type: TransactionType.EXPENSE,
           paymentMethod: { not: PaymentMethod.CREDIT_CARD },
-          NOT: {
-            sourceAccount: { is: { type: AccountType.CREDIT_CARD } },
-          },
+          OR: [
+            { sourceAccountId: null },
+            { sourceAccountId: { notIn: creditCardAccountIds } },
+          ],
         },
         {
           type: TransactionType.TRANSFER,
-          sourceAccount: { is: { type: { not: AccountType.CREDIT_CARD } } },
-          destinationAccount: { is: { type: AccountType.CREDIT_CARD } },
+          sourceAccountId: { notIn: creditCardAccountIds },
+          destinationAccountId: { in: creditCardAccountIds },
         },
       ],
     });
