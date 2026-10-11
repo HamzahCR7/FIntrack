@@ -66,10 +66,10 @@ export class AnalyticsService {
       OR: [
         {
           type: TransactionType.EXPENSE,
-          OR: [
-            { sourceAccountId: null },
-            { sourceAccount: { is: { type: { not: AccountType.CREDIT_CARD } } } },
-          ],
+          paymentMethod: { not: PaymentMethod.CREDIT_CARD },
+          NOT: {
+            sourceAccount: { is: { type: AccountType.CREDIT_CARD } },
+          },
         },
         {
           type: TransactionType.TRANSFER,
