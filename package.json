@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail --names backend,frontend \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\""
+    "dev": "concurrently --kill-others-on-fail --names backend,frontend \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "dev:cloud": "concurrently --kill-others-on-fail --names backend,frontend \"npm --prefix backend run dev:cloud\" \"npm --prefix frontend run dev\""
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
