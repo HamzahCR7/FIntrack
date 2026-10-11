@@ -39,13 +39,16 @@ const ACCOUNT_CATEGORY_LABELS: Record<string, string> = {
 
 const getAccountCategory = (account: Account | undefined, accountTypes: FinancialReferenceOption[]) => {
   if (!account) return undefined;
-  const referenceCategory = accountTypes.find((option) => option.code === account.type)?.category;
-  if (referenceCategory) return referenceCategory;
-  if (account.type === 'CREDIT_CARD' || account.type === 'CHARGE_CARD') return 'CARD';
-  if (account.type === 'BANK_ACCOUNT' || account.type === 'CHECKING_ACCOUNT' || account.type === 'SAVINGS_ACCOUNT' || account.type === 'SALARY_ACCOUNT') return 'BANK';
-  if (account.type === 'CASH') return 'CASH';
-  if (account.type === 'UPI' || account.type === 'AMAZON_PAY' || account.type === 'DIGITAL_WALLET') return 'WALLET';
-  return undefined;
+  const normalizedType = account.type.trim().toUpperCase();
+
+  // Known account types are application rules, so they must behave identically
+  // even when a deployed reference-data row is missing or stale.
+  if (normalizedType === 'CREDIT_CARD' || normalizedType === 'CHARGE_CARD') return 'CARD';
+  if (normalizedType === 'BANK_ACCOUNT' || normalizedType === 'CHECKING_ACCOUNT' || normalizedType === 'SAVINGS_ACCOUNT' || normalizedType === 'SALARY_ACCOUNT') return 'BANK';
+  if (normalizedType === 'CASH') return 'CASH';
+  if (normalizedType === 'UPI' || normalizedType === 'AMAZON_PAY' || normalizedType === 'DIGITAL_WALLET') return 'WALLET';
+
+  return accountTypes.find((option) => option.code.trim().toUpperCase() === normalizedType)?.category;
 };
 
 const FancyInput: React.FC<FancyInputProps> = ({ label, className = '', ...props }) => (
