@@ -37,6 +37,17 @@ const ACCOUNT_CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Other',
 };
 
+const getAccountCategory = (account: Account | undefined, accountTypes: FinancialReferenceOption[]) => {
+  if (!account) return undefined;
+  const referenceCategory = accountTypes.find((option) => option.code === account.type)?.category;
+  if (referenceCategory) return referenceCategory;
+  if (account.type === 'CREDIT_CARD' || account.type === 'CHARGE_CARD') return 'CARD';
+  if (account.type === 'BANK_ACCOUNT' || account.type === 'CHECKING_ACCOUNT' || account.type === 'SAVINGS_ACCOUNT' || account.type === 'SALARY_ACCOUNT') return 'BANK';
+  if (account.type === 'CASH') return 'CASH';
+  if (account.type === 'UPI' || account.type === 'AMAZON_PAY' || account.type === 'DIGITAL_WALLET') return 'WALLET';
+  return undefined;
+};
+
 const FancyInput: React.FC<FancyInputProps> = ({ label, className = '', ...props }) => (
   <div className="relative">
     {label && <label className="mb-1 block text-slate-300 font-semibold">{label}</label>}
@@ -226,7 +237,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     });
 
     const selectedAccount = selectedPaymentAccount;
-    const selectedAccountCategory = accountTypes.find((option) => option.code === selectedAccount?.type)?.category;
+    const selectedAccountCategory = getAccountCategory(selectedAccount, accountTypes);
     const walletIdentity = selectedAccountCategory === 'WALLET'
       ? `${selectedAccount?.type} ${selectedAccount?.name} ${selectedAccount?.institution || ''}`.toLowerCase()
       : '';
@@ -298,7 +309,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     const categoriesWithAccounts = new Set(
       accounts
         .filter((account) => account.name?.trim())
-        .map((account) => accountTypes.find((option) => option.code === account.type)?.category)
+        .map((account) => getAccountCategory(account, accountTypes))
         .filter((category): category is string => Boolean(category)),
     );
     if (accounts.some((account) => /pockets?/.test(`${account.name} ${account.institution || ''}`.toLowerCase()))) {
@@ -318,7 +329,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           const isPocketAccount = /pockets?/.test(`${account.name} ${account.institution || ''}`.toLowerCase());
           if (sourceAccountCategory === 'POCKET') return isPocketAccount;
           if (sourceAccountCategory === 'WALLET' && isPocketAccount) return false;
-          return accountTypes.find((option) => option.code === account.type)?.category === sourceAccountCategory;
+          return getAccountCategory(account, accountTypes) === sourceAccountCategory;
         })
         .map((account) => account.id),
     );
@@ -353,7 +364,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     const sourceAccount = accounts.find((account) => account.id === selectedAccountId);
     const category = /pockets?/.test(`${sourceAccount?.name || ''} ${sourceAccount?.institution || ''}`.toLowerCase())
       ? 'POCKET'
-      : accountTypes.find((option) => option.code === sourceAccount?.type)?.category;
+      : getAccountCategory(sourceAccount, accountTypes);
     if (category && category !== sourceAccountCategory) setSourceAccountCategory(category);
   }, [accountTypes, accounts, destinationAccountId, sourceAccountCategory, sourceAccountId, type]);
 

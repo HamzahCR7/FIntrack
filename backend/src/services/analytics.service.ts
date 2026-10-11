@@ -61,7 +61,27 @@ export class AnalyticsService {
     const totalLiquidBalance = bankBalances + cashBalances + upiBalances;
 
     // 2. All-Time Aggregates
-    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
+    const cashOutflowWhere = (start: Date, end: Date) => ({
+      transactionDate: { gte: start, lte: end },
+      OR: [
+        {
+          type: TransactionType.EXPENSE,
+          OR: [
+            { sourceAccountId: null },
+            { sourceAccount: { is: { type: { not: AccountType.CREDIT_CARD } } } },
+          ],
+        },
+        {
+          type: TransactionType.TRANSFER,
+          sourceAccount: { is: { type: { not: AccountType.CREDIT_CARD } } },
+          destinationAccount: { is: { type: AccountType.CREDIT_CARD } },
+        },
+      ],
+    });
+    const previousMonthStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    const previousMonthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+
+    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, monthCashOutflowAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, prevMonthCashOutflowAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
       this.db.transaction.aggregate({
         _sum: { amount: true },
         where: { type: TransactionType.INCOME },
@@ -76,6 +96,10 @@ export class AnalyticsService {
           type: TransactionType.INCOME,
           transactionDate: { gte: startOfMonth, lte: endOfMonth },
         },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: cashOutflowWhere(startOfMonth, endOfMonth),
       }),
       this.db.transaction.aggregate({
         _sum: { amount: true },
@@ -96,15 +120,19 @@ export class AnalyticsService {
         _sum: { amount: true },
         where: {
           type: TransactionType.INCOME,
-          transactionDate: { gte: new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0)), lte: new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)) },
+          transactionDate: { gte: previousMonthStart, lte: previousMonthEnd },
         },
       }),
       this.db.transaction.aggregate({
         _sum: { amount: true },
         where: {
           type: TransactionType.EXPENSE,
-          transactionDate: { gte: new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0)), lte: new Date(Date.UTC(year, month, 0, 23, 59, 59, 999)) },
+          transactionDate: { gte: previousMonthStart, lte: previousMonthEnd },
         },
+      }),
+      this.db.transaction.aggregate({
+        _sum: { amount: true },
+        where: cashOutflowWhere(previousMonthStart, previousMonthEnd),
       }),
       this.db.transaction.findMany({
         where: { type: TransactionType.EXPENSE },
@@ -137,14 +165,16 @@ export class AnalyticsService {
     const totalSavings = totalIncome - totalExpenses;
 
     const spendingThisMonth = monthExpensesAgg._sum.amount || 0;
+    const cashOutflowThisMonth = monthCashOutflowAgg._sum.amount || 0;
     const incomeThisMonth = monthIncomeAgg._sum.amount || 0;
-    const savingsThisMonth = incomeThisMonth - spendingThisMonth;
+    const savingsThisMonth = incomeThisMonth - cashOutflowThisMonth;
 
     const pocketAllowanceThisMonth = pocketAllowanceAgg._sum.amount || 0;
 
     const previousMonthIncome = prevMonthIncomeAgg._sum.amount || 0;
     const previousMonthExpenses = prevMonthExpensesAgg._sum.amount || 0;
-    const previousMonthSavings = previousMonthIncome - previousMonthExpenses;
+    const previousMonthCashOutflow = prevMonthCashOutflowAgg._sum.amount || 0;
+    const previousMonthSavings = previousMonthIncome - previousMonthCashOutflow;
 
     const categoryMap: Record<string, { id: string; name: string; icon?: string; color?: string; amount: number }> = {};
     for (const tx of categoryExpenses) {
@@ -204,14 +234,19 @@ export class AnalyticsService {
             _sum: { amount: true },
             where: { type: TransactionType.EXPENSE, transactionDate: { gte: mStart, lte: mEnd } },
           }),
-        ]).then(([incAgg, expAgg]) => {
+          this.db.transaction.aggregate({
+            _sum: { amount: true },
+            where: cashOutflowWhere(mStart, mEnd),
+          }),
+        ]).then(([incAgg, expAgg, cashOutflowAgg]) => {
           const inc = incAgg._sum.amount || 0;
           const exp = expAgg._sum.amount || 0;
+          const cashOutflow = cashOutflowAgg._sum.amount || 0;
           return {
             month: monthName,
             income: Number(inc.toFixed(2)),
             expenses: Number(exp.toFixed(2)),
-            savings: Number((inc - exp).toFixed(2)),
+            savings: Number((inc - cashOutflow).toFixed(2)),
           };
         });
       }),
