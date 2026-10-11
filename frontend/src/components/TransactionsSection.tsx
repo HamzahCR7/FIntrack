@@ -152,6 +152,23 @@ interface TransactionsSectionProps {
 }
 
 type LedgerSortKey = 'transaction' | 'type' | 'category' | 'fromTo' | 'paymentMethod' | 'date' | 'amount';
+
+const UPI_PAYMENT_METHODS = new Set([
+  'UPI',
+  'UPI_QR',
+  'PHONEPE',
+  'GOOGLE_PAY',
+  'PAYTM',
+  'NAVI',
+  'BHIM',
+  'AMAZON_PAY',
+  'POCKET_UPI',
+]);
+
+const matchesPaymentMethodFilter = (paymentMethod: string, selectedMethods: string[]) => (
+  selectedMethods.includes(paymentMethod)
+  || (selectedMethods.includes('UPI') && UPI_PAYMENT_METHODS.has(paymentMethod))
+);
 type SortDirection = 'asc' | 'desc';
 
 export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
@@ -287,7 +304,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
       }
     }
 
-    if (selectedPaymentMethod.length > 0 && !selectedPaymentMethod.includes(tx.paymentMethod)) {
+    if (selectedPaymentMethod.length > 0 && !matchesPaymentMethodFilter(tx.paymentMethod, selectedPaymentMethod)) {
       return false;
     }
 

@@ -880,7 +880,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
           {/* Grouped account selection; income credits the selected account. */}
           {(
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2">
               <div>
                 <label className="text-slate-300 font-semibold block mb-1">Source Type <span className="text-rose-400">*</span></label>
                 <FancySelect
@@ -930,7 +930,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 />
               </div>
               {accounts.length === 0 && (
-                <p className="col-span-2 text-[11px] text-amber-400 mt-1">No active accounts found in system.</p>
+                <p className="text-[11px] text-amber-400 mt-1 min-[420px]:col-span-2">No active accounts found in system.</p>
               )}
             </div>
           )}
