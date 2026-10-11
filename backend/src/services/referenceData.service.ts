@@ -1,6 +1,35 @@
 import { prisma } from '../config/prisma';
 import { accountTypeOptions, indianInstitutionOptions, paymentMethodOptions } from '../data/financialReferenceData';
 
+export const defaultPaymentMethods = paymentMethodOptions.map(
+  ([code, label, region, category, allowedAccountCategories], sortOrder) => ({
+    code,
+    label,
+    region,
+    category,
+    allowedAccountCategories,
+    sortOrder,
+    isActive: true,
+  }),
+);
+
+export const defaultAccountTypes = accountTypeOptions.map(([code, label, category], sortOrder) => ({
+  code,
+  label,
+  category,
+  sortOrder,
+  isActive: true,
+}));
+
+export const defaultFinancialInstitutions = indianInstitutionOptions.map(([code, label], sortOrder) => ({
+  code,
+  label,
+  country: 'IN',
+  category: 'BANK',
+  sortOrder,
+  isActive: true,
+}));
+
 let initialization: Promise<void> | undefined;
 
 export function ensureFinancialReferenceData(): Promise<void> {
