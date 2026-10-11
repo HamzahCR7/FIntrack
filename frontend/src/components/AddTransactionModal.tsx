@@ -245,13 +245,13 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     return paymentMethods
       .filter((method) => {
         if (isPocketPaymentAccount) return ['POCKET_UPI', 'POCKET_CARD'].includes(method.code);
+        if (selectedAccount?.type === 'UPI') {
+          return method.category === 'UPI_APP' || ['UPI', 'UPI_QR'].includes(method.code);
+        }
         if (walletProviders.length > 0) {
           return walletProviders.includes(method.code)
             || (method.code === 'WALLET' && selectedAccount?.type !== 'UPI'
               && walletProviders.some((provider) => ['AMAZON_PAY', 'PAYTM', 'PHONEPE'].includes(provider)));
-        }
-        if (selectedAccount?.type === 'UPI') {
-          return method.category === 'UPI_APP' || ['UPI', 'UPI_QR'].includes(method.code);
         }
         if (!selectedAccountCategory) return true;
         const allowedCategories = (method.allowedAccountCategories || 'ANY').split(',');
