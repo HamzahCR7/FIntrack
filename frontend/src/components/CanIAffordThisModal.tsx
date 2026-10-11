@@ -148,7 +148,7 @@ export const CanIAffordThisModal: React.FC<CanIAffordThisModalProps> = ({ isOpen
         {/* Input Form */}
         <form onSubmit={handleEvaluate} className="space-y-4 text-xs">
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Item / Purchase Goal</label>
+            <label className="text-slate-300 font-semibold block mb-1">Item / Purchase Goal <span className="text-rose-400">*</span></label>
             <input
               type="text"
               required
@@ -161,7 +161,7 @@ export const CanIAffordThisModal: React.FC<CanIAffordThisModalProps> = ({ isOpen
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Estimated Cost (₹)</label>
+              <label className="text-slate-300 font-semibold block mb-1">Estimated Cost (₹) <span className="text-rose-400">*</span></label>
               <input
                 type="number"
                 required
@@ -173,7 +173,7 @@ export const CanIAffordThisModal: React.FC<CanIAffordThisModalProps> = ({ isOpen
             </div>
 
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Payment Plan</label>
+              <label className="text-slate-300 font-semibold block mb-1">Payment Plan <span className="text-rose-400">*</span></label>
               <ClearableSelect
                 value={purchaseType}
                 onValueChange={(value) => setPurchaseType(value as 'ONE_TIME' | 'EMI')}
@@ -188,7 +188,7 @@ export const CanIAffordThisModal: React.FC<CanIAffordThisModalProps> = ({ isOpen
 
           {purchaseType === 'EMI' && (
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">EMI Duration (Months)</label>
+              <label className="text-slate-300 font-semibold block mb-1">EMI Duration (Months) <span className="text-rose-400">*</span></label>
               <ClearableSelect
                 value={emiMonths}
                 onValueChange={setEmiMonths}

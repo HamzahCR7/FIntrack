@@ -7,6 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model PaymentMethodOption {
+  code      String  @id
+  label     String
+  region    String  @default("GLOBAL")
+  category  String
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+  allowedAccountCategories String @default("ANY")
+}
+
+model AccountTypeOption {
+  code      String  @id
+  label     String
+  category  String
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+}
+
+model FinancialInstitutionOption {
+  code      String  @id
+  label     String
+  country   String  @default("IN")
+  category  String  @default("BANK")
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+}
+
 model Account {
   id                    String   @id @default(uuid())
   name                  String

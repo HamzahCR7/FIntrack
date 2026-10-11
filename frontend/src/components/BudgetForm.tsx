@@ -142,13 +142,14 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
           )}
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Budget Name</label>
+            <label className="text-slate-300 font-semibold block mb-1">Budget Name <span className="text-rose-400">*</span></label>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g., Monthly Food"
+              required
               className="fintrack-input p-2.5 text-sm"
             />
           </div>
@@ -187,7 +188,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Monthly Budget (₹)</label>
+              <label className="text-slate-300 font-semibold block mb-1">Monthly Budget (₹) <span className="text-rose-400">*</span></label>
               <input
                 type="number"
                 name="amount"
@@ -196,6 +197,7 @@ const BudgetForm: React.FC<BudgetFormProps> = ({
                 placeholder="5000"
                 min="0"
                 step="0.01"
+                required
                 className="fintrack-input p-2.5 text-sm"
               />
             </div>

@@ -80,7 +80,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
             {/* Username Input */}
             <div>
-              <label className="text-slate-300 font-semibold block mb-1.5">Username</label>
+              <label className="text-slate-300 font-semibold block mb-1.5">Username <span className="text-rose-400">*</span></label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -96,7 +96,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
 
             {/* Password Input */}
             <div>
-              <label className="text-slate-300 font-semibold block mb-1.5">Password</label>
+              <label className="text-slate-300 font-semibold block mb-1.5">Password <span className="text-rose-400">*</span></label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input

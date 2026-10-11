@@ -454,7 +454,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
             {recordKind === 'LOAN' && (
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="mb-1 block font-semibold text-slate-300">Loan Type</label>
+                  <label className="mb-1 block font-semibold text-slate-300">Loan Type <span className="text-rose-400">*</span></label>
                   <ClearableSelect value={loanCategory} onValueChange={(nextLoanCategory) => {
                     setLoanCategory(nextLoanCategory);
                     setLoanExpenseCategoryId(defaultLoanExpenseCategoryId(nextLoanCategory));
@@ -513,8 +513,8 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
             </p>
             <FormInput label="Payment Amount (INR)" value={settleAmount} onChange={setSettleAmount} type="number" required />
             <div>
-              <label className="mb-1 block font-semibold text-slate-300">Settlement Date</label>
-              <DatePicker value={settleDate} onChange={setSettleDate} accent="blue" />
+              <label className="mb-1 block font-semibold text-slate-300">Settlement Date <span className="text-rose-400">*</span></label>
+              <DatePicker value={settleDate} onChange={setSettleDate} required accent="blue" />
             </div>
             {accounts.length > 0 && <AccountSelect label="Payment Account (Optional)" value={settleAccountId} onChange={setSettleAccountId} accounts={accounts} />}
             <ModalActions onCancel={() => setSettleDebtItem(null)} isSubmitting={isSubmitting} submitLabel="Record Payment" />
@@ -573,14 +573,14 @@ const Modal = ({ title, onClose, children }: { title: string; onClose: () => voi
 
 const FormInput = ({ label, value, onChange, placeholder, type = 'text', required = false }: { label: string; value: string; onChange: (value: string) => void; placeholder?: string; type?: string; required?: boolean }) => (
   <div>
-    <label className="mb-1 block font-semibold text-slate-300">{label}</label>
+    <label className="mb-1 block font-semibold text-slate-300">{label} {required && <span className="text-rose-400">*</span>}</label>
     <input type={type} step={type === 'number' ? '0.01' : undefined} required={required} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-xs text-white outline-none focus:border-blue-500" />
   </div>
 );
 
 const RecordKindSelector = ({ type, recordKind, onChange }: { type: DebtType; recordKind: DebtRecordKind; onChange: (type: DebtType, recordKind: DebtRecordKind) => void }) => (
   <div>
-    <label className="mb-1 block font-semibold text-slate-300">What are you tracking?</label>
+    <label className="mb-1 block font-semibold text-slate-300">What are you tracking? <span className="text-rose-400">*</span></label>
     <div className="grid grid-cols-3 gap-2">
       <button type="button" onClick={() => onChange('OWED_TO_ME', 'PERSONAL')} className={`rounded-xl border py-2 font-semibold ${type === 'OWED_TO_ME' && recordKind === 'PERSONAL' ? 'border-emerald-500 bg-emerald-600 text-white' : 'border-slate-700 bg-slate-800 text-slate-400'}`}>Lent</button>
       <button type="button" onClick={() => onChange('I_OWE', 'PERSONAL')} className={`rounded-xl border py-2 font-semibold ${type === 'I_OWE' && recordKind === 'PERSONAL' ? 'border-rose-500 bg-rose-600 text-white' : 'border-slate-700 bg-slate-800 text-slate-400'}`}>Borrowed</button>

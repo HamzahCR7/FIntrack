@@ -20,6 +20,7 @@ import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from '.
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
 import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical, Menu, X, Plus, ArrowRight, ChevronDown, WalletCards } from 'lucide-react';
 import { formatCurrency } from './utils/privacyStore';
+import { useTheme } from './utils/theme';
 
 const SummaryCards = lazy(() => import('./components/SummaryCards').then((module) => ({ default: module.SummaryCards })));
 const MetricDetailsModal = lazy(() => import('./components/MetricDetailsModal').then((module) => ({ default: module.MetricDetailsModal })));
@@ -65,6 +66,7 @@ const readCachedAppData = (): CachedAppData | null => {
 };
 
 export const App: React.FC = () => {
+  const { theme, toggleTheme } = useTheme();
   const [cachedAppData] = useState(readCachedAppData);
   const { addToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -118,11 +120,6 @@ export const App: React.FC = () => {
     month: 'short',
     day: 'numeric',
   });
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('fintrack_theme_mode', 'dark');
-  }, []);
 
   const clearLocalAppData = () => {
     localStorage.removeItem(APP_DATA_CACHE_KEY);
@@ -439,6 +436,8 @@ export const App: React.FC = () => {
         goals={goals}
         onNavigate={setActiveTab}
         isLoading={isLoading}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Main Content */}
@@ -547,7 +546,7 @@ export const App: React.FC = () => {
                       { label: 'Income this month', value: dashboardData.summary.incomeThisMonth, tone: 'text-emerald-300', metric: 'INCOME' as MetricType },
                       { label: 'Expenses this month', value: dashboardData.summary.spendingThisMonth, tone: 'text-rose-400', metric: 'EXPENSE' as MetricType },
                       { label: 'Credit outstanding', value: dashboardData.summary.creditOutstanding, tone: 'text-amber-300' },
-                      { label: 'Pocket allowance', value: dashboardData.summary.pocketAllowanceBalance, tone: 'text-violet-300' },
+                      { label: 'Pocket allowance', value: dashboardData.summary.pocketAllowanceBalance, tone: 'text-violet-300', metric: 'POCKET' as MetricType },
                     ].map((item) => <button key={item.label} disabled={!item.metric} onClick={() => item.metric && setMobileMetricDetails(item.metric)} className="flex w-full items-center justify-between gap-3 py-3 text-left disabled:cursor-default">
                       <span className="text-xs text-slate-400">{item.label}</span><span className={`text-sm font-semibold ${item.tone}`}>{formatCurrency(item.value || 0)}</span>
                     </button>)}

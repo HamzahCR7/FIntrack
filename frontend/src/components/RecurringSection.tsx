@@ -232,11 +232,11 @@ export const RecurringSection: React.FC<RecurringSectionProps> = ({ recurring, d
             </div>
             {paymentError && <div className="rounded-xl border border-rose-500/40 bg-rose-500/20 p-3 text-xs font-medium text-rose-400">{paymentError}</div>}
             <label className="block text-xs font-semibold text-slate-300">
-              Payment amount (₹)
+              Payment amount (₹) <span className="text-rose-400">*</span>
               <input autoFocus type="number" min="0.01" step="0.01" required value={paymentAmount} onChange={(event) => setPaymentAmount(event.target.value)} className="mt-1.5 w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-sm text-white outline-none focus:border-indigo-500" />
             </label>
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-300">Billing date</label>
+              <label className="mb-1.5 block text-xs font-semibold text-slate-300">Billing date <span className="text-rose-400">*</span></label>
               <DatePicker value={paymentBillingDate} onChange={setPaymentBillingDate} required accent="indigo" />
             </div>
             <p className="text-[11px] text-slate-400">Changing the amount updates future payments. The next cycle is calculated from the billing date selected here.</p>

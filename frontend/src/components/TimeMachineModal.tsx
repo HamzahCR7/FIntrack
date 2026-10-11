@@ -76,7 +76,7 @@ export const TimeMachineModal: React.FC<TimeMachineModalProps> = ({ isOpen, onCl
         <div className="space-y-4 text-xs">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Target Category</label>
+              <label className="text-slate-300 font-semibold block mb-1">Target Category <span className="text-rose-400">*</span></label>
               <ClearableSelect
                 value={simulatedCategory}
                 onValueChange={setSimulatedCategory}
@@ -92,7 +92,7 @@ export const TimeMachineModal: React.FC<TimeMachineModalProps> = ({ isOpen, onCl
             </div>
 
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Reduce Spending By</label>
+              <label className="text-slate-300 font-semibold block mb-1">Reduce Spending By <span className="text-rose-400">*</span></label>
               <ClearableSelect
                 value={String(reductionPercent)}
                 onValueChange={(value) => setReductionPercent(Number(value))}
@@ -107,7 +107,7 @@ export const TimeMachineModal: React.FC<TimeMachineModalProps> = ({ isOpen, onCl
             </div>
 
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Time Horizon</label>
+              <label className="text-slate-300 font-semibold block mb-1">Time Horizon <span className="text-rose-400">*</span></label>
               <ClearableSelect
                 value={String(monthsAhead)}
                 onValueChange={(value) => setMonthsAhead(Number(value))}

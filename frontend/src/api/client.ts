@@ -162,6 +162,21 @@ export const api = {
     return res.data.data;
   },
 
+  getPaymentMethods: async () => {
+    const res = await apiClient.get(`${API_BASE}/reference-data/payment-methods`);
+    return res.data.data;
+  },
+
+  getAccountTypes: async () => {
+    const res = await apiClient.get(`${API_BASE}/reference-data/account-types`);
+    return res.data.data;
+  },
+
+  getFinancialInstitutions: async () => {
+    const res = await apiClient.get(`${API_BASE}/reference-data/institutions`);
+    return res.data.data;
+  },
+
   // Subscriptions
   getSubscriptions: async (): Promise<Subscription[]> => {
     const res = await apiClient.get(`${API_BASE}/subscriptions`);

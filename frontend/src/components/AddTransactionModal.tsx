@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Account, Category, Transaction } from '../types';
+import { Account, Category, FinancialReferenceOption, Transaction } from '../types';
 import { X, ArrowUpRight, ArrowDownRight, ArrowRightLeft, HandCoins, ChevronDown, Check } from 'lucide-react';
 import { DatePicker } from './DatePicker';
 import { api } from '../api/client';
+import { useAutoSelectSingleOption } from '../hooks/useAutoSelectSingleOption';
 
 interface FancySelectOption {
   value: string;
@@ -15,11 +16,26 @@ interface FancySelectProps {
   options: FancySelectOption[];
   onChange: (value: string) => void;
   defaultValue?: string;
+  disabled?: boolean;
+  autoSelectSingleOption?: boolean;
 }
 
 interface FancyInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
 }
+
+const ACCOUNT_CATEGORY_LABELS: Record<string, string> = {
+  BANK: 'Debit Card / Bank Account',
+  CARD: 'Credit Card',
+  CASH: 'Cash',
+  WALLET: 'UPI / Wallet',
+  POCKET: 'Pocket App',
+  DEPOSIT: 'Deposit Account',
+  INVESTMENT: 'Investment Account',
+  LIABILITY: 'Loan / Credit Account',
+  DIGITAL_ASSET: 'Crypto / Digital Asset',
+  OTHER: 'Other',
+};
 
 const FancyInput: React.FC<FancyInputProps> = ({ label, className = '', ...props }) => (
   <div className="relative">
@@ -28,33 +44,24 @@ const FancyInput: React.FC<FancyInputProps> = ({ label, className = '', ...props
   </div>
 );
 
-const GENERAL_MERCHANT_SUGGESTIONS = [
-  'Amazon', 'Flipkart', 'Swiggy', 'Zomato', 'Blinkit', 'Zepto', 'BigBasket',
-  'Uber', 'Ola', 'Rapido', 'IRCTC', 'Indian Railways', 'Netflix', 'Spotify',
-  'Jio', 'Airtel', 'Electricity Board', 'Gas Agency', 'Landlord', 'Employer',
-];
-
-const GENERAL_DESCRIPTION_SUGGESTIONS: Record<'INCOME' | 'EXPENSE' | 'TRANSFER', string[]> = {
-  EXPENSE: [
-    'Groceries', 'Lunch', 'Dinner', 'Fuel', 'Cab fare', 'Medicine', 'Shopping',
-    'Mobile recharge', 'Electricity bill', 'Internet bill', 'House rent',
-    'Monthly subscription', 'Entertainment', 'Travel expense', 'Office expense',
-  ],
-  INCOME: [
-    'Monthly salary', 'Freelance payment', 'Bonus', 'Interest income',
-    'Dividend income', 'Cashback', 'Refund received', 'Rental income',
-  ],
-  TRANSFER: [
-    'Account transfer', 'Credit card payment', 'Savings transfer',
-    'Investment transfer', 'Cash withdrawal', 'Cash deposit',
-  ],
-};
-
-const FancySelect: React.FC<FancySelectProps> = ({ value, placeholder, options, onChange, defaultValue = '' }) => {
+const FancySelect: React.FC<FancySelectProps> = ({
+  value,
+  placeholder,
+  options,
+  onChange,
+  defaultValue = '',
+  disabled = false,
+  autoSelectSingleOption = true,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const selectRef = useRef<HTMLDivElement | null>(null);
   const selectedOption = options.find((option) => option.value === value);
   const hasSelection = value !== defaultValue;
+  const optionValues = useMemo(() => options.map((option) => option.value), [options]);
+
+  useAutoSelectSingleOption(value === defaultValue ? '' : value, optionValues, (nextValue) => {
+    onChange(nextValue as string);
+  }, !disabled && autoSelectSingleOption);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -78,8 +85,9 @@ const FancySelect: React.FC<FancySelectProps> = ({ value, placeholder, options, 
     <div ref={selectRef} className="relative">
       <button
         type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        className={`fintrack-select flex items-center justify-between p-2.5 text-left text-xs ${
+        onClick={() => !disabled && setIsOpen((open) => !open)}
+        disabled={disabled}
+        className={`transaction-select-trigger flex w-full items-center justify-between rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-left text-xs disabled:cursor-not-allowed disabled:opacity-50 ${
           selectedOption ? 'text-white' : 'text-slate-500'
         }`}
         aria-haspopup="listbox"
@@ -165,8 +173,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [subcategoryId, setSubcategoryId] = useState<string>('');
   const [itemTag, setItemTag] = useState<string>('');
   const [sourceAccountId, setSourceAccountId] = useState<string>('');
+  const [sourceAccountCategory, setSourceAccountCategory] = useState<string>('');
   const [destinationAccountId, setDestinationAccountId] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<string>('BANK_TRANSFER');
+  const [paymentMethods, setPaymentMethods] = useState<FinancialReferenceOption[]>([]);
+  const [accountTypes, setAccountTypes] = useState<FinancialReferenceOption[]>([]);
   const [merchant, setMerchant] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [otherDetails, setOtherDetails] = useState<string>('');
@@ -192,7 +203,6 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
       return Array.from(values.values())
         .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value))
-        .slice(0, 12)
         .map(({ value }) => value);
     };
 
@@ -202,25 +212,150 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     };
   }, [transactions]);
 
-  const textSuggestions = useMemo(() => {
-    const mergeUnique = (...groups: string[][]) => {
-      const seen = new Set<string>();
-      return groups.flat().filter((value) => {
-        const key = value.toLocaleLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    };
+  const selectedPaymentAccountId = type === 'INCOME' ? destinationAccountId : sourceAccountId;
+  const selectedPaymentAccount = accounts.find((account) => account.id === selectedPaymentAccountId);
+  const isUpiAccount = selectedPaymentAccount?.type === 'UPI';
+  const isPocketPaymentAccount = /pockets?/.test(
+    `${selectedPaymentAccount?.name || ''} ${selectedPaymentAccount?.institution || ''}`.toLowerCase(),
+  );
 
-    return {
-      merchants: mergeUnique(frequentTextValues.merchants, GENERAL_MERCHANT_SUGGESTIONS),
-      descriptions: mergeUnique(
-        frequentTextValues.descriptions,
-        GENERAL_DESCRIPTION_SUGGESTIONS[type],
-      ),
-    };
-  }, [frequentTextValues, type]);
+  const paymentMethodOptions = useMemo(() => {
+    const usage = new Map<string, number>();
+    transactions.forEach((transaction) => {
+      usage.set(transaction.paymentMethod, (usage.get(transaction.paymentMethod) || 0) + 1);
+    });
+
+    const selectedAccount = selectedPaymentAccount;
+    const selectedAccountCategory = accountTypes.find((option) => option.code === selectedAccount?.type)?.category;
+    const walletIdentity = selectedAccountCategory === 'WALLET'
+      ? `${selectedAccount?.type} ${selectedAccount?.name} ${selectedAccount?.institution || ''}`.toLowerCase()
+      : '';
+    const walletProviders = [
+      { pattern: /amazon[ _]*pay/, code: 'AMAZON_PAY' },
+      { pattern: /gpay|google[ _]*pay/, code: 'GOOGLE_PAY' },
+      { pattern: /phone[ _]*pe/, code: 'PHONEPE' },
+      { pattern: /paytm/, code: 'PAYTM' },
+      { pattern: /navi/, code: 'NAVI' },
+      { pattern: /bhim/, code: 'BHIM' },
+      { pattern: /paypal/, code: 'PAYPAL' },
+      { pattern: /alipay/, code: 'ALIPAY' },
+      { pattern: /wechat/, code: 'WECHAT_PAY' },
+    ].filter(({ pattern }) => pattern.test(walletIdentity)).map(({ code }) => code);
+
+    return paymentMethods
+      .filter((method) => {
+        if (isPocketPaymentAccount) return ['POCKET_UPI', 'POCKET_CARD'].includes(method.code);
+        if (walletProviders.length > 0) {
+          return walletProviders.includes(method.code)
+            || (method.code === 'WALLET' && selectedAccount?.type !== 'UPI'
+              && walletProviders.some((provider) => ['AMAZON_PAY', 'PAYTM', 'PHONEPE'].includes(provider)));
+        }
+        if (selectedAccount?.type === 'UPI') {
+          return method.category === 'UPI_APP' || ['UPI', 'UPI_QR'].includes(method.code);
+        }
+        if (!selectedAccountCategory) return true;
+        const allowedCategories = (method.allowedAccountCategories || 'ANY').split(',');
+        return allowedCategories.includes('ANY') || allowedCategories.includes(selectedAccountCategory);
+      })
+      .sort((a, b) => {
+        const genericUpiDifference = isUpiAccount
+          ? Number(a.code === 'UPI') - Number(b.code === 'UPI')
+          : 0;
+        const regionDifference = Number(b.region === 'IN') - Number(a.region === 'IN');
+        return genericUpiDifference
+          || regionDifference
+          || (usage.get(b.code) || 0) - (usage.get(a.code) || 0)
+          || (a.sortOrder || 0) - (b.sortOrder || 0)
+          || a.label.localeCompare(b.label);
+      })
+      .map(({ code, label }) => ({
+        value: code,
+        label: isUpiAccount && code === 'UPI'
+          ? 'Other UPI App'
+          : code === 'WALLET' && walletProviders.length > 0
+            ? `${selectedAccount?.name} — Wallet`
+            : label,
+      }));
+  }, [accountTypes, isPocketPaymentAccount, isUpiAccount, paymentMethods, selectedPaymentAccount, transactions]);
+
+  const accountOptions = useMemo(() => {
+    const usage = new Map<string, number>();
+    transactions.forEach((transaction) => {
+      if (transaction.sourceAccountId) usage.set(transaction.sourceAccountId, (usage.get(transaction.sourceAccountId) || 0) + 1);
+      if (transaction.destinationAccountId) usage.set(transaction.destinationAccountId, (usage.get(transaction.destinationAccountId) || 0) + 1);
+    });
+
+    return accounts
+      .filter((account) => account.name?.trim())
+      .sort((a, b) => (usage.get(b.id) || 0) - (usage.get(a.id) || 0) || a.name.localeCompare(b.name))
+      .map((account) => ({
+        value: account.id,
+        label: `${account.name}${account.institution && account.institution !== account.name ? ` · ${account.institution}` : ''}`,
+      }));
+  }, [accounts, transactions]);
+
+  const sourceCategoryOptions = useMemo(() => {
+    const categoriesWithAccounts = new Set(
+      accounts
+        .filter((account) => account.name?.trim())
+        .map((account) => accountTypes.find((option) => option.code === account.type)?.category)
+        .filter((category): category is string => Boolean(category)),
+    );
+    if (accounts.some((account) => /pockets?/.test(`${account.name} ${account.institution || ''}`.toLowerCase()))) {
+      categoriesWithAccounts.add('POCKET');
+    }
+    const categoryOrder = ['BANK', 'CARD', 'CASH', 'WALLET', 'POCKET', 'DEPOSIT', 'INVESTMENT', 'LIABILITY', 'DIGITAL_ASSET', 'OTHER'];
+    return categoryOrder
+      .filter((category) => categoriesWithAccounts.has(category))
+      .map((category) => ({ value: category, label: ACCOUNT_CATEGORY_LABELS[category] || category }));
+  }, [accountTypes, accounts]);
+
+  const sourceAccountOptions = useMemo(() => {
+    if (!sourceAccountCategory) return [];
+    const allowedAccountIds = new Set(
+      accounts
+        .filter((account) => {
+          const isPocketAccount = /pockets?/.test(`${account.name} ${account.institution || ''}`.toLowerCase());
+          if (sourceAccountCategory === 'POCKET') return isPocketAccount;
+          if (sourceAccountCategory === 'WALLET' && isPocketAccount) return false;
+          return accountTypes.find((option) => option.code === account.type)?.category === sourceAccountCategory;
+        })
+        .map((account) => account.id),
+    );
+    return accountOptions.filter((option) => allowedAccountIds.has(option.value));
+  }, [accountOptions, accountTypes, accounts, sourceAccountCategory]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    Promise.all([api.getPaymentMethods(), api.getAccountTypes()])
+      .then(([methods, types]) => {
+        setPaymentMethods(methods);
+        setAccountTypes(types);
+      })
+      .catch(() => setError('Unable to load payment methods. Please try again.'));
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isUpiAccount) {
+      if (paymentMethod && !paymentMethodOptions.some((option) => option.value === paymentMethod)) {
+        setPaymentMethod('');
+      }
+      return;
+    }
+    if (paymentMethodOptions.length > 0 && !paymentMethodOptions.some((option) => option.value === paymentMethod)) {
+      setPaymentMethod(paymentMethodOptions[0].value);
+    }
+  }, [isUpiAccount, paymentMethod, paymentMethodOptions, paymentMethods]);
+
+  useEffect(() => {
+    const selectedAccountId = type === 'INCOME' ? destinationAccountId : sourceAccountId;
+    if (!selectedAccountId) return;
+    const sourceAccount = accounts.find((account) => account.id === selectedAccountId);
+    const category = /pockets?/.test(`${sourceAccount?.name || ''} ${sourceAccount?.institution || ''}`.toLowerCase())
+      ? 'POCKET'
+      : accountTypes.find((option) => option.code === sourceAccount?.type)?.category;
+    if (category && category !== sourceAccountCategory) setSourceAccountCategory(category);
+  }, [accountTypes, accounts, destinationAccountId, sourceAccountCategory, sourceAccountId, type]);
 
   useEffect(() => {
     if (isOpen) {
@@ -254,6 +389,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         setSelectedSubcategoryIds([]);
         setSubcategoryId('');
         setItemTag('');
+        setSourceAccountCategory('');
         setMerchant('');
         setDescription('');
         setOtherDetails('');
@@ -277,6 +413,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     setSelectedSubcategoryIds([]);
     setSubcategoryId('');
     setItemTag('');
+    setSourceAccountCategory('');
     onClose();
   };
 
@@ -304,6 +441,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
   const handleDestinationAccountChange = (accountId: string) => {
     setDestinationAccountId(accountId);
+    setPaymentMethod('');
 
     if (type === 'INCOME') {
       const selectedAccount = accounts.find((account) => account.id === accountId);
@@ -375,6 +513,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       return;
     }
 
+    if (type !== 'TRANSFER' && !categoryId) {
+      setError('Please select a category.');
+      return;
+    }
+
     if (type === 'EXPENSE' && !sourceAccountId) {
       setError('Expense requires selecting a Source Account.');
       return;
@@ -398,6 +541,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
     if (isOtherCategory && !otherDetails.trim()) {
       setError('Please enter details for the Other category.');
+      return;
+    }
+
+    if (!paymentMethod) {
+      setError(`Please select ${isUpiAccount ? 'a UPI app or mode' : 'a payment method'}.`);
       return;
     }
 
@@ -602,7 +750,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
           {/* Amount */}
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Amount (₹)</label>
+            <label className="text-slate-300 font-semibold block mb-1">Amount (₹) <span className="text-rose-400">*</span></label>
             <FancyInput
               type="number"
               step="0.01"
@@ -646,7 +794,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           {/* Category (Required for Expense/Income) */}
           {type !== 'TRANSFER' && (
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Category</label>
+              <label className="text-slate-300 font-semibold block mb-1">Category <span className="text-rose-400">*</span></label>
               <FancySelect
                 value={categoryId}
                 placeholder="Select Category"
@@ -716,7 +864,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
 
               {isOtherCategory && (
                 <div className="mt-3">
-                  <label className="text-slate-300 font-semibold block mb-1">Other Details</label>
+                  <label className="text-slate-300 font-semibold block mb-1">Other Details <span className="text-rose-400">*</span></label>
                   <FancyInput
                     type="text"
                     required
@@ -730,34 +878,74 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </div>
           )}
 
-          {/* Source Account (Expense or Transfer) */}
-          {(type === 'EXPENSE' || type === 'TRANSFER') && (
-            <div>
-              <label className="text-slate-300 font-semibold block mb-1">
-                From Account {type === 'EXPENSE' ? '(Source)' : '(Debited)'}
-              </label>
-              <FancySelect
-                value={sourceAccountId}
-                placeholder="Select Source Account"
-                options={accounts.map((account) => ({ value: account.id, label: `${account.name} (${account.type})` }))}
-                onChange={setSourceAccountId}
-              />
+          {/* Grouped account selection; income credits the selected account. */}
+          {(
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-slate-300 font-semibold block mb-1">Source Type <span className="text-rose-400">*</span></label>
+                <FancySelect
+                  value={sourceAccountCategory}
+                  placeholder="Debit, credit, cash..."
+                  options={sourceCategoryOptions}
+                  autoSelectSingleOption={sourceCategoryOptions[0]?.value !== 'POCKET'}
+                  onChange={(category) => {
+                    setSourceAccountCategory(category);
+                    const inferredAccount = category === 'POCKET'
+                      ? accounts.find((account) => /pockets?/.test(`${account.name} ${account.institution || ''}`.toLowerCase()))
+                      : category === 'WALLET'
+                      ? accounts.find((account) => (
+                          account.type === 'UPI'
+                          && account.name.trim().toLocaleLowerCase() === 'upi'
+                        ))
+                      : category === 'CASH'
+                        ? accounts.find((account) => account.type === 'CASH')
+                        : undefined;
+
+                    if (type === 'INCOME') {
+                      setDestinationAccountId(inferredAccount?.id || '');
+                    } else {
+                      setSourceAccountId(inferredAccount?.id || '');
+                    }
+                    setPaymentMethod(category === 'CASH' ? 'CASH' : '');
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-slate-300 font-semibold block mb-1">
+                  {type === 'INCOME' ? 'To Account (Credited)' : type === 'EXPENSE' ? 'From Account (Source)' : 'From Account (Debited)'} <span className="text-rose-400">*</span>
+                </label>
+                <FancySelect
+                  value={type === 'INCOME' ? destinationAccountId : sourceAccountId}
+                  placeholder={sourceAccountCategory ? 'Select Account' : 'Choose source type first'}
+                  options={sourceAccountOptions}
+                  disabled={!sourceAccountCategory}
+                  onChange={(accountId) => {
+                    if (type === 'INCOME') {
+                      handleDestinationAccountChange(accountId);
+                    } else {
+                      setSourceAccountId(accountId);
+                      setPaymentMethod('');
+                    }
+                  }}
+                />
+              </div>
               {accounts.length === 0 && (
-                <p className="text-[11px] text-amber-400 mt-1">No active accounts found in system.</p>
+                <p className="col-span-2 text-[11px] text-amber-400 mt-1">No active accounts found in system.</p>
               )}
             </div>
           )}
 
-          {/* Destination Account (Income or Transfer) */}
-          {(type === 'INCOME' || type === 'TRANSFER') && (
+          {/* Transfers also require a separate destination account. */}
+          {type === 'TRANSFER' && (
             <div>
               <label className="text-slate-300 font-semibold block mb-1">
-                To Account {type === 'INCOME' ? '(Destination)' : '(Credited)'}
+                To Account (Credited) <span className="text-rose-400">*</span>
               </label>
               <FancySelect
                 value={destinationAccountId}
                 placeholder="Select Destination Account"
-                options={accounts.map((account) => ({ value: account.id, label: `${account.name} (${account.type})` }))}
+                options={accountOptions.filter((option) => option.value !== sourceAccountId)}
+                disabled={type === 'TRANSFER' && !sourceAccountId}
                 onChange={handleDestinationAccountChange}
               />
               {accounts.length === 0 && (
@@ -766,19 +954,16 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             </div>
           )}
 
-          {/* Payment Method */}
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Payment Method</label>
+            <label className="text-slate-300 font-semibold block mb-1">
+              {isPocketPaymentAccount ? 'Pocket App Payment Mode' : isUpiAccount ? 'UPI App / Mode' : 'Payment Method'} <span className="text-rose-400">*</span>
+            </label>
             <FancySelect
               value={paymentMethod}
-              placeholder="Select Payment Method"
-              defaultValue="BANK_TRANSFER"
-              options={[
-                { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-                { value: 'CREDIT_CARD', label: 'Credit Card' },
-                { value: 'CASH', label: 'Cash' },
-                { value: 'UPI', label: 'UPI' },
-              ]}
+              placeholder={isPocketPaymentAccount ? 'Select UPI or card' : isUpiAccount ? 'Google Pay, PhonePe, Paytm...' : 'Select Payment Method'}
+              defaultValue={isUpiAccount ? '' : 'BANK_TRANSFER'}
+              options={paymentMethodOptions}
+              disabled={type === 'INCOME' ? !destinationAccountId : !sourceAccountId}
               onChange={setPaymentMethod}
             />
           </div>
@@ -796,11 +981,11 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                 className="p-2.5 text-xs"
               />
               <datalist id="merchant-suggestions">
-                {textSuggestions.merchants.map((value) => <option key={value} value={value} />)}
+                {frequentTextValues.merchants.map((value) => <option key={value} value={value} />)}
               </datalist>
             </div>
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Date</label>
+              <label className="text-slate-300 font-semibold block mb-1">Date <span className="text-rose-400">*</span></label>
               <DatePicker value={transactionDate} onChange={setTransactionDate} accent="blue" />
             </div>
           </div>
@@ -816,7 +1001,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               className="p-2.5 text-xs"
             />
             <datalist id="description-suggestions">
-              {textSuggestions.descriptions.map((value) => <option key={value} value={value} />)}
+              {frequentTextValues.descriptions.map((value) => <option key={value} value={value} />)}
             </datalist>
           </div>
 

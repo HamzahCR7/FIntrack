@@ -1,11 +1,7 @@
 import { z } from 'zod';
-import { AccountType } from '../types/enums';
-
 export const CreateAccountSchema = z.object({
   name: z.string().min(1, 'Account name is required').max(100),
-  type: z.nativeEnum(AccountType, {
-    errorMap: () => ({ message: 'Invalid account type. Must be BANK_ACCOUNT, CREDIT_CARD, CASH, UPI, or AMAZON_PAY' }),
-  }),
+  type: z.string().trim().min(1, 'Account type is required').max(60),
   institution: z.string().optional(),
   initialBalance: z.number().optional().default(0.0),
   creditLimit: z.number().optional(),

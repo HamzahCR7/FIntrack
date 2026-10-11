@@ -184,11 +184,16 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
         </div>
 
         {/* 7. Pocket allowance */}
-        <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
+        <div
+          onClick={() => setSelectedMetric('POCKET')}
+          className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-amber-500/50 hover:bg-slate-800/90 transition-all shadow-sm cursor-pointer group`}
+          title="Click to view Pocket App history"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Pocket Allowance</span>
-            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
               <Gift className="w-4 h-4" />
+              <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
             </div>
           </div>
           <div className="mt-2">

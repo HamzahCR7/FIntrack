@@ -20,6 +20,7 @@ import { GoalController } from './controllers/goal.controller';
 import { ReceiptController } from './controllers/receipt.controller';
 import { ReportController } from './controllers/report.controller';
 import { PushNotificationController } from './controllers/pushNotification.controller';
+import { ReferenceDataController } from './controllers/referenceData.controller';
 import { errorHandler } from './common/middleware/errorHandler';
 
 export function createApp(): Application {
@@ -88,6 +89,7 @@ export function createApp(): Application {
   const receiptController = new ReceiptController();
   const reportController = new ReportController();
   const pushNotificationController = new PushNotificationController();
+  const referenceDataController = new ReferenceDataController();
 
   app.use('/api/v1/auth', authController.router);
   app.use('/api/v1/accounts', accountController.router);
@@ -106,6 +108,7 @@ export function createApp(): Application {
   app.use('/api/v1/receipts', receiptController.router);
   app.use('/api/v1/reports', reportController.router);
   app.use('/api/v1/notifications', pushNotificationController.router);
+  app.use('/api/v1/reference-data', referenceDataController.router);
 
   // Serve the production PWA from the same origin as the API when it has been built.
   const frontendDist = path.resolve(__dirname, '../../frontend/dist');

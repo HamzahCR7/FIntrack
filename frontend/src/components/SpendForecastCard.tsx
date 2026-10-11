@@ -3,6 +3,7 @@ import { Gauge, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Minus } f
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatCurrency } from './SummaryCards';
 import { SpendForecast } from '../types';
+import { useAutoSelectSingleOption } from '../hooks/useAutoSelectSingleOption';
 
 interface SpendForecastCardProps {
   forecast?: SpendForecast;
@@ -10,6 +11,14 @@ interface SpendForecastCardProps {
 
 export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }) => {
   const [selectedHistoryMonth, setSelectedHistoryMonth] = React.useState('');
+  const historicalMonthValues = React.useMemo(
+    () => forecast?.historicalMonthlyTrends.map((trend) => trend.monthKey) || [],
+    [forecast?.historicalMonthlyTrends],
+  );
+
+  useAutoSelectSingleOption(selectedHistoryMonth, historicalMonthValues, (value) => {
+    setSelectedHistoryMonth(value as string);
+  }, Boolean(forecast));
 
   if (!forecast) return null;
 

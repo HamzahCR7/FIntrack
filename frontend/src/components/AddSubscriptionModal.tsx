@@ -128,7 +128,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           )}
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Subscription Name</label>
+            <label className="text-slate-300 font-semibold block mb-1">Subscription Name <span className="text-rose-400">*</span></label>
             <input
               type="text"
               required
@@ -141,7 +141,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Amount (₹)</label>
+              <label className="text-slate-300 font-semibold block mb-1">Amount (₹) <span className="text-rose-400">*</span></label>
               <input
                 type="number"
                 step="0.01"
@@ -154,7 +154,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
             </div>
 
             <div>
-              <label className="text-slate-300 font-semibold block mb-1">Billing Cycle</label>
+              <label className="text-slate-300 font-semibold block mb-1">Billing Cycle <span className="text-rose-400">*</span></label>
               <ClearableSelect
                 value={billingCycle}
                 onValueChange={(value) => setBillingCycle(value as BillingCycle)}
@@ -171,11 +171,12 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           </div>
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Payment Account</label>
+            <label className="text-slate-300 font-semibold block mb-1">Payment Account <span className="text-rose-400">*</span></label>
             <ClearableSelect
               value={sourceAccountId}
               onValueChange={setSourceAccountId}
               defaultValue={defaultSourceAccountId}
+              disabled={accounts.length === 0}
               className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
             >
               <option value="">Select Account</option>
@@ -188,11 +189,12 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           </div>
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Category</label>
+            <label className="text-slate-300 font-semibold block mb-1">Category <span className="text-rose-400">*</span></label>
             <ClearableSelect
               value={categoryId}
               onValueChange={setCategoryId}
               defaultValue={defaultCategoryId}
+              disabled={categories.length === 0}
               className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
             >
               <option value="">Select Category</option>
@@ -205,7 +207,7 @@ export const AddSubscriptionModal: React.FC<AddSubscriptionModalProps> = ({
           </div>
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Next Billing Date</label>
+            <label className="text-slate-300 font-semibold block mb-1">Next Billing Date <span className="text-rose-400">*</span></label>
             <DatePicker value={nextBillingDate} onChange={setNextBillingDate} required accent="indigo" />
           </div>
 

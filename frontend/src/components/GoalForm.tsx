@@ -173,6 +173,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g., Vacation Fund"
+              required
               className="fintrack-input p-2.5 text-sm"
             />
           </div>
@@ -202,6 +203,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
                   }))
                 }
                 defaultValue="SAVINGS"
+                required
                 className="fintrack-select p-2.5 text-sm"
               >
                 <option value="SAVINGS">Savings</option>
@@ -243,6 +245,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
                 placeholder="50000"
                 min="0"
                 step="0.01"
+                required
                 className="fintrack-input p-2.5 text-sm"
               />
             </div>
@@ -254,6 +257,7 @@ const GoalForm: React.FC<GoalFormProps> = ({
                 name="deadline"
                 value={formData.deadline}
                 onChange={handleChange}
+                required
                 className="fintrack-input p-2.5 text-sm date-field"
               />
             </div>

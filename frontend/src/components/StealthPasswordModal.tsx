@@ -124,7 +124,7 @@ export const StealthPasswordModal: React.FC<StealthPasswordModalProps> = ({
 
           <div>
             <label className="text-[11px] font-semibold text-slate-400 block mb-1.5">
-              Login Password
+              Login Password <span className="text-rose-400">*</span>
             </label>
             <div className="relative">
               <KeyRound className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -134,6 +134,7 @@ export const StealthPasswordModal: React.FC<StealthPasswordModalProps> = ({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter password..."
+                required
                 disabled={isLoading}
                 className="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl pl-9 pr-10 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500/50 transition-colors disabled:opacity-50"
               />

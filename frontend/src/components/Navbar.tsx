@@ -1,5 +1,6 @@
 import React from 'react';
-import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3 } from 'lucide-react';
+import { Wallet, Plus, RefreshCw, HandCoins, Download, Printer, LogOut, User, BarChart3, Moon, Sun } from 'lucide-react';
+import type { Theme } from '../utils/theme';
 import { DashboardData, Budget, Goal } from '../types';
 import { NotificationCenter } from './NotificationCenter';
 import { PushNotificationSettings } from './PushNotificationSettings';
@@ -18,6 +19,8 @@ interface NavbarProps {
   goals?: Goal[];
   onNavigate: (tab: any) => void;
   isLoading: boolean;
+  theme: Theme;
+  onToggleTheme: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,6 +37,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   goals,
   onNavigate,
   isLoading,
+  theme,
+  onToggleTheme,
 }) => {
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/80 px-3 py-2 backdrop-blur-md md:px-4 md:py-3.5 lg:px-8">
@@ -45,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent md:text-xl">
+              <h1 className="fintrack-wordmark text-base font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent md:text-xl">
                 FinTrack
               </h1>
             
@@ -88,6 +93,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>Power BI Data</span>
             </button>
           )}
+
+          <button
+            type="button"
+            onClick={onToggleTheme}
+            className="flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-700/60 bg-slate-800 p-2.5 text-slate-300 transition-colors hover:bg-slate-700/80 hover:text-white"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            aria-pressed={theme === 'dark'}
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4 text-amber-300" aria-hidden="true" /> : <Moon className="h-4 w-4 text-indigo-600" aria-hidden="true" />}
+            <span className="hidden lg:inline text-xs font-semibold">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
 
           <button
             onClick={onRefresh}

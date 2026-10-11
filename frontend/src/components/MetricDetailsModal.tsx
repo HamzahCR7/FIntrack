@@ -14,6 +14,7 @@ import {
   Layers,
   ArrowRight,
   Info,
+  Gift,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -30,7 +31,7 @@ import {
 import { Transaction } from '../types';
 import { formatCurrency, usePrivacyMode } from '../utils/privacyStore';
 
-export type MetricType = 'INCOME' | 'EXPENSE' | 'SAVINGS';
+export type MetricType = 'INCOME' | 'EXPENSE' | 'SAVINGS' | 'POCKET';
 
 type TrendSortKey = 'month' | 'income' | 'expenses' | 'savings' | 'rate';
 type TxSortKey = 'date' | 'category' | 'details' | 'account' | 'amount';
@@ -51,6 +52,8 @@ interface MetricDetailsModalProps {
     previousMonthSavings?: number;
     previousMonthIncome?: number;
     previousMonthExpenses?: number;
+    pocketAllowanceBalance: number;
+    pocketAllowanceThisMonth: number;
   };
   monthlyTrends?: Array<{
     month: string;
@@ -72,7 +75,10 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
   usePrivacyMode();
   const activeType: MetricType = type ?? 'EXPENSE';
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedHistoryMonth, setSelectedHistoryMonth] = useState<string | null>(null);
+  const [selectedHistoryMonth, setSelectedHistoryMonth] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+  });
   const [trendSortKey, setTrendSortKey] = useState<TrendSortKey>('month');
   const [trendSortDirection, setTrendSortDirection] = useState<SortDirection>('desc');
   const [txSortKey, setTxSortKey] = useState<TxSortKey>('date');
@@ -91,6 +97,25 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
   const currentMonthName = new Date().toLocaleString('default', { month: 'long', year: 'numeric' });
   const prevMonthDate = new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1);
   const prevMonthName = prevMonthDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  const isPocketTransaction = (tx: Transaction) => /pockets?/.test(
+    `${tx.sourceAccount?.name || ''} ${tx.sourceAccount?.institution || ''} ${tx.destinationAccount?.name || ''} ${tx.destinationAccount?.institution || ''}`.toLowerCase()
+  );
+  const isPocketCredit = (tx: Transaction) => /pockets?/.test(
+    `${tx.destinationAccount?.name || ''} ${tx.destinationAccount?.institution || ''}`.toLowerCase()
+  );
+  const previousPocketAllowance = transactions.reduce((total, tx) => {
+    const date = new Date(tx.transactionDate);
+    return tx.type === 'INCOME' && isPocketCredit(tx)
+      && date.getFullYear() === prevMonthDate.getFullYear()
+      && date.getMonth() === prevMonthDate.getMonth()
+      ? total + tx.amount
+      : total;
+  }, 0);
+  const allTimePocketAllowance = transactions.reduce(
+    (total, tx) => tx.type === 'INCOME' && isPocketCredit(tx) ? total + tx.amount : total,
+    0
+  );
 
   // Config based on metric type
   const config = {
@@ -139,6 +164,21 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
       txType: null,
       chartDataKey: 'savings',
     },
+    POCKET: {
+      title: 'Pocket App History',
+      subtitle: `Pocket App activity for ${currentMonthName} and previous months`,
+      currentValue: summary.pocketAllowanceThisMonth,
+      prevValue: previousPocketAllowance,
+      totalValue: allTimePocketAllowance,
+      currentLabel: 'Received This Month',
+      prevLabel: 'Received Prev Month',
+      allTimeLabel: 'All-Time Allowance Received',
+      badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+      themeColor: '#f59e0b',
+      icon: <Gift className="w-6 h-6 text-amber-400" />,
+      txType: null,
+      chartDataKey: 'income',
+    },
   }[activeType];
 
   // Month-over-month calculation
@@ -154,12 +194,31 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
 
   // Filter transactions
   const matchingTransactions = transactions.filter((tx) => {
+    if (activeType === 'POCKET') return isPocketTransaction(tx);
     if (activeType === 'INCOME') return tx.type === 'INCOME';
     if (activeType === 'EXPENSE') return tx.type === 'EXPENSE';
     return tx.type === 'INCOME' || tx.type === 'EXPENSE';
   });
 
+  const transactionMonths = Array.from(new Set([
+    selectedHistoryMonth,
+    ...matchingTransactions.map((tx) => {
+      const date = new Date(tx.transactionDate);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    }),
+  ])).sort().reverse();
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const today = new Date();
+    setSelectedHistoryMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
+    setSearchTerm('');
+  }, [isOpen, type]);
+
   const filteredTransactions = matchingTransactions.filter((tx) => {
+    const date = new Date(tx.transactionDate);
+    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    if (monthKey !== selectedHistoryMonth) return false;
     if (!searchTerm.trim()) return true;
     const term = searchTerm.toLowerCase();
     const desc = (tx.description || '').toLowerCase();
@@ -176,8 +235,49 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
     return Number.isNaN(parsed) ? 0 : parsed;
   };
 
+  const pocketMonthlyTrends = useMemo(() => {
+    const totals = new Map<string, { month: string; income: number; expenses: number; savings: number }>();
+    matchingTransactions.forEach((tx) => {
+      const date = new Date(tx.transactionDate);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const item = totals.get(key) || {
+        month: date.toLocaleString('default', { month: 'short', year: 'numeric' }),
+        income: 0,
+        expenses: 0,
+        savings: 0,
+      };
+      if (isPocketCredit(tx)) item.income += tx.amount;
+      else item.expenses += tx.amount;
+      item.savings = item.income - item.expenses;
+      totals.set(key, item);
+    });
+    return [...totals.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
+  }, [transactions, activeType]);
+  const transactionMonthlyTrends = useMemo(() => {
+    const totals = new Map<string, { month: string; income: number; expenses: number; savings: number }>();
+    transactions.forEach((tx) => {
+      if (tx.type !== 'INCOME' && tx.type !== 'EXPENSE') return;
+      const date = new Date(tx.transactionDate);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const item = totals.get(key) || {
+        month: date.toLocaleString('default', { month: 'short', year: 'numeric' }),
+        income: 0,
+        expenses: 0,
+        savings: 0,
+      };
+      if (tx.type === 'INCOME') item.income += tx.amount;
+      else item.expenses += tx.amount;
+      item.savings = item.income - item.expenses;
+      totals.set(key, item);
+    });
+    return [...totals.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
+  }, [transactions]);
+  const historyTrends = activeType === 'POCKET'
+    ? pocketMonthlyTrends
+    : transactionMonthlyTrends.length > 0 ? transactionMonthlyTrends : monthlyTrends;
+
   const sortedMonthlyTrends = useMemo(() => {
-    const sorted = [...monthlyTrends].reverse();
+    const sorted = [...historyTrends].reverse();
     sorted.sort((a, b) => {
       const rateA = a.income > 0 ? (a.savings / a.income) * 100 : 0;
       const rateB = b.income > 0 ? (b.savings / b.income) * 100 : 0;
@@ -198,7 +298,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
       return trendSortDirection === 'asc' ? compareValue : -compareValue;
     });
     return sorted;
-  }, [monthlyTrends, trendSortDirection, trendSortKey]);
+  }, [historyTrends, trendSortDirection, trendSortKey]);
 
   const sortedFilteredTransactions = useMemo(() => {
     const sorted = [...filteredTransactions];
@@ -263,7 +363,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
     },
     { income: 0, expenses: 0, savings: 0 }
   );
-  const latestTrackedMonth = [...monthlyTrends].reverse()[0]?.month;
+  const latestTrackedMonth = [...historyTrends].reverse()[0]?.month;
 
   const txIncomeTotal = sortedFilteredTransactions.reduce((sum, tx) => (tx.type === 'INCOME' ? sum + tx.amount : sum), 0);
   const txExpenseTotal = sortedFilteredTransactions.reduce((sum, tx) => (tx.type === 'EXPENSE' ? sum + tx.amount : sum), 0);
@@ -367,12 +467,12 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
           </div>
 
           {/* 2. Monthly Trends Visualization */}
-          {monthlyTrends.length > 0 && (
+          {historyTrends.length > 0 && (
             <div className="bg-slate-800/40 border border-slate-700/60 p-5 rounded-2xl space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <History className="w-4 h-4 text-cyan-400" />
-                  <h3 className="text-sm font-semibold text-white">6-Month Trend Overview</h3>
+                  <h3 className="text-sm font-semibold text-white">Monthly History</h3>
                 </div>
                 <span className="text-[11px] text-slate-400">Current & Previous Months</span>
               </div>
@@ -380,7 +480,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
               <div className="h-60">
                 <ResponsiveContainer width="100%" height="100%">
                   {type === 'SAVINGS' ? (
-                    <AreaChart data={monthlyTrends} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <AreaChart data={historyTrends} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="savingsGrad" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4} />
@@ -398,7 +498,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                       <Area type="monotone" dataKey="savings" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#savingsGrad)" name="Net Savings" />
                     </AreaChart>
                   ) : (
-                    <BarChart data={monthlyTrends} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                    <BarChart data={historyTrends} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
                       <XAxis dataKey="month" stroke="#94a3b8" />
                       <YAxis stroke="#94a3b8" tickFormatter={(v) => `₹${v >= 1000 ? `${v / 1000}k` : v}`} />
@@ -408,9 +508,9 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                       />
                       <Legend wrapperStyle={{ color: '#94a3b8', fontSize: '12px' }} />
                       <Bar
-                        dataKey={activeType === 'INCOME' ? 'income' : 'expenses'}
+                        dataKey={activeType === 'INCOME' || activeType === 'POCKET' ? 'income' : 'expenses'}
                         fill={config.themeColor}
-                        name={activeType === 'INCOME' ? 'Monthly Income' : 'Monthly Expenses'}
+                        name={activeType === 'POCKET' ? 'Pocket Allowance Received' : activeType === 'INCOME' ? 'Monthly Income' : 'Monthly Expenses'}
                         radius={[6, 6, 0, 0]}
                       />
                     </BarChart>
@@ -492,15 +592,29 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                 <Calendar className="w-4 h-4 text-blue-400" />
                 Transactions ({filteredTransactions.length})
               </h3>
-              <div className="relative w-full sm:w-64">
-                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search transactions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
-                />
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <select
+                  value={selectedHistoryMonth}
+                  onChange={(event) => setSelectedHistoryMonth(event.target.value)}
+                  aria-label="Transaction month"
+                  className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
+                >
+                  {transactionMonths.map((month) => (
+                    <option key={month} value={month}>
+                      {new Date(`${month}-01T00:00:00`).toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </option>
+                  ))}
+                </select>
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search this month..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                </div>
               </div>
             </div>
 
@@ -542,7 +656,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                   </thead>
                   <tbody className="divide-y divide-slate-800">
                     {sortedFilteredTransactions.map((tx) => {
-                      const isIncome = tx.type === 'INCOME';
+                      const isIncome = activeType === 'POCKET' ? isPocketCredit(tx) : tx.type === 'INCOME';
                       return (
                         <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
                           <td className="py-2.5 px-3 text-slate-300 whitespace-nowrap">

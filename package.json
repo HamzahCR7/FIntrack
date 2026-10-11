@@ -1,5 +1,9 @@
 {
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names backend,frontend \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\""
+  },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "vite-plugin-pwa": "^1.3.0"
   }
 }

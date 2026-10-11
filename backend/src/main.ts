@@ -4,6 +4,7 @@ import cron from 'node-cron';
 import { ReportService } from './services/report.service';
 import { FinancialAlertService } from './services/financialAlert.service';
 import { backfillDebtPaymentTransactions } from './services/debtPaymentBackfill.service';
+import { ensureFinancialReferenceData } from './services/referenceData.service';
 
 
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,7 @@ const app = createApp();
 
 // Safe and idempotent migration for repayments generated before the marker existed.
 void backfillDebtPaymentTransactions().catch((error) => console.error('Debt-payment transaction backfill failed:', error));
+void ensureFinancialReferenceData().catch((error) => console.error('Financial reference-data initialization failed:', error));
 
 app.listen(PORT, () => {
   console.log(`🚀 FinTrack Backend API running on http://localhost:${PORT}`);

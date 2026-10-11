@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { X } from 'lucide-react';
+import { useAutoSelectSingleOption } from '../hooks/useAutoSelectSingleOption';
 
 interface ClearableSelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'value' | 'onChange'> {
   value: string;
@@ -19,6 +20,19 @@ export const ClearableSelect: React.FC<ClearableSelectProps> = ({
   ...props
 }) => {
   const canClear = !disabled && value !== defaultValue;
+  const optionValues = useMemo(
+    () => React.Children.toArray(children)
+      .filter((child): child is React.ReactElement<React.OptionHTMLAttributes<HTMLOptionElement>> => (
+        React.isValidElement(child) && child.type === 'option'
+      ))
+      .filter((option) => !option.props.disabled && String(option.props.value ?? '') !== defaultValue)
+      .map((option) => String(option.props.value ?? '')),
+    [children, defaultValue],
+  );
+
+  useAutoSelectSingleOption(value === defaultValue ? '' : value, optionValues, (nextValue) => {
+    onValueChange(nextValue as string);
+  }, !disabled);
 
   return (
     <div className={`relative ${wrapperClassName}`}>

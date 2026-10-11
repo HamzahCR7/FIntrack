@@ -123,7 +123,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
           )}
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">{recordKind === 'LOAN' ? 'Lender Name' : 'Person Name'}</label>
+            <label className="text-slate-300 font-semibold block mb-1">{recordKind === 'LOAN' ? 'Lender Name' : 'Person Name'} <span className="text-rose-400">*</span></label>
             <input
               type="text"
               required
@@ -135,7 +135,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
           </div>
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">What are you tracking?</label>
+            <label className="text-slate-300 font-semibold block mb-1">What are you tracking? <span className="text-rose-400">*</span></label>
             <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
@@ -184,7 +184,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
           </div>
 
           <div>
-            <label className="text-slate-300 font-semibold block mb-1">Amount (₹)</label>
+            <label className="text-slate-300 font-semibold block mb-1">Amount (₹) <span className="text-rose-400">*</span></label>
             <input
               type="number"
               step="0.01"
@@ -199,7 +199,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
           {recordKind === 'LOAN' && (
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-slate-300 font-semibold block mb-1">Loan Type</label>
+                <label className="text-slate-300 font-semibold block mb-1">Loan Type <span className="text-rose-400">*</span></label>
                 <ClearableSelect
                   value={loanCategory}
                   onValueChange={(nextLoanCategory) => {

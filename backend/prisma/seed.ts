@@ -1,8 +1,32 @@
 import { PrismaClient } from "@prisma/client";
+import { accountTypeOptions, indianInstitutionOptions, paymentMethodOptions } from "../src/data/financialReferenceData";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  console.log("Seeding financial reference catalogs...");
+  for (const [sortOrder, [code, label, region, category, allowedAccountCategories]] of paymentMethodOptions.entries()) {
+    await prisma.paymentMethodOption.upsert({
+      where: { code },
+      update: { label, region, category, allowedAccountCategories, sortOrder, isActive: true },
+      create: { code, label, region, category, allowedAccountCategories, sortOrder },
+    });
+  }
+  for (const [sortOrder, [code, label]] of indianInstitutionOptions.entries()) {
+    await prisma.financialInstitutionOption.upsert({
+      where: { code },
+      update: { label, country: 'IN', category: 'BANK', sortOrder, isActive: true },
+      create: { code, label, country: 'IN', category: 'BANK', sortOrder },
+    });
+  }
+  for (const [sortOrder, [code, label, category]] of accountTypeOptions.entries()) {
+    await prisma.accountTypeOption.upsert({
+      where: { code },
+      update: { label, category, sortOrder, isActive: true },
+      create: { code, label, category, sortOrder },
+    });
+  }
+
   console.log("Seeding database categories...");
 
   const legacyFruitsCategory = await prisma.category.findUnique({
@@ -304,7 +328,17 @@ async function main() {
       type: "CREDIT_CARD",
       institution: "Axis Bank",
       currentBalance: 0,
-      creditLimit: 100000,
+      creditLimit: 348000,
+      statementAmount: 0,
+      minimumPayment: 0,
+      paymentDueDay: 9,
+    },
+    {
+      name: "Axis Bank NEO Credit Card",
+      type: "CREDIT_CARD",
+      institution: "Axis Bank",
+      currentBalance: 0,
+      creditLimit: 348000,
       statementAmount: 0,
       minimumPayment: 0,
       paymentDueDay: 9,
@@ -315,7 +349,7 @@ async function main() {
       currentBalance: 0,
     },
     {
-      name: "GPay / PhonePe (UPI)",
+      name: "UPI",
       type: "UPI",
       institution: "UPI",
       currentBalance: 0,
@@ -345,6 +379,11 @@ async function main() {
       await prisma.account.update({
         where: { id: existing.id },
         data: { includeInTotalBalance: false },
+      });
+    } else if (acc.name === "Axis MY ZONE Credit Card" || acc.name === "Axis Bank NEO Credit Card") {
+      await prisma.account.update({
+        where: { id: existing.id },
+        data: { creditLimit: 348000 },
       });
     }
   }

@@ -1,6 +1,15 @@
-export type AccountType = 'BANK_ACCOUNT' | 'CREDIT_CARD' | 'CASH' | 'UPI' | 'AMAZON_PAY';
+export type AccountType = string;
 export type TransactionType = 'INCOME' | 'EXPENSE' | 'TRANSFER';
-export type PaymentMethod = 'BANK_TRANSFER' | 'CREDIT_CARD' | 'CASH' | 'UPI';
+export type PaymentMethod = string;
+
+export interface FinancialReferenceOption {
+  code: string;
+  label: string;
+  category: string;
+  region?: string;
+  sortOrder?: number;
+  allowedAccountCategories?: string;
+}
 export type BillingCycle = 'WEEKLY' | 'EVERY_28_DAYS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
 export type SubscriptionStatus = 'ACTIVE' | 'PAUSED' | 'CANCELLED';
 export type DebtType = 'OWED_TO_ME' | 'I_OWE';

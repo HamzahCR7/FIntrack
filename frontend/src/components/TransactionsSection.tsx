@@ -8,6 +8,7 @@ import { useToast } from '../utils/toastStore';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Search, Filter, ArrowUpRight, ArrowDownRight, ArrowRightLeft, Calendar, Tag, CreditCard, X, Pencil, Trash2, Download, Printer, ChevronLeft, ChevronRight, ChevronDown, Check, Clock, Loader } from 'lucide-react';
 import { matchesLedgerSearch } from '../utils/ledgerSearch';
+import { useAutoSelectSingleOption } from '../hooks/useAutoSelectSingleOption';
 
 interface FancySelectOption {
   value: string;
@@ -37,6 +38,9 @@ const FancySelect: React.FC<FancySelectProps> = ({ value, placeholder, options, 
       ? options.find((option) => option.value === selectedValues[0])?.label || placeholder
       : `${selectedValues.length} selected`
     : selectedOption?.label || placeholder;
+  const optionValues = useMemo(() => options.map((option) => option.value), [options]);
+
+  useAutoSelectSingleOption(value, optionValues, onChange);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -61,7 +65,7 @@ const FancySelect: React.FC<FancySelectProps> = ({ value, placeholder, options, 
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        className={`fintrack-select flex items-center justify-between p-2.5 text-left text-xs w-full rounded-xl border bg-slate-900/80 border-slate-700/80 ${
+        className={`ledger-select-trigger flex w-full items-center justify-between rounded-xl border border-slate-700/80 bg-slate-900/80 p-2.5 text-left text-xs ${
           hasSelection ? 'text-slate-200' : 'text-slate-500'
         }`}
         aria-haspopup="listbox"

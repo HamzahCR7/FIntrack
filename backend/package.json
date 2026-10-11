@@ -14,7 +14,8 @@
     "prisma:generate:cloud": "prisma generate --schema prisma/schema.postgresql.prisma",
     "prisma:db:push": "prisma db push",
     "seed": "ts-node prisma/seed.ts",
-    "test": "set \"DATABASE_URL=file:./test.db\"&& jest --runInBand",
+    "seed:reference-data": "ts-node prisma/seed-reference-data.ts",
+    "test": "DATABASE_URL=file:./test.db jest --runInBand",
     "test:watch": "jest --watch"
   },
   "dependencies": {
