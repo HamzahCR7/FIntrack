@@ -189,8 +189,8 @@ export class AnalyticsService {
     const totalExpenses = allExpenses._sum.amount || 0;
     const totalSavings = totalIncome - totalExpenses;
 
-    const spendingThisMonth = monthExpensesAgg._sum.amount || 0;
     const cashOutflowThisMonth = monthCashOutflowAgg._sum.amount || 0;
+    const spendingThisMonth = cashOutflowThisMonth;
     const incomeThisMonth = monthIncomeAgg._sum.amount || 0;
     const savingsThisMonth = incomeThisMonth - cashOutflowThisMonth;
 

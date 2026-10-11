@@ -80,6 +80,7 @@ const withCashFlowSavings = (
     ...dashboard,
     summary: {
       ...dashboard.summary,
+      spendingThisMonth: Number(cashOutflow.toFixed(2)),
       savingsThisMonth: Number((dashboard.summary.incomeThisMonth - cashOutflow).toFixed(2)),
     },
   };
