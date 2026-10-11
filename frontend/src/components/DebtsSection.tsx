@@ -356,10 +356,13 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                           <button
                             type="button"
                             onClick={() => {
+                              const paymentRemaining = debt.recordKind === 'LOAN'
+                                ? (debt.installmentRemainingAmount ?? Math.max(0, (debt.emiAmount || debt.amount) - debt.settledAmount))
+                                : debt.remainingAmount;
                               setError(null);
                               window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
                               setSettleDebtItem(debt);
-                              setSettleAmount(debt.remainingAmount.toString());
+                              setSettleAmount(paymentRemaining.toString());
                               setSettleAccountId('');
                               setSettleDate(new Date().toISOString().split('T')[0]);
                             }}
@@ -459,7 +462,14 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
           <form onSubmit={handleSettle} className="space-y-4 text-xs">
             {error && <ErrorMessage message={error} />}
             <p className="rounded-lg bg-slate-800 p-3 text-slate-300">
-              Remaining balance: <span className="font-bold text-white">{formatCurrency(settleDebtItem.remainingAmount)}</span>
+              {settleDebtItem.recordKind === 'LOAN' ? 'Remaining monthly EMI' : 'Remaining balance'}:{' '}
+              <span className="font-bold text-white">
+                {formatCurrency(
+                  settleDebtItem.recordKind === 'LOAN'
+                    ? (settleDebtItem.installmentRemainingAmount ?? Math.max(0, (settleDebtItem.emiAmount || settleDebtItem.amount) - settleDebtItem.settledAmount))
+                    : settleDebtItem.remainingAmount
+                )}
+              </span>
             </p>
             <FormInput label="Payment Amount (INR)" value={settleAmount} onChange={setSettleAmount} type="number" required />
             <div>

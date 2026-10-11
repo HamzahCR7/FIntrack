@@ -34,6 +34,7 @@ export interface Debt {
   amount: number;
   settledAmount: number;
   remainingAmount: number;
+  installmentRemainingAmount?: number;
   dueDate?: string;
   status: DebtStatus;
   notes?: string;

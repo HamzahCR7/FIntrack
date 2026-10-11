@@ -37,5 +37,30 @@ describe('DebtService recurring loans', () => {
     }));
     expect(result.status).toBe('PENDING');
     expect(result.remainingAmount).toBe(10000);
+    expect(result.installmentRemainingAmount).toBe(10000);
+  });
+
+  it('reports the remaining monthly installment separately from the total loan balance', () => {
+    const service = new DebtService({} as any, {} as any, {} as any, {} as any);
+
+    const result = service.enhanceDebt({
+      id: 'electronics-loan',
+      personName: 'Electronics loan',
+      type: 'I_OWE',
+      recordKind: 'LOAN',
+      loanCategory: 'ELECTRONICS',
+      loanItem: 'Laptop',
+      emiAmount: 5000,
+      amount: 50000,
+      settledAmount: 2000,
+      dueDate: null,
+      status: 'PARTIALLY_SETTLED',
+      notes: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
+
+    expect(result.remainingAmount).toBe(48000);
+    expect(result.installmentRemainingAmount).toBe(3000);
   });
 });

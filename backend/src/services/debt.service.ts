@@ -9,6 +9,7 @@ import { DebtType, DebtStatus, DebtRecordKind, AccountType, TransactionType, Pay
 
 export interface EnhancedDebt extends Debt {
   remainingAmount: number;
+  installmentRemainingAmount: number;
 }
 
 const nextMonthlyDueDate = (currentDueDate: Date | null, paymentDate: Date): Date => {
@@ -29,9 +30,14 @@ export class DebtService {
 
   public enhanceDebt(debt: Debt): EnhancedDebt {
     const remainingAmount = Math.max(0, debt.amount - debt.settledAmount);
+    const installmentAmount = debt.recordKind === DebtRecordKind.LOAN
+      ? (debt.emiAmount || debt.amount)
+      : debt.amount;
+    const installmentRemainingAmount = Math.max(0, installmentAmount - debt.settledAmount);
     return {
       ...debt,
       remainingAmount: Number(remainingAmount.toFixed(2)),
+      installmentRemainingAmount: Number(installmentRemainingAmount.toFixed(2)),
     };
   }
 
