@@ -33,31 +33,37 @@ export const defaultFinancialInstitutions = indianInstitutionOptions.map(([code,
 let initialization: Promise<void> | undefined;
 
 export function ensureFinancialReferenceData(): Promise<void> {
-  initialization ??= prisma.$transaction(async (database) => {
-    for (const [sortOrder, [code, label, region, category, allowedAccountCategories]] of paymentMethodOptions.entries()) {
-      await database.paymentMethodOption.upsert({
-        where: { code },
-        update: { label, region, category, allowedAccountCategories, sortOrder, isActive: true },
-        create: { code, label, region, category, allowedAccountCategories, sortOrder },
-      });
-    }
+  initialization ??= (async () => {
+    await prisma.$transaction(
+      paymentMethodOptions.map(([code, label, region, category, allowedAccountCategories], sortOrder) =>
+        prisma.paymentMethodOption.upsert({
+          where: { code },
+          update: { label, region, category, allowedAccountCategories, sortOrder, isActive: true },
+          create: { code, label, region, category, allowedAccountCategories, sortOrder },
+        }),
+      ),
+    );
 
-    for (const [sortOrder, [code, label]] of indianInstitutionOptions.entries()) {
-      await database.financialInstitutionOption.upsert({
-        where: { code },
-        update: { label, country: 'IN', category: 'BANK', sortOrder, isActive: true },
-        create: { code, label, country: 'IN', category: 'BANK', sortOrder },
-      });
-    }
+    await prisma.$transaction(
+      indianInstitutionOptions.map(([code, label], sortOrder) =>
+        prisma.financialInstitutionOption.upsert({
+          where: { code },
+          update: { label, country: 'IN', category: 'BANK', sortOrder, isActive: true },
+          create: { code, label, country: 'IN', category: 'BANK', sortOrder },
+        }),
+      ),
+    );
 
-    for (const [sortOrder, [code, label, category]] of accountTypeOptions.entries()) {
-      await database.accountTypeOption.upsert({
-        where: { code },
-        update: { label, category, sortOrder, isActive: true },
-        create: { code, label, category, sortOrder },
-      });
-    }
-  }).catch((error) => {
+    await prisma.$transaction(
+      accountTypeOptions.map(([code, label, category], sortOrder) =>
+        prisma.accountTypeOption.upsert({
+          where: { code },
+          update: { label, category, sortOrder, isActive: true },
+          create: { code, label, category, sortOrder },
+        }),
+      ),
+    );
+  })().catch((error) => {
     initialization = undefined;
     throw error;
   });
