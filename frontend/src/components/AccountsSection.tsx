@@ -190,8 +190,9 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
               creditCards.map((card) => {
                 const limit = card.creditLimit || 0;
                 const debt = card.currentBalance ?? card.currentOutstanding ?? 0;
-                const avail = Math.max(0, limit - debt);
-                const util = limit > 0 ? Math.min(100, Math.round((debt / limit) * 100)) : 0;
+                const sharedDebt = card.sharedOutstanding ?? debt;
+                const avail = card.availableCredit ?? Math.max(0, limit - sharedDebt);
+                const util = card.utilizationPercentage ?? (limit > 0 ? Math.min(100, Math.round((sharedDebt / limit) * 100)) : 0);
 
                 return (
                   <div key={card.id} className="p-3 rounded-xl bg-slate-900/50 border border-slate-700/40 space-y-2">
@@ -208,7 +209,7 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
                     </div>
 
                     <div className="flex items-center justify-between text-[10px] text-slate-400">
-                      <span>Limit: {formatCurrency(limit)}</span>
+                      <span>{card.creditGroupId ? 'Shared limit' : 'Limit'}: {formatCurrency(limit)}</span>
                       <span>Avail: {formatCurrency(avail)}</span>
                     </div>
 

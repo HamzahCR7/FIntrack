@@ -68,12 +68,14 @@ export interface Account {
   institution?: string;
   currentBalance: number;
   creditLimit?: number;
+  creditGroupId?: string;
   lastFourDigits?: string;
   statementCycleDay?: number;
   paymentDueDay?: number;
   statementAmount?: number;
   minimumPayment?: number;
   currentOutstanding?: number;
+  sharedOutstanding?: number;
   availableCredit?: number;
   utilizationPercentage?: number;
   isActive: boolean;

@@ -5,6 +5,7 @@ export const CreateAccountSchema = z.object({
   institution: z.string().optional(),
   initialBalance: z.number().optional().default(0.0),
   creditLimit: z.number().optional(),
+  creditGroupId: z.string().trim().min(1).max(100).optional(),
   lastFourDigits: z.string().length(4).optional(),
   statementCycleDay: z.number().min(1).max(31).optional(),
   paymentDueDay: z.number().min(1).max(31).optional(),

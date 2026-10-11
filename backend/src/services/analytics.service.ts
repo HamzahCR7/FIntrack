@@ -61,6 +61,29 @@ export class AnalyticsService {
     const totalLiquidBalance = bankBalances + cashBalances + upiBalances;
     const creditCardAccountIds = accountBreakdown.CREDIT_CARD.map((account) => account.id);
 
+    const sharedCreditOutstanding = new Map<string, number>();
+    for (const card of accountBreakdown.CREDIT_CARD) {
+      if (!card.creditGroupId) continue;
+      sharedCreditOutstanding.set(
+        card.creditGroupId,
+        (sharedCreditOutstanding.get(card.creditGroupId) || 0) + card.currentBalance,
+      );
+    }
+    accountBreakdown.CREDIT_CARD = accountBreakdown.CREDIT_CARD.map((card) => {
+      const effectiveOutstanding = card.creditGroupId
+        ? sharedCreditOutstanding.get(card.creditGroupId) || 0
+        : card.currentBalance;
+      const limit = card.creditLimit || 0;
+      return {
+        ...card,
+        sharedOutstanding: effectiveOutstanding,
+        availableCredit: Math.max(0, limit - effectiveOutstanding),
+        utilizationPercentage: limit > 0
+          ? Number(((effectiveOutstanding / limit) * 100).toFixed(2))
+          : 0,
+      };
+    });
+
     // 2. All-Time Aggregates
     const cashOutflowWhere = (start: Date, end: Date) => ({
       transactionDate: { gte: start, lte: end },

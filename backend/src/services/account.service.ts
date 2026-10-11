@@ -25,6 +25,7 @@ export class AccountService {
       institution: dto.institution,
       currentBalance: dto.initialBalance ?? 0.0,
       creditLimit: dto.creditLimit,
+      creditGroupId: dto.creditGroupId,
       lastFourDigits: dto.lastFourDigits,
       statementCycleDay: dto.statementCycleDay,
       paymentDueDay: dto.paymentDueDay,

@@ -42,6 +42,7 @@ model Account {
   currentBalance        Float    @default(0.0)
   includeInTotalBalance Boolean  @default(true)
   creditLimit           Float?
+  creditGroupId         String?  // Cards sharing one credit line use the same group ID
   lastFourDigits        String?
   statementCycleDay     Int? // Day of month (1-31) when statement is generated
   paymentDueDay         Int? // Day of month (1-31) when payment is due

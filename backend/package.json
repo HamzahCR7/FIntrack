@@ -9,7 +9,7 @@
     "start": "node dist/main.js",
     "start:app": "npm run build:app && npm start",
     "dev": "prisma generate --schema prisma/schema.prisma && ts-node-dev --respawn --transpile-only src/main.ts",
-    "dev:cloud": "prisma generate --schema prisma/schema.postgresql.prisma && node --env-file=.env.cloud ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/main.ts",
+    "dev:cloud": "node ../scripts/prepare-postgres.cjs && prisma generate --schema prisma/schema.postgresql.prisma && node --env-file=.env.cloud ./node_modules/ts-node-dev/lib/bin.js --respawn --transpile-only src/main.ts",
     "prisma:generate": "prisma generate --schema prisma/schema.prisma",
     "prisma:generate:cloud": "prisma generate --schema prisma/schema.postgresql.prisma",
     "prisma:db:push": "prisma db push",
