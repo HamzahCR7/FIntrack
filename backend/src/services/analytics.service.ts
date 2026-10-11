@@ -87,11 +87,20 @@ export class AnalyticsService {
     // 2. All-Time Aggregates
     const cashOutflowWhere = (start: Date, end: Date) => ({
       transactionDate: { gte: start, lte: end },
-      type: TransactionType.EXPENSE,
-      paymentMethod: { not: PaymentMethod.CREDIT_CARD },
       OR: [
-        { sourceAccountId: null },
-        { sourceAccountId: { notIn: creditCardAccountIds } },
+        {
+          type: TransactionType.EXPENSE,
+          paymentMethod: { not: PaymentMethod.CREDIT_CARD },
+          OR: [
+            { sourceAccountId: null },
+            { sourceAccountId: { notIn: creditCardAccountIds } },
+          ],
+        },
+        {
+          type: TransactionType.TRANSFER,
+          sourceAccountId: { notIn: creditCardAccountIds },
+          destinationAccountId: { in: creditCardAccountIds },
+        },
       ],
     });
     const previousMonthStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));

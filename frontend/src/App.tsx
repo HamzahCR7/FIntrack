@@ -70,7 +70,10 @@ const withCashFlowSavings = (
       return isCreditPurchase ? total : total + transaction.amount;
     }
 
-    return total;
+    const isCardPayment = transaction.type === 'TRANSFER'
+      && Boolean(transaction.destinationAccountId && creditCardIds.has(transaction.destinationAccountId))
+      && !Boolean(transaction.sourceAccountId && creditCardIds.has(transaction.sourceAccountId));
+    return isCardPayment ? total + transaction.amount : total;
   }, 0);
 
   return {
