@@ -351,13 +351,27 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                           )}
                           {debt.notes && <p className="text-[11px] italic">"{debt.notes}"</p>}
                         </div>
+                        {isLoan && debt.payments && debt.payments.length > 0 && (
+                          <div className="mb-3 rounded-lg border border-slate-800 bg-slate-950/30 p-2.5">
+                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400">Payment History</p>
+                            <div className="space-y-1.5">
+                              {debt.payments.map((payment) => (
+                                <div key={payment.id} className="flex items-center justify-between gap-3 text-[11px]">
+                                  <span className="text-slate-400">{new Date(payment.settlementDate).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                  <span className="text-emerald-400">{payment.id.startsWith('legacy-') ? 'Previous payments' : 'Paid'} {formatCurrency(payment.amount)}</span>
+                                  <span className="text-slate-300">Balance {formatCurrency(payment.remainingAmountAfter)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                         <div className="flex justify-end gap-1.5">
                           <IconButton title="Edit record" onClick={() => openAddModal(debt)} icon={<Pencil className="h-3.5 w-3.5" />} />
                           <button
                             type="button"
                             onClick={() => {
                               const paymentRemaining = debt.recordKind === 'LOAN'
-                                ? (debt.installmentRemainingAmount ?? Math.max(0, (debt.emiAmount || debt.amount) - debt.settledAmount))
+                                ? (debt.installmentRemainingAmount ?? Math.min(debt.remainingAmount, (debt.emiAmount || debt.amount) - (debt.settledAmount % (debt.emiAmount || debt.amount))))
                                 : debt.remainingAmount;
                               setError(null);
                               window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
@@ -466,7 +480,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
               <span className="font-bold text-white">
                 {formatCurrency(
                   settleDebtItem.recordKind === 'LOAN'
-                    ? (settleDebtItem.installmentRemainingAmount ?? Math.max(0, (settleDebtItem.emiAmount || settleDebtItem.amount) - settleDebtItem.settledAmount))
+                    ? (settleDebtItem.installmentRemainingAmount ?? Math.min(settleDebtItem.remainingAmount, (settleDebtItem.emiAmount || settleDebtItem.amount) - (settleDebtItem.settledAmount % (settleDebtItem.emiAmount || settleDebtItem.amount))))
                     : settleDebtItem.remainingAmount
                 )}
               </span>

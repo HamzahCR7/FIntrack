@@ -1,4 +1,4 @@
-import { PrismaClient, Debt } from '@prisma/client';
+import { PrismaClient, Debt, DebtPayment } from '@prisma/client';
 import { prisma as defaultPrisma } from '../config/prisma';
 import { DebtRepository } from '../repositories/debt.repository';
 import { AccountRepository } from '../repositories/account.repository';
@@ -10,6 +10,7 @@ import { DebtType, DebtStatus, DebtRecordKind, AccountType, TransactionType, Pay
 export interface EnhancedDebt extends Debt {
   remainingAmount: number;
   installmentRemainingAmount: number;
+  payments: DebtPayment[];
 }
 
 const nextMonthlyDueDate = (currentDueDate: Date | null, paymentDate: Date): Date => {
@@ -28,16 +29,34 @@ export class DebtService {
     private transactionService: TransactionService = new TransactionService(db)
   ) {}
 
-  public enhanceDebt(debt: Debt): EnhancedDebt {
+  public enhanceDebt(debt: Debt & { payments?: DebtPayment[] }): EnhancedDebt {
     const remainingAmount = Math.max(0, debt.amount - debt.settledAmount);
     const installmentAmount = debt.recordKind === DebtRecordKind.LOAN
       ? (debt.emiAmount || debt.amount)
       : debt.amount;
-    const installmentRemainingAmount = Math.max(0, installmentAmount - debt.settledAmount);
+    const paidTowardInstallment = debt.recordKind === DebtRecordKind.LOAN
+      ? debt.settledAmount % installmentAmount
+      : debt.settledAmount;
+    const installmentRemainingAmount = remainingAmount === 0
+      ? 0
+      : Math.min(remainingAmount, installmentAmount - paidTowardInstallment);
+    const payments = debt.payments?.length
+      ? debt.payments
+      : debt.settledAmount > 0
+        ? [{
+            id: `legacy-${debt.id}`,
+            debtId: debt.id,
+            amount: debt.settledAmount,
+            settlementDate: debt.updatedAt,
+            remainingAmountAfter: Number(remainingAmount.toFixed(2)),
+            createdAt: debt.updatedAt,
+          }]
+        : [];
     return {
       ...debt,
       remainingAmount: Number(remainingAmount.toFixed(2)),
       installmentRemainingAmount: Number(installmentRemainingAmount.toFixed(2)),
+      payments,
     };
   }
 
@@ -157,7 +176,7 @@ export class DebtService {
     const settlementDate = dto.settlementDate || new Date();
     const newSettledAmount = Number((debt.settledAmount + dto.amountToSettle).toFixed(2));
     const cycleAmount = isRecurringLoan ? (debt.emiAmount || debt.amount) : debt.amount;
-    if (newSettledAmount > cycleAmount) {
+    if (newSettledAmount > debt.amount) {
       throw new BadRequestError(`Settlement amount exceeds remaining debt balance.`);
     }
 
@@ -197,18 +216,23 @@ export class DebtService {
       }
     }
 
-    const cyclePaid = newSettledAmount >= cycleAmount;
-    const updated = await this.debtRepo.update(id, isRecurringLoan && cyclePaid
-      ? {
-          settledAmount: 0,
-          status: DebtStatus.PENDING,
-          dueDate: nextMonthlyDueDate(debt.dueDate, settlementDate),
-          emiAmount: debt.emiAmount || debt.amount,
-        }
-      : {
-          settledAmount: newSettledAmount,
-          status: cyclePaid ? DebtStatus.SETTLED : DebtStatus.PARTIALLY_SETTLED,
-        });
+    const crossedInstallmentBoundary = isRecurringLoan
+      && Math.floor(newSettledAmount / cycleAmount) > Math.floor(debt.settledAmount / cycleAmount);
+    const fullySettled = newSettledAmount >= debt.amount;
+    const updated = await this.debtRepo.update(id, {
+      settledAmount: newSettledAmount,
+      status: fullySettled ? DebtStatus.SETTLED : DebtStatus.PARTIALLY_SETTLED,
+      payments: {
+        create: {
+          amount: dto.amountToSettle,
+          settlementDate,
+          remainingAmountAfter: Number((debt.amount - newSettledAmount).toFixed(2)),
+        },
+      },
+      ...(crossedInstallmentBoundary && !fullySettled
+        ? { dueDate: nextMonthlyDueDate(debt.dueDate, settlementDate) }
+        : {}),
+    });
 
     return this.enhanceDebt(updated);
   }

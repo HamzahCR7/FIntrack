@@ -128,6 +128,7 @@ export class AnalyticsService {
       this.db.debt.findMany({
         where: { status: { not: 'SETTLED' } },
         orderBy: { createdAt: 'desc' },
+        include: { payments: { orderBy: { settlementDate: 'desc' } } },
       }),
     ]);
 
@@ -279,7 +280,25 @@ export class AnalyticsService {
         activeDebtsCount: allDebts.length,
         activeDebts: allDebts.map((d) => ({
           ...d,
+          payments: d.payments.length > 0
+            ? d.payments
+            : d.settledAmount > 0
+              ? [{
+                  id: `legacy-${d.id}`,
+                  debtId: d.id,
+                  amount: d.settledAmount,
+                  settlementDate: d.updatedAt,
+                  remainingAmountAfter: Number(Math.max(0, d.amount - d.settledAmount).toFixed(2)),
+                  createdAt: d.updatedAt,
+                }]
+              : [],
           remainingAmount: Number(Math.max(0, d.amount - d.settledAmount).toFixed(2)),
+          installmentRemainingAmount: Number((() => {
+            const remaining = Math.max(0, d.amount - d.settledAmount);
+            if (remaining === 0 || d.recordKind !== 'LOAN') return remaining;
+            const installment = d.emiAmount || d.amount;
+            return Math.min(remaining, installment - (d.settledAmount % installment));
+          })().toFixed(2)),
         })),
       },
     };

@@ -35,11 +35,19 @@ export interface Debt {
   settledAmount: number;
   remainingAmount: number;
   installmentRemainingAmount?: number;
+  payments?: DebtPayment[];
   dueDate?: string;
   status: DebtStatus;
   notes?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface DebtPayment {
+  id: string;
+  amount: number;
+  settlementDate: string;
+  remainingAmountAfter: number;
 }
 
 export interface Account {
