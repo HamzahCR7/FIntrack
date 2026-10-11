@@ -188,7 +188,7 @@ export const api = {
     return res.data.data;
   },
 
-  createDebt: async (data: Partial<Debt> & { accountId?: string }): Promise<Debt> => {
+  createDebt: async (data: Partial<Debt> & { accountId?: string; categoryId?: string }): Promise<Debt> => {
     const res = await apiClient.post(`${API_BASE}/debts`, data);
     return res.data.data;
   },

@@ -807,7 +807,7 @@ export const App: React.FC = () => {
                 badgeColor="bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
                 defaultOpen={true}
               >
-                <DebtsSection debts={dashboardData.debts} accounts={accounts} onRefresh={() => fetchAllData()} />
+                <DebtsSection debts={dashboardData.debts} accounts={accounts} categories={categories} onRefresh={() => fetchAllData()} />
               </AccordionSection>
             )}
 
@@ -988,6 +988,7 @@ export const App: React.FC = () => {
         onClose={() => setIsDebtModalOpen(false)}
         onSuccess={() => fetchAllData()}
         accounts={accounts}
+        categories={categories}
       />}
 
       {/* Add Subscription Modal */}

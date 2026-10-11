@@ -31,6 +31,8 @@ export interface Debt {
   loanCategory?: string;
   loanItem?: string;
   emiAmount?: number;
+  categoryId?: string;
+  category?: Category;
   amount: number;
   settledAmount: number;
   remainingAmount: number;
@@ -96,6 +98,7 @@ export interface Transaction {
   referenceNumber?: string;
   isSubscription: boolean;
   subscriptionId?: string;
+  isDebtPayment?: boolean;
   category?: Category;
   subcategory?: Category;
   sourceAccount?: Account;

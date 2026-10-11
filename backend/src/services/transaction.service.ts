@@ -97,6 +97,7 @@ export class TransactionService {
           transactionDate: dto.transactionDate || new Date(),
           referenceNumber: dto.referenceNumber,
           isSubscription: dto.isSubscription ?? false,
+          isDebtPayment: dto.isDebtPayment ?? false,
           subscription: dto.subscriptionId ? { connect: { id: dto.subscriptionId } } : undefined,
           category: dto.categoryId ? { connect: { id: dto.categoryId } } : undefined,
           subcategory: dto.subcategoryId ? { connect: { id: dto.subcategoryId } } : undefined,
@@ -196,6 +197,7 @@ export class TransactionService {
           description: dto.description,
           transactionDate: dto.transactionDate || new Date(),
           referenceNumber: dto.referenceNumber,
+          ...(dto.isDebtPayment !== undefined ? { isDebtPayment: dto.isDebtPayment } : {}),
           category: dto.categoryId
             ? { connect: { id: dto.categoryId } }
             : { disconnect: true },

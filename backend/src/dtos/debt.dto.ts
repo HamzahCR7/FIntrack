@@ -10,6 +10,7 @@ export const CreateDebtSchema = z.object({
   loanCategory: z.string().max(50).optional(),
   loanItem: z.string().max(100).optional(),
   emiAmount: z.number().positive('EMI amount must be greater than zero').optional(),
+  categoryId: z.string().optional(),
   amount: z.number().positive('Amount must be greater than zero'),
   accountId: z.string().optional(),
   dueDate: z

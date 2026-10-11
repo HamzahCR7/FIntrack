@@ -25,6 +25,7 @@ export const CreateTransactionSchema = z
     referenceNumber: z.string().optional(),
     isSubscription: z.boolean().optional().default(false),
     subscriptionId: z.string().optional(),
+    isDebtPayment: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.type === TransactionType.EXPENSE) {

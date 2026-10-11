@@ -63,7 +63,7 @@ export class FinancialAlertService {
     }
     for (const budget of budgets) {
       const categoryIds = (budget.categoryIds || budget.categoryId || '').split(',').filter(Boolean);
-      const spent = await this.db.transaction.aggregate({ _sum: { amount: true }, where: { ...owner, type: 'EXPENSE', transactionDate: { gte: budget.billingCycleStartDate, lte: budget.billingCycleEndDate }, ...(categoryIds.length ? { categoryId: { in: categoryIds } } : {}) } });
+      const spent = await this.db.transaction.aggregate({ _sum: { amount: true }, where: { ...owner, type: 'EXPENSE', transactionDate: { gte: budget.billingCycleStartDate, lte: budget.billingCycleEndDate }, ...(categoryIds.length ? { categoryId: { in: categoryIds } } : { isDebtPayment: false }) } });
       const percent = budget.amount ? ((spent._sum.amount || 0) / budget.amount) * 100 : 0;
       const level = percent >= 100 ? 'exceeded' : percent >= budget.alertThreshold ? 'warning' : null;
       if (level) alerts.push({ key: `budget:${budget.id}:${budget.billingCycleStartDate.toISOString().slice(0, 10)}:${level}`, title: level === 'exceeded' ? 'Budget exceeded' : 'Budget nearing its limit', body: `${budget.name} is at ${percent.toFixed(0)}% of its ${money(budget.amount)} limit.`, tab: 'budgets' });

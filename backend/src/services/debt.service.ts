@@ -11,6 +11,7 @@ export interface EnhancedDebt extends Debt {
   remainingAmount: number;
   installmentRemainingAmount: number;
   payments: DebtPayment[];
+  category?: { id: string; name: string; icon?: string | null; color?: string | null } | null;
 }
 
 const nextMonthlyDueDate = (currentDueDate: Date | null, paymentDate: Date): Date => {
@@ -28,6 +29,30 @@ export class DebtService {
     private accountRepo: AccountRepository = new AccountRepository(db),
     private transactionService: TransactionService = new TransactionService(db)
   ) {}
+
+  private async resolveLoanExpenseCategoryId(loanCategory: string | null | undefined, categoryId?: string | null): Promise<string> {
+    if (categoryId) {
+      const category = await this.db.category.findUnique({ where: { id: categoryId } });
+      if (!category) throw new NotFoundError(`Category '${categoryId}' not found`);
+      return category.id;
+    }
+
+    const defaultCategoryName: Record<string, string> = {
+      ELECTRONICS: 'Shopping > Electronics',
+      EDUCATION: 'Education Loan > EMI Payment',
+      VEHICLE: 'Transport > Vehicle Service',
+      HOME: 'Rent & Housing',
+      PERSONAL: 'Miscellaneous',
+      OTHER: 'Other',
+    };
+    const category = await this.db.category.findFirst({
+      where: { name: defaultCategoryName[loanCategory || 'OTHER'] || 'Other' },
+    });
+    if (!category) {
+      throw new BadRequestError('Select an expense category for this loan before recording payments.');
+    }
+    return category.id;
+  }
 
   public enhanceDebt(debt: Debt & { payments?: DebtPayment[] }): EnhancedDebt {
     const remainingAmount = Math.max(0, debt.amount - debt.settledAmount);
@@ -116,6 +141,9 @@ export class DebtService {
       }
     }
 
+    const categoryId = dto.recordKind === DebtRecordKind.LOAN
+      ? await this.resolveLoanExpenseCategoryId(dto.loanCategory, dto.categoryId)
+      : undefined;
     const created = await this.debtRepo.create({
       personName: dto.personName,
       type: dto.type,
@@ -123,6 +151,7 @@ export class DebtService {
       loanCategory: dto.recordKind === DebtRecordKind.LOAN ? dto.loanCategory : undefined,
       loanItem: dto.recordKind === DebtRecordKind.LOAN ? dto.loanItem : undefined,
       emiAmount: dto.recordKind === DebtRecordKind.LOAN ? dto.emiAmount : undefined,
+      category: categoryId ? { connect: { id: categoryId } } : undefined,
       amount: dto.amount,
       dueDate: dto.dueDate,
       notes: dto.notes,
@@ -149,6 +178,9 @@ export class DebtService {
       newStatus = DebtStatus.PENDING;
     }
 
+    const categoryId = dto.recordKind === DebtRecordKind.LOAN
+      ? await this.resolveLoanExpenseCategoryId(dto.loanCategory, dto.categoryId)
+      : undefined;
     const updated = await this.debtRepo.update(id, {
       personName: dto.personName,
       type: dto.type,
@@ -156,6 +188,9 @@ export class DebtService {
       loanCategory: dto.recordKind === DebtRecordKind.LOAN ? dto.loanCategory : null,
       loanItem: dto.recordKind === DebtRecordKind.LOAN ? dto.loanItem : null,
       emiAmount: dto.recordKind === DebtRecordKind.LOAN ? dto.emiAmount : null,
+      category: dto.recordKind === DebtRecordKind.LOAN
+        ? { connect: { id: categoryId! } }
+        : { disconnect: true },
       amount: dto.amount,
       dueDate: dto.dueDate,
       notes: dto.notes,
@@ -174,6 +209,9 @@ export class DebtService {
     }
 
     const settlementDate = dto.settlementDate || new Date();
+    const categoryId = isRecurringLoan
+      ? await this.resolveLoanExpenseCategoryId(debt.loanCategory, debt.categoryId)
+      : undefined;
     const newSettledAmount = Number((debt.settledAmount + dto.amountToSettle).toFixed(2));
     const cycleAmount = isRecurringLoan ? (debt.emiAmount || debt.amount) : debt.amount;
     if (newSettledAmount > debt.amount) {
@@ -211,6 +249,8 @@ export class DebtService {
           paymentMethod,
           merchant: debt.personName,
           description: `Paid back borrowed money to ${debt.personName}`,
+          categoryId,
+          isDebtPayment: true,
           transactionDate: settlementDate,
         });
       }
@@ -229,6 +269,7 @@ export class DebtService {
           remainingAmountAfter: Number((debt.amount - newSettledAmount).toFixed(2)),
         },
       },
+      ...(categoryId && !debt.categoryId ? { category: { connect: { id: categoryId } } } : {}),
       ...(crossedInstallmentBoundary && !fullySettled
         ? { dueDate: nextMonthlyDueDate(debt.dueDate, settlementDate) }
         : {}),

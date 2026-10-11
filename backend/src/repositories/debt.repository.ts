@@ -5,7 +5,7 @@ import { QueryDebtDto } from '../dtos/debt.dto';
 export class DebtRepository {
   constructor(private db: PrismaClient = defaultPrisma) {}
 
-  async findAll(query: QueryDebtDto): Promise<(Debt & { payments: DebtPayment[] })[]> {
+  async findAll(query: QueryDebtDto): Promise<(Debt & { payments: DebtPayment[]; category?: any })[]> {
     const where: Prisma.DebtWhereInput = {};
 
     if (query.type) {
@@ -19,14 +19,14 @@ export class DebtRepository {
     return this.db.debt.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      include: { payments: { orderBy: { settlementDate: 'desc' } } },
+      include: { payments: { orderBy: { settlementDate: 'desc' } }, category: true },
     });
   }
 
-  async findById(id: string): Promise<(Debt & { payments: DebtPayment[] }) | null> {
+  async findById(id: string): Promise<(Debt & { payments: DebtPayment[]; category?: any }) | null> {
     return this.db.debt.findUnique({
       where: { id },
-      include: { payments: { orderBy: { settlementDate: 'desc' } } },
+      include: { payments: { orderBy: { settlementDate: 'desc' } }, category: true },
     });
   }
 
@@ -34,11 +34,11 @@ export class DebtRepository {
     return this.db.debt.create({ data });
   }
 
-  async update(id: string, data: Prisma.DebtUpdateInput): Promise<Debt & { payments: DebtPayment[] }> {
+  async update(id: string, data: Prisma.DebtUpdateInput): Promise<Debt & { payments: DebtPayment[]; category?: any }> {
     return this.db.debt.update({
       where: { id },
       data,
-      include: { payments: { orderBy: { settlementDate: 'desc' } } },
+      include: { payments: { orderBy: { settlementDate: 'desc' } }, category: true },
     });
   }
 

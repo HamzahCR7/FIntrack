@@ -623,7 +623,9 @@ export class FinancialAnalysisEngine {
           where: {
             type: TransactionType.EXPENSE,
             transactionDate: { gte: cycleStart, lte: cycleEnd },
-            ...(categoryIds.length > 0 ? { categoryId: { in: categoryIds } } : {}),
+            ...(categoryIds.length > 0
+              ? { categoryId: { in: categoryIds } }
+              : { isDebtPayment: false }),
           },
         });
 

@@ -185,7 +185,11 @@ export class BudgetService {
 
     const transactions = await this.transactionRepo.findByDateRange(start, end);
     const selectedCategoryTokens = this.parseCategoryIds(categoryIds);
-    let matchingTxs = transactions.filter((t) => t.type === 'EXPENSE');
+    // General personal-expense budgets exclude repayments. Category-specific
+    // budgets may include them when the loan's configured category matches.
+    let matchingTxs = transactions.filter(
+      (t) => t.type === 'EXPENSE' && (selectedCategoryTokens.length > 0 || !t.isDebtPayment),
+    );
 
     if (selectedCategoryTokens.length > 0) {
       // Resolve matching category IDs and names (including all subcategories)

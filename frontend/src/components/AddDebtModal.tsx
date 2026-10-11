@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DebtType, DebtRecordKind, Account } from '../types';
+import { DebtType, DebtRecordKind, Account, Category } from '../types';
 import { X, HandCoins } from 'lucide-react';
 import { api } from '../api/client';
 import { DatePicker } from './DatePicker';
@@ -10,13 +10,15 @@ interface AddDebtModalProps {
   onClose: () => void;
   onSuccess: () => void;
   accounts?: Account[];
+  categories?: Category[];
 }
 
-export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onSuccess, accounts = [] }) => {
+export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onSuccess, accounts = [], categories = [] }) => {
   const [personName, setPersonName] = useState('');
   const [type, setType] = useState<DebtType>('OWED_TO_ME');
   const [recordKind, setRecordKind] = useState<DebtRecordKind>('PERSONAL');
   const [loanCategory, setLoanCategory] = useState('EDUCATION');
+  const [categoryId, setCategoryId] = useState('');
   const [loanItem, setLoanItem] = useState('');
   const [emiAmount, setEmiAmount] = useState('');
   const [amount, setAmount] = useState('');
@@ -25,6 +27,13 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const defaultCategoryId = (loanType: string) => {
+    const names: Record<string, string> = {
+      ELECTRONICS: 'Shopping > Electronics', EDUCATION: 'Education Loan > EMI Payment',
+      VEHICLE: 'Transport > Vehicle Service', HOME: 'Rent & Housing', PERSONAL: 'Miscellaneous', OTHER: 'Other',
+    };
+    return categories.find((category) => category.name === (names[loanType] || 'Other'))?.id || '';
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -32,6 +41,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
       setType('OWED_TO_ME');
       setRecordKind('PERSONAL');
       setLoanCategory('EDUCATION');
+      setCategoryId(defaultCategoryId('EDUCATION'));
       setLoanItem('');
       setEmiAmount('');
       setAmount('');
@@ -41,7 +51,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
       setIsSubmitting(false);
       setAccountId('');
     }
-  }, [isOpen, accounts]);
+  }, [isOpen, accounts, categories]);
 
   if (!isOpen) return null;
 
@@ -68,6 +78,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
         loanCategory: recordKind === 'LOAN' ? loanCategory : undefined,
         loanItem: recordKind === 'LOAN' && loanItem ? loanItem : undefined,
         emiAmount: recordKind === 'LOAN' && emiAmount ? parseFloat(emiAmount) : undefined,
+        categoryId: recordKind === 'LOAN' ? categoryId || undefined : undefined,
         amount: numAmount,
         accountId: accountId || undefined,
         dueDate: dueDate || undefined,
@@ -191,7 +202,10 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
                 <label className="text-slate-300 font-semibold block mb-1">Loan Type</label>
                 <ClearableSelect
                   value={loanCategory}
-                  onValueChange={setLoanCategory}
+                  onValueChange={(nextLoanCategory) => {
+                    setLoanCategory(nextLoanCategory);
+                    setCategoryId(defaultCategoryId(nextLoanCategory));
+                  }}
                   defaultValue="EDUCATION"
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
                 >
@@ -212,6 +226,13 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
                   onChange={(e) => setLoanItem(e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
                 />
+              </div>
+              <div className="col-span-2">
+                <label className="text-slate-300 font-semibold block mb-1">Payment Expense Category</label>
+                <ClearableSelect value={categoryId} onValueChange={setCategoryId} defaultValue="" className="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+                  <option value="">Choose a category</option>
+                  {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                </ClearableSelect>
               </div>
               <div>
                 <label className="text-slate-300 font-semibold block mb-1">Monthly EMI (Optional)</label>

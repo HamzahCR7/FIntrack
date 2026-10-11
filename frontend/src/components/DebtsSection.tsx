@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Account, Debt, DebtRecordKind, DebtType } from '../types';
+import { Account, Category, Debt, DebtRecordKind, DebtType } from '../types';
 import { formatCurrency } from './SummaryCards';
 import { DatePicker } from './DatePicker';
 import { ClearableSelect } from './ClearableSelect';
@@ -29,10 +29,11 @@ interface DebtsSectionProps {
     activeDebts: Debt[];
   };
   accounts?: Account[];
+  categories?: Category[];
   onRefresh: () => void;
 }
 
-export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = [], onRefresh }) => {
+export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = [], categories = [], onRefresh }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingDebt, setEditingDebt] = useState<Debt | null>(null);
   const [settleDebtItem, setSettleDebtItem] = useState<Debt | null>(null);
@@ -43,6 +44,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
   const [type, setType] = useState<DebtType>('OWED_TO_ME');
   const [recordKind, setRecordKind] = useState<DebtRecordKind>('PERSONAL');
   const [loanCategory, setLoanCategory] = useState('EDUCATION');
+  const [loanExpenseCategoryId, setLoanExpenseCategoryId] = useState('');
   const [loanItem, setLoanItem] = useState('');
   const [emiAmount, setEmiAmount] = useState('');
   const [amount, setAmount] = useState('');
@@ -69,6 +71,13 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
   const loanCount = debts.activeDebts.filter((debt) => debt.recordKind === 'LOAN').length;
   const iOweCount = debts.activeDebts.filter((debt) => debt.type === 'I_OWE' && debt.recordKind !== 'LOAN').length;
   const owedToMeCount = debts.activeDebts.filter((debt) => debt.type === 'OWED_TO_ME').length;
+  const defaultLoanExpenseCategoryId = (type: string) => {
+    const names: Record<string, string> = {
+      ELECTRONICS: 'Shopping > Electronics', EDUCATION: 'Education Loan > EMI Payment',
+      VEHICLE: 'Transport > Vehicle Service', HOME: 'Rent & Housing', PERSONAL: 'Miscellaneous', OTHER: 'Other',
+    };
+    return categories.find((category) => category.name === (names[type] || 'Other'))?.id || '';
+  };
 
   const resetDebtForm = () => {
     setEditingDebt(null);
@@ -76,6 +85,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
     setType('OWED_TO_ME');
     setRecordKind('PERSONAL');
     setLoanCategory('EDUCATION');
+    setLoanExpenseCategoryId(defaultLoanExpenseCategoryId('EDUCATION'));
     setLoanItem('');
     setEmiAmount('');
     setAmount('');
@@ -92,6 +102,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
       setType(debtToEdit.type);
       setRecordKind(debtToEdit.recordKind || 'PERSONAL');
       setLoanCategory(debtToEdit.loanCategory || 'EDUCATION');
+      setLoanExpenseCategoryId(debtToEdit.categoryId || defaultLoanExpenseCategoryId(debtToEdit.loanCategory || 'EDUCATION'));
       setLoanItem(debtToEdit.loanItem || '');
       setEmiAmount(debtToEdit.emiAmount?.toString() || '');
       setAmount(debtToEdit.amount.toString());
@@ -135,6 +146,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
           loanCategory: recordKind === 'LOAN' ? loanCategory : undefined,
           loanItem: recordKind === 'LOAN' && loanItem ? loanItem : undefined,
           emiAmount: recordKind === 'LOAN' && emiAmount ? parseFloat(emiAmount) : undefined,
+          categoryId: recordKind === 'LOAN' ? loanExpenseCategoryId || undefined : undefined,
           amount: numericAmount,
           dueDate: dueDate || undefined,
           notes: notes || undefined,
@@ -147,6 +159,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
           loanCategory: recordKind === 'LOAN' ? loanCategory : undefined,
           loanItem: recordKind === 'LOAN' && loanItem ? loanItem : undefined,
           emiAmount: recordKind === 'LOAN' && emiAmount ? parseFloat(emiAmount) : undefined,
+          categoryId: recordKind === 'LOAN' ? loanExpenseCategoryId || undefined : undefined,
           amount: numericAmount,
           accountId: addAccountId || undefined,
           dueDate: dueDate || undefined,
@@ -343,6 +356,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                             <span className="font-medium text-emerald-400">{formatCurrency(debt.settledAmount)}</span>
                           </p>
                           {isLoan && debt.emiAmount && <p>Monthly EMI: <span className="font-medium text-amber-300">{formatCurrency(debt.emiAmount)}</span></p>}
+                          {isLoan && debt.category && <p>Expense category: <span className="font-medium text-amber-300">{debt.category.name}</span></p>}
                           {dueDateFormatted && (
                             <p className="flex items-center gap-1 text-[11px]">
                               <Calendar className="h-3 w-3 text-slate-500" />
@@ -433,6 +447,7 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
               onChange={(nextType, nextRecordKind) => {
                 setType(nextType);
                 setRecordKind(nextRecordKind);
+                if (nextRecordKind === 'LOAN') setLoanExpenseCategoryId(defaultLoanExpenseCategoryId(loanCategory));
               }}
             />
             <FormInput label="Amount (INR)" value={amount} onChange={setAmount} placeholder="e.g. 2500" type="number" required />
@@ -440,7 +455,10 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="mb-1 block font-semibold text-slate-300">Loan Type</label>
-                  <ClearableSelect value={loanCategory} onValueChange={setLoanCategory} defaultValue="EDUCATION" className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-xs text-white outline-none focus:border-amber-500">
+                  <ClearableSelect value={loanCategory} onValueChange={(nextLoanCategory) => {
+                    setLoanCategory(nextLoanCategory);
+                    setLoanExpenseCategoryId(defaultLoanExpenseCategoryId(nextLoanCategory));
+                  }} defaultValue="EDUCATION" className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-xs text-white outline-none focus:border-amber-500">
                     <option value="EDUCATION">Education</option>
                     <option value="PERSONAL">Personal</option>
                     <option value="VEHICLE">Vehicle</option>
@@ -451,6 +469,14 @@ export const DebtsSection: React.FC<DebtsSectionProps> = ({ debts, accounts = []
                 </div>
                 <FormInput label="Item (Optional)" value={loanItem} onChange={setLoanItem} placeholder="e.g. Laptop / Mobile" />
                 <FormInput label="Monthly EMI (Optional)" value={emiAmount} onChange={setEmiAmount} placeholder="e.g. 5000" type="number" />
+                <div className="col-span-2">
+                  <label className="mb-1 block font-semibold text-slate-300">Payment Expense Category</label>
+                  <ClearableSelect value={loanExpenseCategoryId} onValueChange={setLoanExpenseCategoryId} defaultValue="" className="w-full rounded-xl border border-slate-700 bg-slate-800 p-2.5 text-xs text-white outline-none focus:border-amber-500">
+                    <option value="">Choose a category</option>
+                    {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
+                  </ClearableSelect>
+                  <p className="mt-1 text-[10px] text-slate-500">Loan payments are recorded under this category in budgets and analytics.</p>
+                </div>
               </div>
             )}
             {!editingDebt && accounts.length > 0 && (

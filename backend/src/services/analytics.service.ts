@@ -128,7 +128,7 @@ export class AnalyticsService {
       this.db.debt.findMany({
         where: { status: { not: 'SETTLED' } },
         orderBy: { createdAt: 'desc' },
-        include: { payments: { orderBy: { settlementDate: 'desc' } } },
+        include: { payments: { orderBy: { settlementDate: 'desc' } }, category: true },
       }),
     ]);
 
