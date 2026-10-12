@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Account, Category, FinancialReferenceOption, Transaction } from '../types';
+import { Account, Category, CategorySuggestion, FinancialReferenceOption, OpenItemSuggestion, Transaction } from '../types';
 import { X, ArrowUpRight, ArrowDownRight, ArrowRightLeft, HandCoins, ChevronDown, Check } from 'lucide-react';
 import { DatePicker } from './DatePicker';
 import { api } from '../api/client';
@@ -50,6 +50,16 @@ const INCOME_CATEGORY_NAMES = new Set([
   'Other Income',
 ]);
 const HIDDEN_LEGACY_CATEGORY_NAMES = new Set(['Salary & Income']);
+const DEFAULT_SUBCATEGORY_PRIORITY: Record<string, string[]> = {
+  'Food & Dining': ['Dining Out', 'Breakfast', 'Tea & Coffee', 'Fast Food', 'Snacks', 'Sweets & Desserts', 'Bakery', 'Biryani'],
+  Groceries: ['Supermarket', 'Online Grocery', 'Milk', 'Vegetarian', 'Fruits', 'Bread & Bakery', 'Snacks & Namkeen', 'Cleaning Supplies'],
+  Transport: ['Office Commute', 'Fuel', 'Metro', 'Bus', 'Train', 'Auto / Taxi', 'Ride Share', 'Parking'],
+  Travel: ['Flight', 'Train', 'Intercity Bus', 'Taxi / Cab', 'Hotel / Stay', 'Trip Meals', 'Sightseeing', 'Travel Insurance'],
+  'Health & Medical': ['Doctor Visit', 'Medicines', 'Lab Tests', 'Health Insurance', 'Emergency Care'],
+  Shopping: ['Clothing', 'Footwear', 'Electronics', 'Home Essentials', 'Accessories'],
+  Utilities: ['Electricity', 'Mobile Recharge', 'Internet', 'Water', 'Gas'],
+  'Self Grooming': ['Hair Cut', 'Salon & Spa', 'Beard Grooming', 'Shavings', 'Facial & Cleanup', 'Head Massage'],
+};
 
 const getAccountCategory = (account: Account | undefined, accountTypes: FinancialReferenceOption[]) => {
   if (!account) return undefined;
@@ -214,6 +224,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isParsingReceipt, setIsParsingReceipt] = useState(false);
   const [amountCandidates, setAmountCandidates] = useState<number[]>([]);
+  const [categorySuggestions, setCategorySuggestions] = useState<CategorySuggestion[]>([]);
+  const [showAllSubcategories, setShowAllSubcategories] = useState(false);
+  const [itemSearch, setItemSearch] = useState('');
+  const [openItemSuggestions, setOpenItemSuggestions] = useState<OpenItemSuggestion[]>([]);
+  const [externalItemTags, setExternalItemTags] = useState<string[]>([]);
+  const [isSearchingItems, setIsSearchingItems] = useState(false);
 
   const frequentTextValues = useMemo(() => {
     const rankValues = (getValue: (transaction: Transaction) => string | undefined) => {
@@ -375,6 +391,28 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     return accounts.find(matchesCategory);
   };
 
+  useEffect(() => {
+    if (!isOpen || type === 'TRANSFER' || editingTransaction) {
+      setCategorySuggestions([]);
+      return;
+    }
+    const text = `${merchant} ${description}`.trim();
+    if (text.length < 2) {
+      setCategorySuggestions([]);
+      return;
+    }
+    let active = true;
+    const timer = window.setTimeout(() => {
+      api.getCategorySuggestions(text, type)
+        .then((suggestions) => active && setCategorySuggestions(suggestions))
+        .catch(() => active && setCategorySuggestions([]));
+    }, 350);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [description, editingTransaction, isOpen, merchant, type]);
+
   const getPreferredPaymentMethod = (category: string) => {
     if (category === 'POCKET') return 'POCKET_UPI';
     if (category === 'WALLET') return 'GOOGLE_PAY';
@@ -420,6 +458,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       setError(null);
       setIsSubmitting(false);
       setAmountCandidates([]);
+      setShowAllSubcategories(false);
+      setItemSearch('');
+      setOpenItemSuggestions([]);
 
       if (editingTransaction) {
         setType(editingTransaction.type || 'EXPENSE');
@@ -429,6 +470,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         setSelectedSubcategoryIds(initSubIds);
         setSubcategoryId(editingTransaction.subcategoryId || '');
         setItemTag(editingTransaction.itemTag || '');
+        setExternalItemTags((editingTransaction.itemTag || '').split(',').map((tag) => tag.trim()).filter(Boolean));
         setSourceAccountId(editingTransaction.sourceAccountId || '');
         setDestinationAccountId(editingTransaction.destinationAccountId || '');
         setPaymentMethod(editingTransaction.paymentMethod || 'BANK_TRANSFER');
@@ -447,6 +489,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
         setSelectedSubcategoryIds([]);
         setSubcategoryId('');
         setItemTag('');
+        setExternalItemTags([]);
         setSourceAccountCategory('');
         setMerchant('');
         setDescription('');
@@ -471,6 +514,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     setSelectedSubcategoryIds([]);
     setSubcategoryId('');
     setItemTag('');
+    setItemSearch('');
+    setOpenItemSuggestions([]);
+    setExternalItemTags([]);
     setSourceAccountCategory('');
     onClose();
   };
@@ -500,6 +546,9 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     setSelectedSubcategoryIds([]);
     setSubcategoryId('');
     setItemTag('');
+    setItemSearch('');
+    setOpenItemSuggestions([]);
+    setExternalItemTags([]);
   };
 
   const handleDestinationAccountChange = (accountId: string) => {
@@ -572,6 +621,54 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     });
   }, [categories, selectedCategory]);
 
+  const rankedSubcategories = useMemo(() => {
+    const usage = new Map<string, number>();
+    transactions.forEach((transaction) => {
+      if (transaction.categoryId === categoryId && transaction.subcategoryId) {
+        usage.set(transaction.subcategoryId, (usage.get(transaction.subcategoryId) || 0) + 1);
+      }
+    });
+    const suggestedIds = new Set(
+      categorySuggestions
+        .filter((suggestion) => suggestion.categoryId === categoryId && suggestion.subcategoryId)
+        .map((suggestion) => suggestion.subcategoryId as string),
+    );
+    const defaultPriority = DEFAULT_SUBCATEGORY_PRIORITY[selectedCategory?.name || ''] || [];
+    const priorityOf = (category: Category) => {
+      const index = defaultPriority.indexOf(category.name.replace(/^.*?>\s*/, ''));
+      return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+    };
+
+    return [...availableSubcategories].sort((a, b) => {
+      const selectedDifference = Number(selectedSubcategoryIds.includes(b.id)) - Number(selectedSubcategoryIds.includes(a.id));
+      const suggestionDifference = Number(suggestedIds.has(b.id)) - Number(suggestedIds.has(a.id));
+      const usageDifference = (usage.get(b.id) || 0) - (usage.get(a.id) || 0);
+      return selectedDifference || suggestionDifference || usageDifference || priorityOf(a) - priorityOf(b) || a.name.localeCompare(b.name);
+    });
+  }, [availableSubcategories, categoryId, categorySuggestions, selectedCategory?.name, selectedSubcategoryIds, transactions]);
+
+  const visibleSubcategories = showAllSubcategories ? rankedSubcategories : rankedSubcategories.slice(0, 8);
+
+  useEffect(() => {
+    if (!selectedCategory || itemSearch.trim().length < 2) {
+      setOpenItemSuggestions([]);
+      setIsSearchingItems(false);
+      return;
+    }
+    let active = true;
+    setIsSearchingItems(true);
+    const timer = window.setTimeout(() => {
+      api.searchOpenCategoryItems(selectedCategory.name, itemSearch.trim())
+        .then((suggestions) => active && setOpenItemSuggestions(suggestions))
+        .catch(() => active && setOpenItemSuggestions([]))
+        .finally(() => active && setIsSearchingItems(false));
+    }, 400);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [itemSearch, selectedCategory]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -622,7 +719,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       setIsSubmitting(true);
       const selectedSubs = availableSubcategories.filter((s) => selectedSubcategoryIds.includes(s.id));
       const cleanNames = selectedSubs.map((s) => s.name.replace(/^.*?>\s*/, ''));
-      const finalItemTag = cleanNames.length > 0 ? cleanNames.join(', ') : itemTag;
+      const finalItemTag = [...new Set([...cleanNames, ...externalItemTags])].join(', ') || itemTag;
       const finalSubcategoryId = selectedSubcategoryIds[0] || subcategoryId;
 
       await onSubmitTransaction(
@@ -875,24 +972,79 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   setItemTag('');
                   setDescription('');
                   setOtherDetails('');
+                  setShowAllSubcategories(false);
+                  setItemSearch('');
+                  setOpenItemSuggestions([]);
+                  setExternalItemTags([]);
                 }}
               />
+
+              {selectedCategory && (
+                <div className="mt-2.5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-2.5">
+                  <label className="mb-1 block text-[11px] font-semibold text-slate-300">
+                    Search open category knowledge
+                  </label>
+                  <FancyInput
+                    type="search"
+                    value={itemSearch}
+                    onChange={(event) => setItemSearch(event.target.value)}
+                    placeholder={`Try milk, biryani, pharmacy, haircut...`}
+                    className="p-2.5 text-xs"
+                  />
+                  {isSearchingItems && <p className="mt-1.5 text-[10px] text-cyan-400">Searching open data…</p>}
+                  {openItemSuggestions.length > 0 && (
+                    <div className="mt-2 flex max-h-32 flex-wrap gap-1.5 overflow-y-auto">
+                      {openItemSuggestions.map((suggestion) => {
+                        const isSelected = externalItemTags.includes(suggestion.label);
+                        return (
+                          <button
+                            key={`${suggestion.source}:${suggestion.label}`}
+                            type="button"
+                            title={`${suggestion.description || suggestion.label} · ${suggestion.source}`}
+                            onClick={() => setExternalItemTags((current) => isSelected
+                              ? current.filter((tag) => tag !== suggestion.label)
+                              : [...current, suggestion.label])}
+                            className={`rounded-lg border px-2.5 py-1 text-[11px] font-semibold transition ${isSelected
+                              ? 'border-emerald-400 bg-emerald-500/20 text-emerald-100'
+                              : 'border-slate-700 bg-slate-900/80 text-slate-300 hover:border-cyan-500/40'}`}
+                          >
+                            {isSelected && <Check className="mr-1 inline h-3 w-3" />}
+                            {suggestion.label}
+                            <span className="ml-1 text-[9px] font-normal text-slate-500">{suggestion.source}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Subcategory / Item Type Quick Chips (Multi-Select) */}
               {availableSubcategories.length > 0 && (
                 <div className="mt-2.5 p-2.5 rounded-xl bg-slate-800/60 border border-slate-800">
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-slate-400 text-[11px] font-semibold block">
-                      Specific Item / Subcategory (Select Multiple):
+                      Suggested specific items
                     </label>
-                    {selectedSubcategoryIds.length > 0 && (
-                      <span className="text-[10px] text-cyan-400 font-bold">
-                        {selectedSubcategoryIds.length} selected
-                      </span>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {selectedSubcategoryIds.length > 0 && (
+                        <span className="text-[10px] text-cyan-400 font-bold">
+                          {selectedSubcategoryIds.length} selected
+                        </span>
+                      )}
+                      {rankedSubcategories.length > 8 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllSubcategories((current) => !current)}
+                          className="text-[10px] font-bold text-cyan-400 hover:text-cyan-300"
+                        >
+                          {showAllSubcategories ? 'Show suggested' : `Show all ${rankedSubcategories.length}`}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
-                    {availableSubcategories.map((sub) => {
+                  <div className={`flex flex-wrap gap-1.5 pr-1 ${showAllSubcategories ? 'max-h-36 overflow-y-auto' : ''}`}>
+                    {visibleSubcategories.map((sub) => {
                       const cleanName = sub.name.replace(/^.*?>\s*/, '');
                       const isSelected = selectedSubcategoryIds.includes(sub.id);
                       return (
@@ -1043,6 +1195,27 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
               <datalist id="merchant-suggestions">
                 {frequentTextValues.merchants.map((value) => <option key={value} value={value} />)}
               </datalist>
+              {categorySuggestions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Suggested categories">
+                  {categorySuggestions.map((suggestion) => (
+                    <button
+                      key={`${suggestion.categoryId}:${suggestion.subcategoryId || ''}`}
+                      type="button"
+                      title={`${suggestion.reason} · ${suggestion.confidence}% confidence`}
+                      onClick={() => {
+                        setCategoryId(suggestion.categoryId);
+                        setSelectedSubcategoryIds(suggestion.subcategoryId ? [suggestion.subcategoryId] : []);
+                        setSubcategoryId(suggestion.subcategoryId || '');
+                        setItemTag(suggestion.subcategoryName || '');
+                      }}
+                      className="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-1.5 text-left text-[11px] font-semibold text-cyan-100 transition hover:bg-cyan-500/20"
+                    >
+                      {suggestion.categoryName}{suggestion.subcategoryName ? ` › ${suggestion.subcategoryName}` : ''}
+                      <span className="ml-1 text-cyan-400">{suggestion.confidence}%</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <label className="text-slate-300 font-semibold block mb-1">Date <span className="text-rose-400">*</span></label>

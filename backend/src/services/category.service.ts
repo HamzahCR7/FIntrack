@@ -2,9 +2,89 @@ import { CategoryRepository } from '../repositories/category.repository';
 import { CreateCategoryDto } from '../dtos/category.dto';
 import { BadRequestError, NotFoundError } from '../common/errors';
 import { Category } from '@prisma/client';
+import { TransactionRepository } from '../repositories/transaction.repository';
+import { expenseCategoryKnowledge, incomeCategoryKnowledge } from '../data/categorySuggestionKnowledge';
+
+export interface CategorySuggestion {
+  categoryId: string;
+  categoryName: string;
+  subcategoryId?: string;
+  subcategoryName?: string;
+  confidence: number;
+  reason: string;
+}
+
+const normalize = (value: string) => value
+  .toLocaleLowerCase()
+  .replace(/\b(?:upi|imps|neft|rtgs|txn|ref|payment|paid|debit|credit|dr|cr)\b/g, ' ')
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
+const leafName = (value?: string | null) => value?.replace(/^.*?>\s*/, '');
 
 export class CategoryService {
-  constructor(private categoryRepo: CategoryRepository = new CategoryRepository()) {}
+  constructor(
+    private categoryRepo: CategoryRepository = new CategoryRepository(),
+    private transactionRepo: TransactionRepository = new TransactionRepository(),
+  ) {}
+
+  async suggestCategories(text: string, type = 'EXPENSE'): Promise<CategorySuggestion[]> {
+    const query = normalize(text).slice(0, 160);
+    if (query.length < 2 || !['EXPENSE', 'INCOME'].includes(type)) return [];
+
+    const [categories, history] = await Promise.all([
+      this.categoryRepo.findAll(),
+      this.transactionRepo.findCategorizedForSuggestions(type),
+    ]);
+    const byName = new Map(categories.map((category) => [category.name.toLocaleLowerCase(), category]));
+    const scores = new Map<string, CategorySuggestion>();
+
+    const add = (categoryName: string, subcategoryName: string | undefined, score: number, reason: string) => {
+      const category = byName.get(categoryName.toLocaleLowerCase());
+      const fullSubcategoryName = subcategoryName ? `${categoryName} > ${subcategoryName}` : undefined;
+      const subcategory = fullSubcategoryName ? byName.get(fullSubcategoryName.toLocaleLowerCase()) : undefined;
+      if (!category) return;
+      const key = `${category.id}:${subcategory?.id || ''}`;
+      const previous = scores.get(key);
+      if (!previous || score > previous.confidence) {
+        scores.set(key, {
+          categoryId: category.id,
+          categoryName: category.name,
+          subcategoryId: subcategory?.id,
+          subcategoryName: leafName(subcategory?.name),
+          confidence: Math.min(99, Math.round(score)),
+          reason,
+        });
+      }
+    };
+
+    for (const transaction of history) {
+      const merchant = normalize(transaction.merchant || '');
+      const description = normalize(transaction.description || '');
+      const exactMerchant = merchant.length >= 2 && (query === merchant || query.includes(merchant));
+      const exactDescription = description.length >= 3 && query === description;
+      if (exactMerchant || exactDescription) {
+        add(transaction.category?.name, leafName(transaction.subcategory?.name), exactMerchant ? 98 : 92, 'Based on your previous transactions');
+      }
+    }
+
+    const knowledge = type === 'INCOME' ? incomeCategoryKnowledge : expenseCategoryKnowledge;
+    for (const rule of knowledge) {
+      const matched = rule.keywords.find((keyword) => query.includes(normalize(keyword)));
+      if (matched) add(rule.category, rule.subcategory, 86, `Matched “${matched}”`);
+    }
+
+    const queryTokens = new Set(query.split(' ').filter((token) => token.length > 2));
+    for (const transaction of history) {
+      const candidateTokens = new Set(normalize(`${transaction.merchant || ''} ${transaction.description || ''}`).split(' '));
+      const overlap = [...queryTokens].filter((token) => candidateTokens.has(token)).length;
+      if (overlap > 0) add(transaction.category?.name, leafName(transaction.subcategory?.name), 60 + Math.min(18, overlap * 6), 'Similar to a previous transaction');
+    }
+
+    return [...scores.values()]
+      .sort((a, b) => b.confidence - a.confidence || a.categoryName.localeCompare(b.categoryName))
+      .slice(0, 3);
+  }
 
   async getAllCategories(): Promise<Category[]> {
     const requiredCategories = [

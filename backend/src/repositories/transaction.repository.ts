@@ -45,6 +45,22 @@ export class TransactionRepository {
     });
   }
 
+  async findCategorizedForSuggestions(type: string, limit = 500): Promise<any[]> {
+    return this.db.transaction.findMany({
+      where: { type, categoryId: { not: null } },
+      select: {
+        merchant: true,
+        description: true,
+        categoryId: true,
+        subcategoryId: true,
+        category: { select: { name: true } },
+        subcategory: { select: { name: true } },
+      },
+      orderBy: { transactionDate: 'desc' },
+      take: limit,
+    });
+  }
+
   async findById(id: string, tx?: Prisma.TransactionClient): Promise<Transaction | null> {
     const client = tx || this.db;
     return client.transaction.findUnique({

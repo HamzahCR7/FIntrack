@@ -3,11 +3,11 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ command, mode }) => ({
   plugins: [
     react(),
     VitePWA({
-      disable: mode === 'native',
+      disable: command === 'serve' || mode === 'native',
       workbox: {
         importScripts: ['push-handler.js'],
       },

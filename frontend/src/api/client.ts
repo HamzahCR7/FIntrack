@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DashboardData, Transaction, Account, Category, Subscription, Debt, QuickItem, QuickItemType, QuickItemPriority, TransactionFilters, ParsedReceipt, RunwaySimulationResponse } from '../types';
+import { DashboardData, Transaction, Account, Category, CategorySuggestion, OpenItemSuggestion, Subscription, Debt, QuickItem, QuickItemType, QuickItemPriority, TransactionFilters, ParsedReceipt, RunwaySimulationResponse } from '../types';
 import { resolveApiOrigin } from './config';
 
 export const API_TIMEOUT_MS = 25000;
@@ -159,6 +159,16 @@ export const api = {
   // Categories
   getCategories: async (): Promise<Category[]> => {
     const res = await apiClient.get(`${API_BASE}/categories`);
+    return res.data.data;
+  },
+
+  getCategorySuggestions: async (text: string, type: 'INCOME' | 'EXPENSE'): Promise<CategorySuggestion[]> => {
+    const res = await apiClient.get(`${API_BASE}/categories/suggestions/search`, { params: { text, type } });
+    return res.data.data;
+  },
+
+  searchOpenCategoryItems: async (category: string, text: string): Promise<OpenItemSuggestion[]> => {
+    const res = await apiClient.get(`${API_BASE}/categories/items/search`, { params: { category, text } });
     return res.data.data;
   },
 

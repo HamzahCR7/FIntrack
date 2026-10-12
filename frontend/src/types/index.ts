@@ -92,6 +92,21 @@ export interface Category {
   children?: Category[];
 }
 
+export interface CategorySuggestion {
+  categoryId: string;
+  categoryName: string;
+  subcategoryId?: string;
+  subcategoryName?: string;
+  confidence: number;
+  reason: string;
+}
+
+export interface OpenItemSuggestion {
+  label: string;
+  description?: string;
+  source: 'Open Food Facts' | 'Open Beauty Facts' | 'Open Products Facts' | 'Wikidata' | 'OpenStreetMap';
+}
+
 export interface Transaction {
   id: string;
   type: TransactionType;
