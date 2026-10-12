@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Info,
   Gift,
+  CreditCard,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -31,7 +32,7 @@ import {
 import { Transaction } from '../types';
 import { formatCurrency, usePrivacyMode } from '../utils/privacyStore';
 
-export type MetricType = 'INCOME' | 'EXPENSE' | 'SAVINGS' | 'POCKET';
+export type MetricType = 'INCOME' | 'EXPENSE' | 'SAVINGS' | 'POCKET' | 'CREDIT';
 
 type TrendSortKey = 'month' | 'income' | 'expenses' | 'savings' | 'rate';
 type TxSortKey = 'date' | 'category' | 'details' | 'account' | 'amount';
@@ -46,6 +47,7 @@ interface MetricDetailsModalProps {
     totalIncome: number;
     totalExpenses: number;
     savings: number;
+    creditOutstanding: number;
     spendingThisMonth: number;
     incomeThisMonth: number;
     savingsThisMonth: number;
@@ -116,6 +118,21 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
     (total, tx) => tx.type === 'INCOME' && isPocketCredit(tx) ? total + tx.amount : total,
     0
   );
+  const isCreditCardAccount = (account: Transaction['sourceAccount']) => account?.type === 'CREDIT_CARD';
+  const isCreditCardPurchase = (tx: Transaction) => tx.type === 'EXPENSE'
+    && (isCreditCardAccount(tx.sourceAccount) || tx.paymentMethod === 'CREDIT_CARD');
+  const isCreditCardPayment = (tx: Transaction) => tx.type === 'TRANSFER' && isCreditCardAccount(tx.destinationAccount);
+  const isCreditCardTransaction = (tx: Transaction) => isCreditCardPurchase(tx) || isCreditCardPayment(tx);
+  const cardSpendingForMonth = (date: Date) => transactions.reduce((total, tx) => {
+    const txDate = new Date(tx.transactionDate);
+    return isCreditCardPurchase(tx)
+      && txDate.getFullYear() === date.getFullYear()
+      && txDate.getMonth() === date.getMonth()
+      ? total + tx.amount
+      : total;
+  }, 0);
+  const currentCardSpending = cardSpendingForMonth(new Date());
+  const previousCardSpending = cardSpendingForMonth(prevMonthDate);
 
   // Config based on metric type
   const config = {
@@ -179,6 +196,21 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
       txType: null,
       chartDataKey: 'income',
     },
+    CREDIT: {
+      title: 'Credit Card Outstanding & History',
+      subtitle: `Card purchases and payments for ${currentMonthName} and previous months`,
+      currentValue: currentCardSpending,
+      prevValue: previousCardSpending,
+      totalValue: summary.creditOutstanding,
+      currentLabel: 'Card Spend This Month',
+      prevLabel: 'Card Spend Prev Month',
+      allTimeLabel: 'Current Outstanding',
+      badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+      themeColor: '#f59e0b',
+      icon: <CreditCard className="w-6 h-6 text-amber-400" />,
+      txType: null,
+      chartDataKey: 'expenses',
+    },
   }[activeType];
 
   // Month-over-month calculation
@@ -194,19 +226,19 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
 
   // Filter transactions
   const matchingTransactions = transactions.filter((tx) => {
+    if (activeType === 'CREDIT') return isCreditCardTransaction(tx);
     if (activeType === 'POCKET') return isPocketTransaction(tx);
     if (activeType === 'INCOME') return tx.type === 'INCOME';
     if (activeType === 'EXPENSE') return tx.type === 'EXPENSE';
     return tx.type === 'INCOME' || tx.type === 'EXPENSE';
   });
 
-  const transactionMonths = Array.from(new Set([
-    selectedHistoryMonth,
-    ...matchingTransactions.map((tx) => {
+  const transactionMonths = Array.from(new Set(
+    matchingTransactions.map((tx) => {
       const date = new Date(tx.transactionDate);
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    }),
-  ])).sort().reverse();
+    })
+  )).sort().reverse();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -218,7 +250,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
   const filteredTransactions = matchingTransactions.filter((tx) => {
     const date = new Date(tx.transactionDate);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    if (monthKey !== selectedHistoryMonth) return false;
+    if (selectedHistoryMonth !== 'ALL' && monthKey !== selectedHistoryMonth) return false;
     if (!searchTerm.trim()) return true;
     const term = searchTerm.toLowerCase();
     const desc = (tx.description || '').toLowerCase();
@@ -272,9 +304,29 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
     });
     return [...totals.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
   }, [transactions]);
+  const creditCardMonthlyTrends = useMemo(() => {
+    const totals = new Map<string, { month: string; income: number; expenses: number; savings: number }>();
+    matchingTransactions.forEach((tx) => {
+      const date = new Date(tx.transactionDate);
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const item = totals.get(key) || {
+        month: date.toLocaleString('default', { month: 'short', year: 'numeric' }),
+        income: 0,
+        expenses: 0,
+        savings: 0,
+      };
+      if (isCreditCardPayment(tx)) item.income += tx.amount;
+      if (isCreditCardPurchase(tx)) item.expenses += tx.amount;
+      item.savings = item.income - item.expenses;
+      totals.set(key, item);
+    });
+    return [...totals.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
+  }, [transactions, activeType]);
   const historyTrends = activeType === 'POCKET'
     ? pocketMonthlyTrends
-    : transactionMonthlyTrends.length > 0 ? transactionMonthlyTrends : monthlyTrends;
+    : activeType === 'CREDIT'
+      ? creditCardMonthlyTrends
+      : transactionMonthlyTrends.length > 0 ? transactionMonthlyTrends : monthlyTrends;
 
   const sortedMonthlyTrends = useMemo(() => {
     const sorted = [...historyTrends].reverse();
@@ -365,22 +417,28 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
   );
   const latestTrackedMonth = [...historyTrends].reverse()[0]?.month;
 
-  const txIncomeTotal = sortedFilteredTransactions.reduce((sum, tx) => (tx.type === 'INCOME' ? sum + tx.amount : sum), 0);
-  const txExpenseTotal = sortedFilteredTransactions.reduce((sum, tx) => (tx.type === 'EXPENSE' ? sum + tx.amount : sum), 0);
+  const txIncomeTotal = sortedFilteredTransactions.reduce(
+    (sum, tx) => (activeType === 'CREDIT' ? isCreditCardPayment(tx) : tx.type === 'INCOME') ? sum + tx.amount : sum,
+    0
+  );
+  const txExpenseTotal = sortedFilteredTransactions.reduce(
+    (sum, tx) => (activeType === 'CREDIT' ? isCreditCardPurchase(tx) : tx.type === 'EXPENSE') ? sum + tx.amount : sum,
+    0
+  );
 
   if (!isOpen || !type) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 sticky top-0 z-10">
+        <div className="p-4 sm:p-6 border-b border-slate-800 flex items-center justify-between gap-3 bg-slate-900/90 sticky top-0 z-10">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center shadow-inner">
               {config.icon}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-base sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
                 {config.title}
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">{config.subtitle}</p>
@@ -396,7 +454,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
+        <div className="p-3 sm:p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
           {/* 1. Metric Overview Cards */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
             {/* Current Month */}
@@ -457,7 +515,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                   {activeType === 'SAVINGS' ? 'Savings Rate' : config.allTimeLabel}
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium">
-                  {activeType === 'SAVINGS' ? `${currentMonthName}` : 'Lifetime Total'}
+                  {activeType === 'SAVINGS' ? `${currentMonthName}` : activeType === 'CREDIT' ? 'Across active cards' : 'Lifetime Total'}
                 </span>
               </div>
               <p className="text-xl font-bold text-slate-200 mt-2">
@@ -468,7 +526,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
 
           {/* 2. Monthly Trends Visualization */}
           {historyTrends.length > 0 && (
-            <div className="bg-slate-800/40 border border-slate-700/60 p-5 rounded-2xl space-y-4">
+            <div className="bg-slate-800/40 border border-slate-700/60 p-3 sm:p-5 rounded-2xl space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <History className="w-4 h-4 text-cyan-400" />
@@ -510,7 +568,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                       <Bar
                         dataKey={activeType === 'INCOME' || activeType === 'POCKET' ? 'income' : 'expenses'}
                         fill={config.themeColor}
-                        name={activeType === 'POCKET' ? 'Pocket Allowance Received' : activeType === 'INCOME' ? 'Monthly Income' : 'Monthly Expenses'}
+                        name={activeType === 'POCKET' ? 'Pocket Allowance Received' : activeType === 'INCOME' ? 'Monthly Income' : activeType === 'CREDIT' ? 'Card Purchases' : 'Monthly Expenses'}
                         radius={[6, 6, 0, 0]}
                       />
                     </BarChart>
@@ -519,8 +577,8 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
               </div>
 
               {/* Month-by-month Table */}
-              <div className="border border-slate-700/60 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="border border-slate-700/60 rounded-xl overflow-x-auto">
+                <table className="w-full min-w-[680px] text-left text-xs">
                   <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-2.5 px-3">
@@ -530,12 +588,12 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                       </th>
                       <th className="py-2.5 px-3">
                         <button type="button" onClick={() => toggleTrendSort('income')} className="flex items-center gap-1 hover:text-cyan-300">
-                          Income <span className="text-[10px]">{sortIndicator(trendSortKey === 'income', trendSortDirection)}</span>
+                          {activeType === 'CREDIT' ? 'Payments' : 'Income'} <span className="text-[10px]">{sortIndicator(trendSortKey === 'income', trendSortDirection)}</span>
                         </button>
                       </th>
                       <th className="py-2.5 px-3">
                         <button type="button" onClick={() => toggleTrendSort('expenses')} className="flex items-center gap-1 hover:text-cyan-300">
-                          Expenses <span className="text-[10px]">{sortIndicator(trendSortKey === 'expenses', trendSortDirection)}</span>
+                          {activeType === 'CREDIT' ? 'Purchases' : 'Expenses'} <span className="text-[10px]">{sortIndicator(trendSortKey === 'expenses', trendSortDirection)}</span>
                         </button>
                       </th>
                       <th className="py-2.5 px-3">
@@ -599,6 +657,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                   aria-label="Transaction month"
                   className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
                 >
+                  <option value="ALL">All months</option>
                   {transactionMonths.map((month) => (
                     <option key={month} value={month}>
                       {new Date(`${month}-01T00:00:00`).toLocaleString('default', { month: 'long', year: 'numeric' })}
@@ -623,8 +682,42 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                 No matching transactions recorded.
               </div>
             ) : (
-              <div className="border border-slate-700/60 rounded-2xl overflow-hidden bg-slate-900/60 max-h-72 overflow-y-auto">
-                <table className="w-full text-left text-xs">
+              <div className="border border-slate-700/60 rounded-2xl overflow-hidden bg-slate-900/60 max-h-96 overflow-y-auto">
+                <div className="divide-y divide-slate-800 sm:hidden">
+                  {sortedFilteredTransactions.map((tx) => {
+                    const isIncoming = activeType === 'CREDIT'
+                      ? isCreditCardPayment(tx)
+                      : activeType === 'POCKET' ? isPocketCredit(tx) : tx.type === 'INCOME';
+                    const accountName = isIncoming
+                      ? tx.destinationAccount?.name || 'Account'
+                      : tx.sourceAccount?.name || 'Account';
+
+                    return (
+                      <div key={tx.id} className="space-y-2 p-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-100">
+                              {tx.merchant || tx.description || tx.category?.name || (tx.type === 'TRANSFER' ? 'Card payment' : 'Transaction')}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-slate-400">
+                              {new Date(tx.transactionDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <span className={`shrink-0 text-sm font-bold ${isIncoming ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {isIncoming ? '+' : '-'}{formatCurrency(tx.amount)}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 text-[10px]">
+                          <span className="rounded-md bg-slate-800 px-2 py-1 text-slate-300">
+                            {tx.category?.name || (tx.type === 'TRANSFER' ? 'Transfer' : 'Uncategorized')}
+                          </span>
+                          <span className="rounded-md bg-slate-800 px-2 py-1 text-slate-400">{accountName}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <table className="hidden w-full text-left text-xs sm:table">
                   <thead className="bg-slate-800/80 border-b border-slate-700/80 text-slate-400 font-semibold uppercase tracking-wider sticky top-0 z-10">
                     <tr>
                       <th className="py-2.5 px-3">
@@ -656,7 +749,9 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                   </thead>
                   <tbody className="divide-y divide-slate-800">
                     {sortedFilteredTransactions.map((tx) => {
-                      const isIncome = activeType === 'POCKET' ? isPocketCredit(tx) : tx.type === 'INCOME';
+                      const isIncome = activeType === 'CREDIT'
+                        ? isCreditCardPayment(tx)
+                        : activeType === 'POCKET' ? isPocketCredit(tx) : tx.type === 'INCOME';
                       return (
                         <tr key={tx.id} className="hover:bg-slate-800/40 transition-colors">
                           <td className="py-2.5 px-3 text-slate-300 whitespace-nowrap">
@@ -687,8 +782,8 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                 </table>
                 <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-2 border-t border-slate-700/70 bg-slate-900/95 px-3 py-2 text-[11px] text-slate-400">
                   <span>Rows: {sortedFilteredTransactions.length}</span>
-                  <span className="text-emerald-300">Income: +{formatCurrency(txIncomeTotal)}</span>
-                  <span className="text-rose-400">Expense: -{formatCurrency(txExpenseTotal)}</span>
+                  <span className="text-emerald-300">{activeType === 'CREDIT' ? 'Payments' : 'Income'}: +{formatCurrency(txIncomeTotal)}</span>
+                  <span className="text-rose-400">{activeType === 'CREDIT' ? 'Purchases' : 'Expense'}: -{formatCurrency(txExpenseTotal)}</span>
                   <span className="font-semibold text-slate-200">Net: {formatCurrency(txIncomeTotal - txExpenseTotal)}</span>
                 </div>
               </div>

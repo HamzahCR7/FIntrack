@@ -24,8 +24,8 @@ export class BudgetController {
   private getAllBudgets = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const month = req.query.month;
-      if (month !== undefined && (typeof month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))) {
-        throw new BadRequestError('Month must use YYYY-MM format');
+      if (month !== undefined && (typeof month !== 'string' || (month !== 'all' && !/^\d{4}-(0[1-9]|1[0-2])$/.test(month)))) {
+        throw new BadRequestError("Month must use YYYY-MM format or 'all'");
       }
       const budgets = await this.budgetService.getAllBudgets(month);
       res.status(200).json({ status: 'success', data: budgets });

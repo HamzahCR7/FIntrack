@@ -49,7 +49,11 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
     <>
       <div className={`dashboard-summary grid gap-2 sm:gap-3 ${isColumn ? 'grid-cols-1 w-full' : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 md:gap-4'}`}>
         {/* 1. Total Balance */}
-        <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
+        <div
+          onClick={() => setSelectedMetric('CREDIT')}
+          className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-amber-500/50 hover:bg-slate-800/90 transition-all shadow-sm cursor-pointer group`}
+          title="Click to view credit card history"
+        >
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Balance</span>
             <div className="p-1.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
@@ -169,8 +173,9 @@ export const SummaryCards: React.FC<SummaryCardsProps> = ({
         <div className={`bg-slate-800/60 border border-slate-700/60 rounded-2xl ${cardPadding} hover:border-slate-600 transition-all shadow-sm`}>
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Credit Outstanding</span>
-            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1 group-hover:bg-amber-500/20 group-hover:scale-105 transition-all">
               <CreditCard className="w-4 h-4" />
+              <ExternalLink className="w-2.5 h-2.5 opacity-60 group-hover:opacity-100" />
             </div>
           </div>
           <div className="mt-2">

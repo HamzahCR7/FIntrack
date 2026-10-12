@@ -13,6 +13,11 @@ export class BudgetService {
   ) {}
 
   async getAllBudgets(month?: string): Promise<BudgetResponseDto[]> {
+    if (month === 'all') {
+      const budgets = await this.budgetRepo.findActiveBudgets();
+      return Promise.all(budgets.map((budget) => this.enrichBudget(budget)));
+    }
+
     const now = new Date();
     const [year, monthIndex] = month
       ? month.split('-').map(Number)

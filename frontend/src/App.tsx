@@ -134,12 +134,13 @@ export const App: React.FC = () => {
   const [showMobileInsights, setShowMobileInsights] = useState(false);
   const [showMobileSummaryDetails, setShowMobileSummaryDetails] = useState(false);
   const [mobileMetricDetails, setMobileMetricDetails] = useState<MetricType | null>(null);
-  const [ledgerMonth, setLedgerMonth] = useState(() => {
+  const [ledgerMonth, setLedgerMonth] = useState<Date | null>(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
 
   const ledgerTransactionCount = transactions.filter((transaction) => {
+    if (!ledgerMonth) return true;
     const transactionDate = new Date(transaction.transactionDate);
     const isInLedgerMonth =
       transactionDate.getFullYear() === ledgerMonth.getFullYear() &&
@@ -585,7 +586,7 @@ export const App: React.FC = () => {
                       { label: 'Previous month saved', value: dashboardData.summary.previousMonthSavings, tone: 'text-teal-300' },
                       { label: 'Income this month', value: dashboardData.summary.incomeThisMonth, tone: 'text-emerald-300', metric: 'INCOME' as MetricType },
                       { label: 'Expenses this month', value: dashboardData.summary.spendingThisMonth, tone: 'text-rose-400', metric: 'EXPENSE' as MetricType },
-                      { label: 'Credit outstanding', value: dashboardData.summary.creditOutstanding, tone: 'text-amber-300' },
+                      { label: 'Credit outstanding', value: dashboardData.summary.creditOutstanding, tone: 'text-amber-300', metric: 'CREDIT' as MetricType },
                       { label: 'Pocket allowance', value: dashboardData.summary.pocketAllowanceBalance, tone: 'text-violet-300', metric: 'POCKET' as MetricType },
                     ].map((item) => <button key={item.label} disabled={!item.metric} onClick={() => item.metric && setMobileMetricDetails(item.metric)} className="flex w-full items-center justify-between gap-3 py-3 text-left disabled:cursor-default">
                       <span className="text-xs text-slate-400">{item.label}</span><span className={`text-sm font-semibold ${item.tone}`}>{formatCurrency(item.value || 0)}</span>

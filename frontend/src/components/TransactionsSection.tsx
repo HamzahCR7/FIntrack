@@ -142,8 +142,8 @@ interface TransactionsSectionProps {
   transactions: Transaction[];
   categories: Category[];
   accounts: Account[];
-  selectedMonth: Date;
-  onSelectedMonthChange: (month: Date) => void;
+  selectedMonth: Date | null;
+  onSelectedMonthChange: (month: Date | null) => void;
   onFilterChange: (filters: any) => void;
   onEditTransaction?: (transaction: Transaction) => void;
   onDeleteTransaction?: (id: string) => void;
@@ -194,7 +194,9 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   };
 
   const todayIsoDate = formatDateForInput(new Date());
-  const selectedMonthStartIsoDate = formatDateForInput(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1));
+  const selectedMonthStartIsoDate = selectedMonth
+    ? formatDateForInput(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth(), 1))
+    : '';
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string[]>([]);
@@ -224,8 +226,8 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
 
   useEffect(() => {
     setStartDate(selectedMonthStartIsoDate);
-    setEndDate(todayIsoDate);
-    onFilterChange(getSelectedMonthRange(selectedMonth));
+    setEndDate(selectedMonth ? todayIsoDate : '');
+    onFilterChange(selectedMonth ? getSelectedMonthRange(selectedMonth) : {});
     setCurrentPage(1);
   }, [selectedMonth]);
 
@@ -235,11 +237,11 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
 
   const handleApplyFilters = (newFilters: any) => {
     setCurrentPage(1);
-    const monthRange = getSelectedMonthRange(selectedMonth);
+    const monthRange: { startDate?: string; endDate?: string } = selectedMonth ? getSelectedMonthRange(selectedMonth) : {};
     onFilterChange({
       ...monthRange,
-      startDate: startDate || monthRange.startDate,
-      endDate: endDate || monthRange.endDate,
+      startDate: startDate || (selectedMonth ? monthRange.startDate : undefined),
+      endDate: endDate || (selectedMonth ? monthRange.endDate : undefined),
       ...newFilters,
     });
   };
@@ -251,13 +253,13 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
     setSelectedAccount([]);
     setSelectedPaymentMethod([]);
     setStartDate(selectedMonthStartIsoDate);
-    setEndDate(todayIsoDate);
+    setEndDate(selectedMonth ? todayIsoDate : '');
     setCurrentPage(1);
-    const monthRange = getSelectedMonthRange(selectedMonth);
+    const monthRange: { startDate?: string; endDate?: string } = selectedMonth ? getSelectedMonthRange(selectedMonth) : {};
     onFilterChange({
       ...monthRange,
-      startDate: selectedMonthStartIsoDate,
-      endDate: todayIsoDate,
+      startDate: selectedMonthStartIsoDate || undefined,
+      endDate: selectedMonth ? todayIsoDate : undefined,
     });
   };
 
@@ -277,7 +279,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
 
   const filteredTransactions = transactions.filter((tx) => {
     const transactionDate = new Date(tx.transactionDate);
-    const isInSelectedMonth =
+    const isInSelectedMonth = !selectedMonth ||
       transactionDate.getFullYear() === selectedMonth.getFullYear() &&
       transactionDate.getMonth() === selectedMonth.getMonth();
 
@@ -408,22 +410,35 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
         <div className="flex items-center gap-2 rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-2 py-1.5">
           <button
             type="button"
-            onClick={() => onSelectedMonthChange(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1))}
+            onClick={() => {
+              const baseMonth = selectedMonth || new Date();
+              onSelectedMonthChange(new Date(baseMonth.getFullYear(), baseMonth.getMonth() - 1, 1));
+            }}
             className="rounded-lg p-1.5 text-cyan-200 transition-colors hover:bg-cyan-400/20 hover:text-white"
             aria-label="Previous month"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <span className="min-w-[7.5rem] text-center text-xs font-semibold text-cyan-100">
-            {selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+            {selectedMonth ? selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' }) : 'All months'}
           </span>
           <button
             type="button"
-            onClick={() => onSelectedMonthChange(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + 1, 1))}
+            onClick={() => {
+              const baseMonth = selectedMonth || new Date();
+              onSelectedMonthChange(new Date(baseMonth.getFullYear(), baseMonth.getMonth() + 1, 1));
+            }}
             className="rounded-lg p-1.5 text-cyan-200 transition-colors hover:bg-cyan-400/20 hover:text-white"
             aria-label="Next month"
           >
             <ChevronRight className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onSelectedMonthChange(null)}
+            className="rounded-lg border border-cyan-400/30 px-2 py-1 text-[10px] font-semibold text-cyan-100 transition-colors hover:bg-cyan-400/20"
+          >
+            All
           </button>
         </div>
 

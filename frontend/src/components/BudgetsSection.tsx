@@ -15,7 +15,7 @@ interface BudgetsSectionProps {
 const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: parentBudgets, onRefresh }) => {
   const [budgets, setBudgets] = useState<Budget[]>(parentBudgets || []);
   const [loading, setLoading] = useState(!parentBudgets);
-  const [selectedMonth, setSelectedMonth] = useState(() => {
+  const [selectedMonth, setSelectedMonth] = useState<Date | null>(() => {
     const now = new Date();
     return new Date(now.getFullYear(), now.getMonth(), 1);
   });
@@ -23,9 +23,11 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBudget, setEditingBudget] = useState<any>(null);
 
-  const monthParam = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`;
+  const monthParam = selectedMonth
+    ? `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}`
+    : 'all';
   const currentMonth = new Date();
-  const isCurrentMonth = selectedMonth.getFullYear() === currentMonth.getFullYear() &&
+  const isCurrentMonth = selectedMonth !== null && selectedMonth.getFullYear() === currentMonth.getFullYear() &&
     selectedMonth.getMonth() === currentMonth.getMonth();
 
   useEffect(() => {
@@ -104,7 +106,10 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
           <div className="flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-950/70 p-1">
             <button
               type="button"
-              onClick={() => setSelectedMonth((month) => new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+              onClick={() => setSelectedMonth((month) => {
+                const baseMonth = month || new Date();
+                return new Date(baseMonth.getFullYear(), baseMonth.getMonth() - 1, 1);
+              })}
               aria-label="View previous month"
               title="Previous month"
               className="rounded-lg p-2 text-slate-300 hover:bg-slate-800 hover:text-white"
@@ -112,17 +117,27 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
               <ChevronLeft className="h-4 w-4" />
             </button>
             <span className="min-w-32 px-2 text-center text-xs font-semibold text-white">
-              {selectedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+              {selectedMonth ? selectedMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : 'All months'}
             </span>
             <button
               type="button"
-              onClick={() => setSelectedMonth((month) => new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+              onClick={() => setSelectedMonth((month) => {
+                const baseMonth = month || new Date();
+                return new Date(baseMonth.getFullYear(), baseMonth.getMonth() + 1, 1);
+              })}
               disabled={isCurrentMonth}
               aria-label="View next month"
               title="Next month"
               className="rounded-lg p-2 text-slate-300 hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
               <ChevronRight className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectedMonth(null)}
+              className="rounded-lg border border-slate-700 px-2 py-1 text-[10px] font-semibold text-slate-300 hover:bg-slate-800 hover:text-white"
+            >
+              All
             </button>
           </div>
           <button
