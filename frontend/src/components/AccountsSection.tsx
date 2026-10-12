@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Account, Transaction } from '../types';
 import { formatCurrency } from './SummaryCards';
 import { usePrivacyMode } from '../utils/privacyStore';
-import { Landmark, CreditCard as CardIcon, Wallet, Smartphone, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Landmark, CreditCard as CardIcon, Wallet, Smartphone, Calendar, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface AccountsSectionProps {
   accounts: {
@@ -17,6 +17,7 @@ interface AccountsSectionProps {
 
 export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, transactions }) => {
   usePrivacyMode();
+  const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<Date | null>(() => {
     const today = new Date();
     return new Date(today.getFullYear(), today.getMonth(), 1);
@@ -54,6 +55,9 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
       { incoming: 0, outgoing: 0 }
     );
   };
+  const getCardHistory = (cardId: string) => selectedMonthTransactions
+    .filter((transaction) => transaction.sourceAccountId === cardId || transaction.destinationAccountId === cardId)
+    .sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime());
   const getDisplayedAccountValue = (account: Account) => {
     if (isAllMonths) return account.currentBalance;
 
@@ -193,6 +197,8 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
                 const sharedDebt = card.sharedOutstanding ?? debt;
                 const avail = card.availableCredit ?? Math.max(0, limit - sharedDebt);
                 const util = card.utilizationPercentage ?? (limit > 0 ? Math.min(100, Math.round((sharedDebt / limit) * 100)) : 0);
+                const cardHistory = getCardHistory(card.id);
+                const isHistoryExpanded = expandedCardId === card.id;
 
                 return (
                   <div key={card.id} className="p-3 rounded-xl bg-slate-900/50 border border-slate-700/40 space-y-2">
@@ -222,6 +228,41 @@ export const AccountsSection: React.FC<AccountsSectionProps> = ({ accounts, tran
                         {card.paymentDueDay ? `${card.paymentDueDay}th of month` : '9th of month'}
                       </span>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setExpandedCardId(isHistoryExpanded ? null : card.id)}
+                      className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-[11px] font-semibold text-purple-300 transition-colors hover:text-purple-200"
+                      aria-expanded={isHistoryExpanded}
+                    >
+                      <span>History ({cardHistory.length})</span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${isHistoryExpanded ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {isHistoryExpanded && (
+                      <div className="space-y-1.5 border-t border-slate-700/60 pt-2">
+                        {cardHistory.length === 0 ? (
+                          <p className="py-1 text-[10px] italic text-slate-500">No card activity in this period.</p>
+                        ) : cardHistory.map((transaction) => {
+                          const isPayment = transaction.destinationAccountId === card.id;
+                          const label = transaction.merchant || transaction.description || transaction.category?.name || (isPayment ? 'Card payment' : 'Card purchase');
+
+                          return (
+                            <div key={transaction.id} className="flex items-center justify-between gap-2 rounded-lg bg-slate-950/50 px-2 py-1.5">
+                              <div className="min-w-0">
+                                <p className="truncate text-[10px] font-medium text-slate-200">{label}</p>
+                                <p className="text-[9px] text-slate-500">
+                                  {new Date(transaction.transactionDate).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                                </p>
+                              </div>
+                              <span className={`shrink-0 text-[10px] font-bold ${isPayment ? 'text-emerald-300' : 'text-rose-400'}`}>
+                                {isPayment ? '-' : '+'}{formatCurrency(transaction.amount)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 );
               })
