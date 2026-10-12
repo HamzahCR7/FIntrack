@@ -214,6 +214,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [sortKey, setSortKey] = useState<LedgerSortKey>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [expandedMobileTransactionId, setExpandedMobileTransactionId] = useState<string | null>(null);
 
   const categoryFilterOptions = Array.from(
     new Set(categories.map((category) => category.name.split('>')[0].trim()).filter(Boolean))
@@ -395,7 +396,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
   const lastVisibleRow = Math.min(page * pageSize, filteredTransactions.length);
 
   return (
-    <div className="ledger-shell bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 shadow-sm space-y-6">
+    <div className="ledger-shell bg-slate-800/60 border border-slate-700/60 rounded-2xl p-3 sm:p-6 shadow-sm space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-700/60">
         <div>
           <div className="flex items-center gap-2">
@@ -419,7 +420,7 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="min-w-[7.5rem] text-center text-xs font-semibold text-cyan-100">
+          <span className="min-w-[7.5rem] rounded-md bg-cyan-400/10 px-2 py-1 text-center text-xs font-bold text-cyan-300">
             {selectedMonth ? selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' }) : 'All months'}
           </span>
           <button
@@ -590,7 +591,103 @@ export const TransactionsSection: React.FC<TransactionsSectionProps> = ({
       </div>
 
       {/* Transactions Table */}
-      <div className="ledger-table-wrap max-h-[32rem] overflow-auto rounded-2xl border border-slate-700/60 shadow-xl shadow-slate-950/20">
+      <div className="space-y-2 sm:hidden">
+        {filteredTransactions.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-slate-700/60 bg-slate-900/60 px-4 py-12 text-center text-xs italic text-slate-500">
+            <Search className="h-7 w-7 text-slate-600" />
+            <span>No transactions match your current query or filters.</span>
+          </div>
+        ) : paginatedTransactions.map((tx) => {
+          const isIncome = tx.type === 'INCOME';
+          const isExpense = tx.type === 'EXPENSE';
+          const mainCategoryName = tx.category?.name?.split('>')[0]?.trim() || 'Uncategorized';
+          const fromDisplay = tx.sourceAccount?.name || tx.sourceAccountId || '—';
+          const toDisplay = tx.destinationAccount?.name || tx.destinationAccountId || tx.merchant || tx.description || mainCategoryName;
+          const txDate = new Date(tx.transactionDate).toLocaleDateString('en-IN', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          });
+          const isExpanded = expandedMobileTransactionId === tx.id;
+
+          return (
+            <article key={tx.id} className="rounded-xl border border-slate-700/70 bg-slate-900/75 px-3 py-2.5 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                  isIncome ? 'bg-emerald-500/10 text-emerald-400' : isExpense ? 'bg-rose-500/20 text-rose-400' : 'bg-blue-500/10 text-blue-400'
+                }`}>
+                  {isIncome ? <ArrowUpRight className="h-4 w-4" /> : isExpense ? <ArrowDownRight className="h-4 w-4" /> : <ArrowRightLeft className="h-4 w-4" />}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedMobileTransactionId(isExpanded ? null : tx.id)}
+                    className="flex w-full items-start justify-between gap-2 text-left"
+                    aria-expanded={isExpanded}
+                  >
+                    <div className="min-w-0">
+                      <h3 className="truncate text-sm font-semibold text-slate-100">{tx.merchant || tx.description || 'Transaction'}</h3>
+                      <p className="mt-0.5 text-[11px] text-slate-400">{txDate} · {mainCategoryName}</p>
+                    </div>
+                    <span className="flex shrink-0 items-center gap-1.5">
+                      <span className={`text-sm font-bold ${isIncome ? 'text-emerald-400' : isExpense ? 'text-rose-400' : 'text-blue-400'}`}>
+                        {isIncome ? '+' : isExpense ? '-' : ''}{formatCurrency(tx.amount)}
+                      </span>
+                      <ChevronDown className={`h-4 w-4 text-slate-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                    </span>
+                  </button>
+
+                  {isExpanded && (
+                    <>
+                      {tx.description && tx.merchant && <p className="mt-2 break-words text-xs text-slate-300">{tx.description}</p>}
+
+                  <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl bg-slate-950/55 p-2.5 text-[11px]">
+                    <div className="min-w-0">
+                      <span className="block text-[9px] font-semibold uppercase tracking-wide text-slate-500">From</span>
+                      <span className="block truncate font-medium text-slate-200">{fromDisplay}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[9px] font-semibold uppercase tracking-wide text-slate-500">To</span>
+                      <span className="block truncate font-medium text-slate-200">{toDisplay}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <span className="block text-[9px] font-semibold uppercase tracking-wide text-slate-500">Method</span>
+                      <span className="block truncate text-slate-300">{tx.paymentMethod.replace(/_/g, ' ')}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[9px] font-semibold uppercase tracking-wide text-slate-500">Type</span>
+                      <span className={`font-semibold ${isIncome ? 'text-emerald-300' : isExpense ? 'text-rose-400' : 'text-blue-300'}`}>{tx.type}</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap gap-1">
+                      {tx.isSubscription && <span className="rounded border border-indigo-500/30 bg-indigo-500/20 px-1.5 py-0.5 text-[9px] text-indigo-300">Recurring</span>}
+                      {tx.syncStatus === 'pending' && <span className="rounded border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 text-[9px] text-amber-300">Pending sync</span>}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {onEditTransaction && (
+                        <button onClick={() => onEditTransaction(tx)} disabled={tx.id.startsWith('offline-')} className="rounded-lg bg-slate-800 p-2 text-slate-300 disabled:opacity-40" aria-label="Edit transaction">
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                      )}
+                      {onDeleteTransaction && (
+                        <button onClick={() => setDeleteConfirmDialog({ isOpen: true, transactionId: tx.id })} disabled={tx.id.startsWith('offline-')} className="rounded-lg bg-rose-500/15 p-2 text-rose-400 disabled:opacity-40" aria-label="Delete transaction">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="ledger-table-wrap hidden max-h-[32rem] overflow-auto rounded-2xl border border-slate-700/60 shadow-xl shadow-slate-950/20 sm:block">
         <table className="ledger-table w-full text-left text-xs">
           <thead className="bg-slate-900/90 text-slate-400 uppercase tracking-wider border-b border-slate-700/60">
             <tr>

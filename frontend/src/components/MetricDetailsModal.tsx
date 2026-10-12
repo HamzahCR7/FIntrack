@@ -655,7 +655,7 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
                   value={selectedHistoryMonth}
                   onChange={(event) => setSelectedHistoryMonth(event.target.value)}
                   aria-label="Transaction month"
-                  className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs text-white focus:border-blue-500 focus:outline-none"
+                  className="rounded-xl border border-cyan-400/30 bg-slate-900 px-3 py-1.5 text-xs font-semibold text-cyan-300 focus:border-cyan-400 focus:outline-none"
                 >
                   <option value="ALL">All months</option>
                   {transactionMonths.map((month) => (

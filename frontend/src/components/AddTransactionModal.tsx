@@ -37,6 +37,20 @@ const ACCOUNT_CATEGORY_LABELS: Record<string, string> = {
   OTHER: 'Other',
 };
 
+const INCOME_CATEGORY_NAMES = new Set([
+  'Salary',
+  'Pocket Allowance',
+  'Freelance Income',
+  'Interest Income',
+  'Investment Returns',
+  'Rental Income',
+  'Refund',
+  'Money Returned',
+  'Gift Received',
+  'Other Income',
+]);
+const HIDDEN_LEGACY_CATEGORY_NAMES = new Set(['Salary & Income']);
+
 const getAccountCategory = (account: Account | undefined, accountTypes: FinancialReferenceOption[]) => {
   if (!account) return undefined;
   const normalizedType = account.type.trim().toUpperCase();
@@ -339,6 +353,36 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
     return accountOptions.filter((option) => allowedAccountIds.has(option.value));
   }, [accountOptions, accountTypes, accounts, sourceAccountCategory]);
 
+  const getPreferredAccountForCategory = (category: string) => {
+    const matchesCategory = (account: Account) => getAccountCategory(account, accountTypes) === category;
+    const accountIdentity = (account: Account) => `${account.name} ${account.institution || ''}`.toLowerCase();
+    const isPocketAccount = (account: Account) => /pockets?/.test(accountIdentity(account));
+
+    if (category === 'POCKET') {
+      return accounts.find(isPocketAccount);
+    }
+    if (category === 'WALLET') {
+      return accounts.find((account) => account.type === 'UPI' && !isPocketAccount(account) && account.name.trim().toLowerCase() === 'upi')
+        || accounts.find((account) => account.type === 'UPI' && !isPocketAccount(account));
+    }
+    if (category === 'BANK') {
+      return accounts.find((account) => matchesCategory(account) && /axis/.test(accountIdentity(account)))
+        || accounts.find(matchesCategory);
+    }
+    if (category === 'CASH') {
+      return accounts.find((account) => account.type === 'CASH');
+    }
+    return accounts.find(matchesCategory);
+  };
+
+  const getPreferredPaymentMethod = (category: string) => {
+    if (category === 'POCKET') return 'POCKET_UPI';
+    if (category === 'WALLET') return 'GOOGLE_PAY';
+    if (category === 'BANK') return 'DEBIT_CARD';
+    if (category === 'CASH') return 'CASH';
+    return '';
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     Promise.all([api.getPaymentMethods(), api.getAccountTypes()])
@@ -450,7 +494,12 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       if (salaryCat) {
         setCategoryId(salaryCat.id);
       }
+    } else if (INCOME_CATEGORY_NAMES.has(categories.find((category) => category.id === categoryId)?.name || '')) {
+      setCategoryId('');
     }
+    setSelectedSubcategoryIds([]);
+    setSubcategoryId('');
+    setItemTag('');
   };
 
   const handleDestinationAccountChange = (accountId: string) => {
@@ -468,8 +517,14 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   };
 
   const mainCategories = useMemo(() => {
-    return categories.filter((category) => !category.parentId && !category.name.includes(' > '));
-  }, [categories]);
+    return categories.filter((category) => {
+      if (category.parentId || category.name.includes(' > ')) return false;
+      if (HIDDEN_LEGACY_CATEGORY_NAMES.has(category.name)) return false;
+      return type === 'INCOME'
+        ? INCOME_CATEGORY_NAMES.has(category.name)
+        : !INCOME_CATEGORY_NAMES.has(category.name);
+    });
+  }, [categories, type]);
 
   const selectedCategory = categories.find((category) => category.id === categoryId);
   const isOtherCategory = selectedCategory?.name === 'Other';
@@ -904,23 +959,14 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
                   autoSelectSingleOption={sourceCategoryOptions[0]?.value !== 'POCKET'}
                   onChange={(category) => {
                     setSourceAccountCategory(category);
-                    const inferredAccount = category === 'POCKET'
-                      ? accounts.find((account) => /pockets?/.test(`${account.name} ${account.institution || ''}`.toLowerCase()))
-                      : category === 'WALLET'
-                      ? accounts.find((account) => (
-                          account.type === 'UPI'
-                          && account.name.trim().toLocaleLowerCase() === 'upi'
-                        ))
-                      : category === 'CASH'
-                        ? accounts.find((account) => account.type === 'CASH')
-                        : undefined;
+                    const inferredAccount = getPreferredAccountForCategory(category);
 
                     if (type === 'INCOME') {
                       setDestinationAccountId(inferredAccount?.id || '');
                     } else {
                       setSourceAccountId(inferredAccount?.id || '');
                     }
-                    setPaymentMethod(category === 'CASH' ? 'CASH' : '');
+                    setPaymentMethod(getPreferredPaymentMethod(category));
                   }}
                 />
               </div>

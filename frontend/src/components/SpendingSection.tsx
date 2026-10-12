@@ -328,7 +328,7 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="min-w-[6.5rem] text-center text-xs font-semibold text-cyan-100">
+            <span className="min-w-[6.5rem] rounded-md bg-cyan-400/10 px-2 py-1 text-center text-xs font-bold text-cyan-300">
               {isAllTime ? 'All Time' : selectedMonth.toLocaleString('default', { month: 'short', year: 'numeric' })}
             </span>
             <button

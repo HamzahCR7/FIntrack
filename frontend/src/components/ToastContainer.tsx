@@ -9,14 +9,14 @@ export const ToastContainer: React.FC = () => {
     <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
       {toasts.map((toast) => {
         const bgColor = {
-          success: 'bg-emerald-900/90 border-emerald-700/60',
+          success: 'bg-emerald-100 border-emerald-300 shadow-emerald-950/20',
           error: 'bg-rose-900/90 border-rose-700/60',
           info: 'bg-blue-900/90 border-blue-700/60',
           warning: 'bg-amber-900/90 border-amber-700/60',
         }[toast.type];
 
         const textColor = {
-          success: 'text-emerald-100',
+          success: 'text-emerald-950',
           error: 'text-rose-100',
           info: 'text-blue-100',
           warning: 'text-amber-100',
@@ -30,7 +30,7 @@ export const ToastContainer: React.FC = () => {
         }[toast.type];
 
         const iconColor = {
-          success: 'text-emerald-400',
+          success: 'text-emerald-700',
           error: 'text-rose-400',
           info: 'text-blue-400',
           warning: 'text-amber-400',
