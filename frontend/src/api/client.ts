@@ -167,6 +167,13 @@ export const api = {
     return res.data.data;
   },
 
+  getMerchantSuggestions: async (categoryId: string, subcategoryId: string, text: string, type: 'INCOME' | 'EXPENSE'): Promise<string[]> => {
+    const res = await apiClient.get(`${API_BASE}/categories/merchant-suggestions/search`, {
+      params: { categoryId, subcategoryId, text, type },
+    });
+    return res.data.data;
+  },
+
   searchOpenCategoryItems: async (category: string, text: string): Promise<OpenItemSuggestion[]> => {
     const res = await apiClient.get(`${API_BASE}/categories/items/search`, { params: { category, text } });
     return res.data.data;

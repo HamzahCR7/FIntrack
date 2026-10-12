@@ -225,6 +225,8 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
   const [isParsingReceipt, setIsParsingReceipt] = useState(false);
   const [amountCandidates, setAmountCandidates] = useState<number[]>([]);
   const [categorySuggestions, setCategorySuggestions] = useState<CategorySuggestion[]>([]);
+  const [merchantSuggestions, setMerchantSuggestions] = useState<string[]>([]);
+  const [showMerchantSuggestions, setShowMerchantSuggestions] = useState(false);
   const [showAllSubcategories, setShowAllSubcategories] = useState(false);
   const [itemSearch, setItemSearch] = useState('');
   const [openItemSuggestions, setOpenItemSuggestions] = useState<OpenItemSuggestion[]>([]);
@@ -412,6 +414,23 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
       window.clearTimeout(timer);
     };
   }, [description, editingTransaction, isOpen, merchant, type]);
+
+  useEffect(() => {
+    if (!isOpen || type === 'TRANSFER' || editingTransaction || !categoryId) {
+      setMerchantSuggestions([]);
+      return;
+    }
+    let active = true;
+    const timer = window.setTimeout(() => {
+      api.getMerchantSuggestions(categoryId, subcategoryId, merchant.trim(), type)
+        .then((suggestions) => active && setMerchantSuggestions(suggestions))
+        .catch(() => active && setMerchantSuggestions([]));
+    }, 250);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, [categoryId, editingTransaction, isOpen, merchant, subcategoryId, type]);
 
   const getPreferredPaymentMethod = (category: string) => {
     if (category === 'POCKET') return 'POCKET_UPI';
@@ -1181,20 +1200,38 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
           </div>
 
           {/* Merchant & Description */}
-          <div className="grid grid-cols-2 gap-2">
-            <div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="relative">
               <label className="text-slate-300 font-semibold block mb-1">Merchant / Payee</label>
               <FancyInput
                 type="text"
-                list="merchant-suggestions"
                 placeholder="e.g. Zaitoon / Amazon"
                 value={merchant}
                 onChange={(e) => setMerchant(e.target.value)}
+                onFocus={() => setShowMerchantSuggestions(true)}
+                onBlur={() => window.setTimeout(() => setShowMerchantSuggestions(false), 150)}
+                autoComplete="off"
                 className="p-2.5 text-xs"
               />
-              <datalist id="merchant-suggestions">
-                {frequentTextValues.merchants.map((value) => <option key={value} value={value} />)}
-              </datalist>
+              {showMerchantSuggestions && merchantSuggestions.length > 0 && (
+                <div className="absolute left-0 right-0 top-[4.25rem] z-40 max-h-52 overflow-y-auto rounded-xl border border-slate-600 bg-slate-950 p-1.5 shadow-2xl" role="listbox" aria-label="Merchant and payee suggestions">
+                  {merchantSuggestions.map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      role="option"
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => {
+                        setMerchant(value);
+                        setShowMerchantSuggestions(false);
+                      }}
+                      className="block w-full rounded-lg px-3 py-2.5 text-left text-sm text-slate-200 hover:bg-cyan-500/15 hover:text-cyan-100"
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              )}
               {categorySuggestions.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Suggested categories">
                   {categorySuggestions.map((suggestion) => (

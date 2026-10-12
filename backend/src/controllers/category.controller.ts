@@ -16,6 +16,7 @@ export class CategoryController {
   private initRoutes() {
     this.router.get('/', this.getAllCategories);
     this.router.get('/suggestions/search', this.getCategorySuggestions);
+    this.router.get('/merchant-suggestions/search', this.getMerchantSuggestions);
     this.router.get('/items/search', this.searchOpenItems);
     this.router.get('/:id', this.getCategoryById);
     this.router.post('/', validateBody(CreateCategorySchema), this.createCategory);
@@ -26,6 +27,19 @@ export class CategoryController {
       const text = typeof req.query.text === 'string' ? req.query.text : '';
       const type = typeof req.query.type === 'string' ? req.query.type.toUpperCase() : 'EXPENSE';
       const suggestions = await this.categoryService.suggestCategories(text, type);
+      res.status(200).json({ status: 'success', data: suggestions });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  private getMerchantSuggestions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const categoryId = typeof req.query.categoryId === 'string' ? req.query.categoryId : '';
+      const subcategoryId = typeof req.query.subcategoryId === 'string' ? req.query.subcategoryId : '';
+      const text = typeof req.query.text === 'string' ? req.query.text : '';
+      const type = typeof req.query.type === 'string' ? req.query.type.toUpperCase() : 'EXPENSE';
+      const suggestions = await this.categoryService.suggestMerchants(categoryId, text, type, subcategoryId);
       res.status(200).json({ status: 'success', data: suggestions });
     } catch (err) {
       next(err);

@@ -461,7 +461,8 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
       )}
 
       {/* Chart Section */}
-      <div className="mt-5 h-72 sm:h-80">
+      <div className="mt-5 touch-pan-x overflow-x-auto pb-2">
+        <div className="h-72 sm:h-80" style={{ minWidth: `${Math.max(980, daysInMonth * 38)}px` }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
@@ -528,8 +529,8 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
                 label={{ value: `Limit: ${formatCompactCurrency(dailyBudgetLimit)}`, fill: '#f59e0b', fontSize: 10, position: 'insideTopRight' }}
               />
             )}
-            <Bar dataKey="income" fill="#34d399" radius={[4, 4, 0, 0]} maxBarSize={24} shape={<VisibleBarShape />} />
-            <Bar dataKey="spending" fill="#fb7185" radius={[4, 4, 0, 0]} maxBarSize={24} shape={<VisibleBarShape />} />
+            <Bar dataKey="income" fill="#34d399" radius={[4, 4, 0, 0]} maxBarSize={28} shape={<VisibleBarShape />} />
+            <Bar dataKey="spending" fill="#fb7185" radius={[4, 4, 0, 0]} maxBarSize={28} shape={<VisibleBarShape />} />
             {/* Feature 3: Net Flow Trend Line */}
             {showNetFlow && (
               <Line type="monotone" dataKey="netFlow" stroke="#10b981" strokeWidth={2.5} dot={{ r: 2 }} />
@@ -540,6 +541,7 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
             )}
           </ComposedChart>
         </ResponsiveContainer>
+        </div>
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-400">

@@ -68,6 +68,9 @@ html[data-theme='light'] {
   --fin-bg-2: #e2e8f0;
   --fin-card: rgba(255, 255, 255, 0.84);
   --fin-border: rgba(100, 116, 139, 0.3);
+  --fin-danger: #991b1b;
+  --fin-danger-strong: #7f1d1d;
+  --fin-danger-soft: rgba(127, 29, 29, 0.14);
 }
 
 body {
@@ -150,12 +153,8 @@ html[data-theme='light'] [class*='text-amber-200'],
 html[data-theme='light'] [class*='text-amber-300'],
 html[data-theme='light'] [class*='text-amber-400'],
 html[data-theme='light'] [class*='text-yellow-300'] { color: #92400e !important; }
-html[data-theme='light'] [class*='text-rose-100'],
-html[data-theme='light'] [class*='text-rose-200'],
-html[data-theme='light'] [class*='text-rose-300'],
-html[data-theme='light'] [class*='text-rose-400'],
-html[data-theme='light'] [class*='text-red-300'],
-html[data-theme='light'] [class*='text-red-400'] { color: #be123c !important; }
+html[data-theme='light'] [class*='text-rose-'],
+html[data-theme='light'] [class*='text-red-'] { color: var(--fin-danger) !important; }
 html[data-theme='light'] [class*='text-emerald-100'],
 html[data-theme='light'] [class*='text-emerald-200'],
 html[data-theme='light'] [class*='text-emerald-300'],
@@ -193,10 +192,12 @@ html[data-theme='light'] [class*='bg-amber-400/'],
 html[data-theme='light'] [class*='bg-amber-500/'],
 html[data-theme='light'] [class*='bg-yellow-400/'],
 html[data-theme='light'] [class*='bg-yellow-500/'] { background-color: rgba(245, 158, 11, 0.18) !important; }
-html[data-theme='light'] [class*='bg-rose-400/'],
-html[data-theme='light'] [class*='bg-rose-500/'],
-html[data-theme='light'] [class*='bg-red-400/'],
-html[data-theme='light'] [class*='bg-red-500/'] { background-color: rgba(225, 29, 72, 0.15) !important; }
+html[data-theme='light'] [class*='bg-rose-'][class*='/'],
+html[data-theme='light'] [class*='bg-red-'][class*='/'] { background-color: var(--fin-danger-soft) !important; }
+html[data-theme='light'] :is(
+  [class~='bg-rose-400'], [class~='bg-rose-500'], [class~='bg-rose-600'], [class~='bg-rose-700'], [class~='bg-rose-800'], [class~='bg-rose-900'],
+  [class~='bg-red-400'], [class~='bg-red-500'], [class~='bg-red-600'], [class~='bg-red-700'], [class~='bg-red-800'], [class~='bg-red-900']
+) { background-color: var(--fin-danger) !important; }
 html[data-theme='light'] [class*='bg-emerald-400/'],
 html[data-theme='light'] [class*='bg-emerald-500/'],
 html[data-theme='light'] [class*='bg-emerald-600/'],
@@ -222,7 +223,25 @@ html[data-theme='light'] [class*='border-sky-'] { border-color: rgba(2, 132, 199
 html[data-theme='light'] [class*='border-amber-'],
 html[data-theme='light'] [class*='border-yellow-'] { border-color: rgba(217, 119, 6, 0.5) !important; }
 html[data-theme='light'] [class*='border-rose-'],
-html[data-theme='light'] [class*='border-red-'] { border-color: rgba(225, 29, 72, 0.5) !important; }
+html[data-theme='light'] [class*='border-red-'] { border-color: rgba(127, 29, 29, 0.62) !important; }
+
+html[data-theme='light'] [class*='from-rose-'],
+html[data-theme='light'] [class*='from-red-'] { --tw-gradient-from: var(--fin-danger) var(--tw-gradient-from-position) !important; }
+html[data-theme='light'] [class*='via-rose-'],
+html[data-theme='light'] [class*='via-red-'] { --tw-gradient-via: var(--fin-danger) var(--tw-gradient-via-position) !important; }
+html[data-theme='light'] [class*='to-rose-'],
+html[data-theme='light'] [class*='to-red-'] { --tw-gradient-to: var(--fin-danger-strong) var(--tw-gradient-to-position) !important; }
+
+/* Recharts uses SVG presentation attributes instead of Tailwind utilities. */
+html[data-theme='light'] :is(
+  [stroke='#f43f5e'], [stroke='#fb7185'], [stroke='#ef4444'], [stroke='#dc2626']
+) { stroke: var(--fin-danger) !important; }
+html[data-theme='light'] :is(
+  [fill='#f43f5e'], [fill='#fb7185'], [fill='#ef4444'], [fill='#dc2626']
+) { fill: var(--fin-danger) !important; }
+html[data-theme='light'] :is(
+  [stop-color='#f43f5e'], [stop-color='#fb7185'], [stop-color='#ef4444'], [stop-color='#dc2626']
+) { stop-color: var(--fin-danger) !important; }
 html[data-theme='light'] [class*='border-emerald-'],
 html[data-theme='light'] [class*='border-green-'],
 html[data-theme='light'] [class*='border-teal-'] { border-color: rgba(5, 150, 105, 0.5) !important; }

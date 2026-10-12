@@ -3,7 +3,7 @@ import { CreateCategoryDto } from '../dtos/category.dto';
 import { BadRequestError, NotFoundError } from '../common/errors';
 import { Category } from '@prisma/client';
 import { TransactionRepository } from '../repositories/transaction.repository';
-import { expenseCategoryKnowledge, incomeCategoryKnowledge } from '../data/categorySuggestionKnowledge';
+import { expenseCategoryKnowledge, getSubcategoryMerchantSuggestions, incomeCategoryKnowledge, merchantSuggestionKnowledge } from '../data/categorySuggestionKnowledge';
 
 export interface CategorySuggestion {
   categoryId: string;
@@ -84,6 +84,45 @@ export class CategoryService {
     return [...scores.values()]
       .sort((a, b) => b.confidence - a.confidence || a.categoryName.localeCompare(b.categoryName))
       .slice(0, 3);
+  }
+
+  async suggestMerchants(categoryId: string, text = '', type = 'EXPENSE', subcategoryId = ''): Promise<string[]> {
+    if (!categoryId || !['EXPENSE', 'INCOME'].includes(type)) return [];
+
+    const [category, subcategory, history] = await Promise.all([
+      this.categoryRepo.findById(categoryId),
+      subcategoryId ? this.categoryRepo.findById(subcategoryId) : Promise.resolve(null),
+      this.transactionRepo.findCategorizedForSuggestions(type),
+    ]);
+    if (!category) return [];
+
+    const query = normalize(text);
+    const ranked = new Map<string, { value: string; score: number }>();
+    const add = (value: string, score: number) => {
+      const trimmed = value.trim();
+      if (!trimmed || (query && !normalize(trimmed).includes(query))) return;
+      const key = normalize(trimmed);
+      const current = ranked.get(key);
+      ranked.set(key, { value: current?.value || trimmed, score: (current?.score || 0) + score });
+    };
+
+    history.forEach((transaction, index) => {
+      if (transaction.categoryId === categoryId && transaction.merchant) {
+        const subcategoryBoost = subcategoryId && transaction.subcategoryId === subcategoryId ? 100 : 0;
+        add(transaction.merchant, 100 + subcategoryBoost + Math.max(0, 25 - index));
+      }
+    });
+
+    const rootCategoryName = category.name.split('>')[0].trim().toLocaleLowerCase();
+    if (subcategory) {
+      getSubcategoryMerchantSuggestions(subcategory.name).forEach((merchant) => add(merchant, 50));
+    }
+    (merchantSuggestionKnowledge[rootCategoryName] || []).forEach((merchant) => add(merchant, 10));
+
+    return [...ranked.values()]
+      .sort((a, b) => b.score - a.score || a.value.localeCompare(b.value))
+      .slice(0, 20)
+      .map(({ value }) => value);
   }
 
   async getAllCategories(): Promise<Category[]> {

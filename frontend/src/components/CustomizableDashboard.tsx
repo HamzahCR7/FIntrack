@@ -93,21 +93,53 @@ const MoneyWrapped: React.FC<{ transactions: Transaction[] }> = ({ transactions 
     });
 
     const totalSpent = monthly.reduce((sum, item) => sum + item.expenses, 0);
+    const totalIncome = monthly.reduce((sum, item) => sum + item.income, 0);
     const totalSaved = monthly.reduce((sum, item) => sum + item.income - item.expenses, 0);
     const topCategory = Array.from(categories.entries()).sort((a, b) => b[1] - a[1])[0];
-    const bestMonthIndex = monthly.reduce((best, item, index, all) =>
-      item.income - item.expenses > all[best].income - all[best].expenses ? index : best, 0);
+    const activeMonthIndexes = monthly
+      .map((item, index) => ({ ...item, index }))
+      .filter((item) => item.income > 0 || item.expenses > 0);
+    const bestMonthIndex = activeMonthIndexes.length
+      ? activeMonthIndexes.reduce((best, item) =>
+        item.income - item.expenses > best.income - best.expenses ? item : best).index
+      : null;
     const maxMonthlySpend = Math.max(...monthly.map((item) => item.expenses), 1);
+    const transactionCount = transactions.filter((tx) => new Date(tx.transactionDate).getFullYear() === year).length;
+    const savingsRate = totalIncome > 0 ? (totalSaved / totalIncome) * 100 : 0;
 
-    return { monthly, totalSpent, totalSaved, topCategory, biggestExpense, bestMonthIndex, maxMonthlySpend };
+    return { monthly, totalIncome, totalSpent, totalSaved, savingsRate, topCategory, biggestExpense, bestMonthIndex, maxMonthlySpend, transactionCount, activeMonths: activeMonthIndexes.length };
   }, [transactions, year]);
 
-  return <div className="overflow-hidden rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-950/70 via-slate-900 to-cyan-950/60 p-5"><div className="flex items-start justify-between gap-3"><div><div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-violet-300"><Sparkles className="h-4 w-4"/>{year} Money Wrapped</div><h3 className="mt-2 text-2xl font-black text-white">Your year, told through money.</h3></div><Trophy className="h-8 w-8 text-amber-300"/></div><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[
-    ['Total spent', formatCurrency(stats.totalSpent)],
-    ['Net saved', formatCurrency(stats.totalSaved)],
-    ['Top category', stats.topCategory ? `${stats.topCategory[0]} · ${formatCurrency(stats.topCategory[1])}` : 'No spending yet'],
-    ['Biggest purchase', stats.biggestExpense ? `${stats.biggestExpense.merchant || stats.biggestExpense.description || 'Expense'} · ${formatCurrency(stats.biggestExpense.amount)}` : 'No spending yet'],
-  ].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-white/5 p-3"><p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p><p className="mt-1 text-sm font-bold text-white">{value}</p></div>)}</div><div className="mt-5"><div className="mb-2 flex justify-between text-xs"><span className="text-slate-400">Monthly spending rhythm</span><span className="text-emerald-300">Best saving month: {new Date(year, stats.bestMonthIndex).toLocaleDateString(undefined, { month: 'long' })}</span></div><div className="flex h-28 items-end gap-1.5">{stats.monthly.map((item, index) => <div key={index} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1"><div title={`${new Date(year, index).toLocaleDateString(undefined, { month: 'long' })}: ${formatCurrency(item.expenses)}`} className="w-full rounded-t bg-gradient-to-t from-violet-600 to-cyan-400" style={{ height: `${Math.max(3, (item.expenses / stats.maxMonthlySpend) * 82)}px` }}/><span className="text-[8px] text-slate-500">{new Date(year, index).toLocaleDateString(undefined, { month: 'narrow' })}</span></div>)}</div></div></div>;
+  const hasData = stats.transactionCount > 0;
+  return <section className="overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900 p-4 shadow-lg shadow-slate-950/20 sm:p-6">
+    <header className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-cyan-300"><Sparkles className="h-4 w-4"/>{year} financial recap</div>
+        <h3 className="mt-2 text-xl font-bold text-slate-50 sm:text-2xl">Your money at a glance</h3>
+        <p className="mt-1 text-xs leading-5 text-slate-400">{hasData ? `${stats.transactionCount} transactions across ${stats.activeMonths} active month${stats.activeMonths === 1 ? '' : 's'}.` : 'Your yearly recap will appear after you add transactions.'}</p>
+      </div>
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-amber-400/20 bg-amber-400/10"><Trophy className="h-5 w-5 text-amber-300"/></div>
+    </header>
+
+    {!hasData ? <div className="mt-5 rounded-xl border border-dashed border-slate-700 bg-slate-950/40 px-4 py-10 text-center"><p className="text-sm font-semibold text-slate-300">No {year} activity yet</p><p className="mt-1 text-xs text-slate-500">Income and expense transactions will build this recap automatically.</p></div> : <>
+      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-300">Income</p><p className="mt-2 break-words text-base font-bold text-slate-50">{formatCurrency(stats.totalIncome)}</p></div>
+        <div className="rounded-xl border border-red-800/60 bg-red-950/35 p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-red-400">Spent</p><p className="mt-2 break-words text-base font-bold text-red-200">{formatCurrency(stats.totalSpent)}</p></div>
+        <div className={`rounded-xl border p-3 ${stats.totalSaved >= 0 ? 'border-cyan-500/20 bg-cyan-500/5' : 'border-amber-500/20 bg-amber-500/5'}`}><p className={`text-[10px] font-semibold uppercase tracking-wider ${stats.totalSaved >= 0 ? 'text-cyan-300' : 'text-amber-300'}`}>Net saved</p><p className="mt-2 break-words text-base font-bold text-slate-50">{formatCurrency(stats.totalSaved)}</p></div>
+        <div className="rounded-xl border border-slate-700 bg-slate-950/50 p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Savings rate</p><p className={`mt-2 text-base font-bold ${stats.savingsRate >= 0 ? 'text-cyan-200' : 'text-amber-300'}`}>{stats.savingsRate.toFixed(1)}%</p></div>
+      </div>
+
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="min-w-0 rounded-xl border border-slate-700/80 bg-slate-950/50 p-4"><p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Top spending category</p><p className="mt-2 truncate text-sm font-semibold text-slate-100">{stats.topCategory?.[0] || 'Uncategorized'}</p><p className="mt-1 text-lg font-bold text-red-400">{formatCurrency(stats.topCategory?.[1] || 0)}</p></div>
+        <div className="min-w-0 rounded-xl border border-slate-700/80 bg-slate-950/50 p-4"><p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">Biggest purchase</p><p className="mt-2 truncate text-sm font-semibold text-slate-100">{stats.biggestExpense?.merchant || stats.biggestExpense?.description || 'Expense'}</p><p className="mt-1 text-lg font-bold text-red-400">{formatCurrency(stats.biggestExpense?.amount || 0)}</p></div>
+      </div>
+
+      <div className="mt-5 border-t border-slate-800 pt-4">
+        <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs font-semibold text-slate-300">Monthly spending</p>{stats.bestMonthIndex !== null && <p className="text-[11px] text-emerald-300">Best saving month: <strong>{new Date(year, stats.bestMonthIndex).toLocaleDateString(undefined, { month: 'long' })}</strong></p>}</div>
+        <div className="overflow-x-auto pb-2"><div className="flex h-36 min-w-[640px] items-end gap-2 rounded-xl bg-slate-950/40 px-3 pt-4">{stats.monthly.map((item, index) => <div key={index} className="flex min-w-0 flex-1 flex-col items-center justify-end gap-1.5"><span className="text-[9px] font-medium text-slate-400">{item.expenses > 0 ? formatCurrency(item.expenses) : ''}</span><div title={`${new Date(year, index).toLocaleDateString(undefined, { month: 'long' })}: ${formatCurrency(item.expenses)}`} className="w-full max-w-8 rounded-t-md bg-red-700" style={{ height: `${Math.max(3, (item.expenses / stats.maxMonthlySpend) * 82)}px` }}/><span className="text-[10px] font-medium text-slate-500">{new Date(year, index).toLocaleDateString(undefined, { month: 'short' })}</span></div>)}</div></div>
+      </div>
+    </>}
+  </section>;
 };
 
 const FinancialHealthRings: React.FC<{ dashboard: DashboardData }> = ({ dashboard }) => {
@@ -257,7 +289,7 @@ export const CustomizableDashboard: React.FC<{
     'financial-highlights': <FinancialHighlights dashboard={dashboardData} transactions={transactions}/>,
     spending: <SpendingSection spendingThisMonth={dashboardData.summary.spendingThisMonth} spendingByCategory={dashboardData.spendingByCategory} spendingByPaymentMethod={dashboardData.spendingByPaymentMethod} totalIncome={dashboardData.summary.totalIncome} totalExpenses={dashboardData.summary.totalExpenses} incomeThisMonth={dashboardData.summary.incomeThisMonth} savingsThisMonth={dashboardData.summary.savingsThisMonth} monthlyTrends={dashboardData.monthlyTrends} transactions={transactions}/>,
     dues: <BillRemindersSection creditCards={dashboardData.accounts.breakdown.CREDIT_CARD} subscriptions={dashboardData.recurring.upcomingSubscriptions} debts={dashboardData.debts.activeDebts} onPayCreditCard={onPayCreditCard} onPaySubscription={onPaySubscription} onPayDebt={onPayDebt}/>,
-    daily: <DailySpendingSection transactions={transactions} onAddTransactionForDate={onAddTransactionForDate}/>, trends: <TrendsSection monthlyTrends={dashboardData.monthlyTrends}/>, runway: <RunwaySimulatorCard/>,
+    daily: <DailySpendingSection transactions={transactions} onAddTransactionForDate={onAddTransactionForDate}/>, trends: <TrendsSection monthlyTrends={dashboardData.monthlyTrends} transactions={transactions}/>, runway: <RunwaySimulatorCard/>,
   }[id]);
   if (device === 'mobile') return <div className="space-y-3">
     <div className="-mx-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Financial insights">
