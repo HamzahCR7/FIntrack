@@ -180,18 +180,19 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
   };
 
   const tableIncomeTotal = sortedFilteredTransactions.reduce(
-    (sum, tx) => (tx.type === 'INCOME' && !tx.isDebtPayment ? sum + tx.amount : sum),
+    (sum, tx) => (tx.type === 'INCOME' ? sum + tx.amount : sum),
     0
   );
   const tableExpenseTotal = sortedFilteredTransactions.reduce(
-    (sum, tx) => (tx.type === 'EXPENSE' && !tx.isDebtPayment ? sum + tx.amount : sum),
+    (sum, tx) => (tx.type === 'EXPENSE' && !(tx.isDebtPayment && tx.description?.startsWith('Lent money to ')) ? sum + tx.amount : sum),
     0
   );
   const tableTransferTotal = sortedFilteredTransactions.reduce(
     (sum, tx) => (tx.type === 'TRANSFER' ? sum + tx.amount : sum),
     0
   );
-  const filteredTableTotal = sortedFilteredTransactions.reduce((sum, tx) => sum + tx.amount, 0);
+  // Transfers are internal movements, so net is income minus expenses.
+  const filteredTableTotal = tableIncomeTotal - tableExpenseTotal;
 
   // Calculate Summary Statistics
   const totalAmount = matchingTransactions.reduce((acc, tx) => acc + tx.amount, 0);
