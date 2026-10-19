@@ -138,8 +138,8 @@ export const DailySpendingSection: React.FC<DailySpendingSectionProps> = ({
 
     const isCurrentMonthTx = tYear === year && tMonth === month;
     const isPrevMonthTx = tYear === prevYear && tMonth === prevMonth;
-    const isExpense = transaction.type === 'EXPENSE';
-    const isIncome = transaction.type === 'INCOME';
+    const isExpense = transaction.type === 'EXPENSE' && !(transaction.isDebtPayment && transaction.description?.startsWith('Lent money to '));
+    const isIncome = transaction.type === 'INCOME' && !(transaction.isDebtPayment && transaction.description?.startsWith('Returned money / Debt settlement from '));
 
     if (isCurrentMonthTx) {
       if (isExpense) {

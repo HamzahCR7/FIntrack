@@ -64,7 +64,10 @@ const withCashFlowSavings = (
   const cashOutflow = transactions.reduce((total, transaction) => {
     if (!isCurrentMonth(transaction)) return total;
 
-    if (transaction.type === 'EXPENSE') {
+    const isSettledPersonalDebt = transaction.isDebtPayment
+      && (transaction.description?.startsWith('Lent money to ') || transaction.description?.startsWith('Returned money / Debt settlement from '));
+
+    if (transaction.type === 'EXPENSE' && !isSettledPersonalDebt) {
       const isCreditPurchase = transaction.paymentMethod === 'CREDIT_CARD'
         || (transaction.sourceAccountId ? creditCardIds.has(transaction.sourceAccountId) : false);
       return isCreditPurchase ? total : total + transaction.amount;

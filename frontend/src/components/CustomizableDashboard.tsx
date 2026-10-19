@@ -83,8 +83,10 @@ const MoneyWrapped: React.FC<{ transactions: Transaction[] }> = ({ transactions 
       const date = new Date(tx.transactionDate);
       if (date.getFullYear() !== year) return;
       const bucket = monthly[date.getMonth()];
-      if (tx.type === 'INCOME') bucket.income += tx.amount;
-      if (tx.type === 'EXPENSE') {
+      const isReturnedPersonalDebt = tx.description?.startsWith('Returned money / Debt settlement from ');
+      const isLentPersonalDebt = tx.description?.startsWith('Lent money to ');
+      if (tx.type === 'INCOME' && !isReturnedPersonalDebt) bucket.income += tx.amount;
+      if (tx.type === 'EXPENSE' && !isLentPersonalDebt) {
         bucket.expenses += tx.amount;
         const category = tx.category?.name || 'Uncategorized';
         categories.set(category, (categories.get(category) || 0) + tx.amount);

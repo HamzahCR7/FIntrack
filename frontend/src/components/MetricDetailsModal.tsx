@@ -228,9 +228,9 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
   const matchingTransactions = transactions.filter((tx) => {
     if (activeType === 'CREDIT') return isCreditCardTransaction(tx);
     if (activeType === 'POCKET') return isPocketTransaction(tx);
-    if (activeType === 'INCOME') return tx.type === 'INCOME';
-    if (activeType === 'EXPENSE') return tx.type === 'EXPENSE';
-    return tx.type === 'INCOME' || tx.type === 'EXPENSE';
+    if (activeType === 'INCOME') return tx.type === 'INCOME' && !tx.isDebtPayment;
+    if (activeType === 'EXPENSE') return tx.type === 'EXPENSE' && !tx.isDebtPayment;
+    return (tx.type === 'INCOME' || tx.type === 'EXPENSE') && !tx.isDebtPayment;
   });
 
   const transactionMonths = Array.from(new Set(
@@ -297,8 +297,10 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
         expenses: 0,
         savings: 0,
       };
-      if (tx.type === 'INCOME') item.income += tx.amount;
-      else item.expenses += tx.amount;
+      const isReturnedPersonalDebt = tx.description?.startsWith('Returned money / Debt settlement from ');
+      const isLentPersonalDebt = tx.description?.startsWith('Lent money to ');
+      if (tx.type === 'INCOME' && !isReturnedPersonalDebt) item.income += tx.amount;
+      else if (tx.type === 'EXPENSE' && !isLentPersonalDebt) item.expenses += tx.amount;
       item.savings = item.income - item.expenses;
       totals.set(key, item);
     });
@@ -418,11 +420,11 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
   const latestTrackedMonth = [...historyTrends].reverse()[0]?.month;
 
   const txIncomeTotal = sortedFilteredTransactions.reduce(
-    (sum, tx) => (activeType === 'CREDIT' ? isCreditCardPayment(tx) : tx.type === 'INCOME') ? sum + tx.amount : sum,
+    (sum, tx) => (activeType === 'CREDIT' ? isCreditCardPayment(tx) : tx.type === 'INCOME' && !tx.isDebtPayment) ? sum + tx.amount : sum,
     0
   );
   const txExpenseTotal = sortedFilteredTransactions.reduce(
-    (sum, tx) => (activeType === 'CREDIT' ? isCreditCardPurchase(tx) : tx.type === 'EXPENSE') ? sum + tx.amount : sum,
+    (sum, tx) => (activeType === 'CREDIT' ? isCreditCardPurchase(tx) : tx.type === 'EXPENSE' && !tx.isDebtPayment) ? sum + tx.amount : sum,
     0
   );
 

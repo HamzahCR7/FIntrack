@@ -180,11 +180,11 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
   };
 
   const tableIncomeTotal = sortedFilteredTransactions.reduce(
-    (sum, tx) => (tx.type === 'INCOME' ? sum + tx.amount : sum),
+    (sum, tx) => (tx.type === 'INCOME' && !tx.isDebtPayment ? sum + tx.amount : sum),
     0
   );
   const tableExpenseTotal = sortedFilteredTransactions.reduce(
-    (sum, tx) => (tx.type === 'EXPENSE' ? sum + tx.amount : sum),
+    (sum, tx) => (tx.type === 'EXPENSE' && !tx.isDebtPayment ? sum + tx.amount : sum),
     0
   );
   const tableTransferTotal = sortedFilteredTransactions.reduce(

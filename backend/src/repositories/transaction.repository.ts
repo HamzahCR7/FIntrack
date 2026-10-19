@@ -132,14 +132,22 @@ export class TransactionRepository {
 
   // Summary aggregation excluding transfers from income/expense totals
   async calculateSummary() {
+    const personalDebtPairExclusion = {
+      NOT: {
+        OR: [
+          { description: { startsWith: 'Lent money to ' } },
+          { description: { startsWith: 'Returned money / Debt settlement from ' } },
+        ],
+      },
+    };
     const incomeAggregate = await this.db.transaction.aggregate({
       _sum: { amount: true },
-      where: { type: 'INCOME' },
+      where: { type: 'INCOME', ...personalDebtPairExclusion },
     });
 
     const expenseAggregate = await this.db.transaction.aggregate({
       _sum: { amount: true },
-      where: { type: 'EXPENSE' },
+      where: { type: 'EXPENSE', ...personalDebtPairExclusion },
     });
 
     const transferAggregate = await this.db.transaction.aggregate({

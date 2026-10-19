@@ -105,40 +105,9 @@ export class DebtService {
       throw new BadRequestError('Loans must be recorded as money you owe.');
     }
 
-    if (dto.accountId) {
-      const account = await this.accountRepo.findById(dto.accountId);
-      if (!account || !account.isActive) {
-        throw new NotFoundError(`Account '${dto.accountId}' not found`);
-      }
-
-      let paymentMethod: PaymentMethod = PaymentMethod.BANK_TRANSFER;
-      if (account.type === AccountType.CREDIT_CARD) paymentMethod = PaymentMethod.CREDIT_CARD;
-      else if (account.type === AccountType.CASH) paymentMethod = PaymentMethod.CASH;
-      else if (account.type === AccountType.UPI || account.type === AccountType.AMAZON_PAY) paymentMethod = PaymentMethod.UPI;
-
-      if (dto.type === DebtType.OWED_TO_ME) {
-        // Lending money -> Expense (Money leaving account)
-        await this.transactionService.createTransaction({
-          type: TransactionType.EXPENSE,
-          amount: dto.amount,
-          sourceAccountId: dto.accountId,
-          paymentMethod,
-          merchant: dto.personName,
-          description: `Lent money to ${dto.personName}${dto.notes ? `: ${dto.notes}` : ''}`,
-          transactionDate: new Date(),
-        });
-      } else if (dto.type === DebtType.I_OWE) {
-        // Borrowing money -> Income (Money entering account)
-        await this.transactionService.createTransaction({
-          type: TransactionType.INCOME,
-          amount: dto.amount,
-          destinationAccountId: dto.accountId,
-          paymentMethod,
-          merchant: dto.personName,
-          description: `Borrowed money from ${dto.personName}${dto.notes ? `: ${dto.notes}` : ''}`,
-          transactionDate: new Date(),
-        });
-      }
+    const account = dto.accountId ? await this.accountRepo.findById(dto.accountId) : null;
+    if (dto.accountId && (!account || !account.isActive)) {
+      throw new NotFoundError(`Account '${dto.accountId}' not found`);
     }
 
     const categoryId = dto.recordKind === DebtRecordKind.LOAN
@@ -157,6 +126,38 @@ export class DebtService {
       notes: dto.notes,
       status: DebtStatus.PENDING,
     });
+
+    if (dto.accountId && account) {
+      let paymentMethod: PaymentMethod = PaymentMethod.BANK_TRANSFER;
+      if (account.type === AccountType.CREDIT_CARD) paymentMethod = PaymentMethod.CREDIT_CARD;
+      else if (account.type === AccountType.CASH) paymentMethod = PaymentMethod.CASH;
+      else if (account.type === AccountType.UPI || account.type === AccountType.AMAZON_PAY) paymentMethod = PaymentMethod.UPI;
+
+      if (dto.type === DebtType.OWED_TO_ME) {
+        // Lending remains an expense until the money is fully returned.
+        await this.transactionService.createTransaction({
+          type: TransactionType.EXPENSE,
+          amount: dto.amount,
+          sourceAccountId: dto.accountId,
+          paymentMethod,
+          referenceNumber: `debt-lent:${created.id}`,
+          merchant: dto.personName,
+          description: `Lent money to ${dto.personName}${dto.notes ? `: ${dto.notes}` : ''}`,
+          transactionDate: new Date(),
+        });
+      } else if (dto.type === DebtType.I_OWE) {
+        // Borrowing money -> Income (Money entering account)
+        await this.transactionService.createTransaction({
+          type: TransactionType.INCOME,
+          amount: dto.amount,
+          destinationAccountId: dto.accountId,
+          paymentMethod,
+          merchant: dto.personName,
+          description: `Borrowed money from ${dto.personName}${dto.notes ? `: ${dto.notes}` : ''}`,
+          transactionDate: new Date(),
+        });
+      }
+    }
 
     return this.enhanceDebt(created);
   }
@@ -236,6 +237,7 @@ export class DebtService {
           amount: dto.amountToSettle,
           destinationAccountId: dto.accountId,
           paymentMethod,
+          isDebtPayment: true,
           merchant: debt.personName,
           description: `Returned money / Debt settlement from ${debt.personName}`,
           transactionDate: settlementDate,
@@ -274,6 +276,21 @@ export class DebtService {
         ? { dueDate: nextMonthlyDueDate(debt.dueDate, settlementDate) }
         : {}),
     });
+
+    if (fullySettled && dto.accountId && debt.type === DebtType.OWED_TO_ME) {
+      await this.db.transaction.updateMany({
+        where: {
+          type: TransactionType.EXPENSE,
+          isDebtPayment: false,
+          amount: debt.amount,
+          OR: [
+            { referenceNumber: `debt-lent:${debt.id}` },
+            { description: { startsWith: `Lent money to ${debt.personName}` } },
+          ],
+        },
+        data: { isDebtPayment: true },
+      });
+    }
 
     return this.enhanceDebt(updated);
   }

@@ -9,3 +9,12 @@ Apply the `explain-code-changes` skill after every code or configuration change 
 Reserve custom agents for substantial work with genuinely independent subtasks. Do not delegate routine implementation or explanation merely because an agent is available.
 
 Keep repository exploration narrow, avoid generated and dependency directories unless required, run targeted verification first, and keep final responses concise. Correctness and safety take priority when broader investigation is necessary.
+
+## Change discipline
+
+- Make the smallest scoped change that satisfies the request.
+- Inspect the exact data and UI path before editing.
+- Preserve unrelated behavior, calculations, and existing data.
+- Avoid broad flags, filters, or refactors for narrow problems.
+- Skip tests unless the user explicitly asks for them.
+- Explain uncertainty before changing existing data or calculations.

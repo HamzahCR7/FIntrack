@@ -93,7 +93,7 @@ export const FinancialIntelligenceHub: React.FC<{
     }, { income: 0, expenses: 0 });
     const current = summarize(currentKey);
     const previous = summarize(previousKey);
-    const expenses = transactions.filter((transaction) => transaction.type === 'EXPENSE' && monthKey(new Date(transaction.transactionDate)) === currentKey);
+    const expenses = transactions.filter((transaction) => transaction.type === 'EXPENSE' && !transaction.isDebtPayment && monthKey(new Date(transaction.transactionDate)) === currentKey);
     const average = expenses.length ? expenses.reduce((sum, transaction) => sum + transaction.amount, 0) / expenses.length : 0;
     const unusual = expenses.filter((transaction) => transaction.amount > average * 2 && transaction.amount > 500).sort((a, b) => b.amount - a.amount).slice(0, 5);
     const savings = current.income - current.expenses;

@@ -194,15 +194,15 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
       return { periodIncome: totalIncome, periodExpenses: totalExpenses };
     }
     if (isCurrentMonthSelected && incomeThisMonth !== undefined && spendingThisMonth !== undefined) {
-      const inc = periodTransactions.filter((tx) => tx.type === 'INCOME').reduce((s, tx) => s + tx.amount, 0);
-      const exp = periodTransactions.filter((tx) => tx.type === 'EXPENSE').reduce((s, tx) => s + tx.amount, 0);
+      const inc = periodTransactions.filter((tx) => tx.type === 'INCOME' && !(tx.isDebtPayment && tx.description?.startsWith('Returned money / Debt settlement from '))).reduce((s, tx) => s + tx.amount, 0);
+      const exp = periodTransactions.filter((tx) => tx.type === 'EXPENSE' && !(tx.isDebtPayment && tx.description?.startsWith('Lent money to '))).reduce((s, tx) => s + tx.amount, 0);
       return {
         periodIncome: inc > 0 ? inc : incomeThisMonth,
         periodExpenses: exp > 0 ? exp : spendingThisMonth,
       };
     }
-    const inc = periodTransactions.filter((tx) => tx.type === 'INCOME').reduce((s, tx) => s + tx.amount, 0);
-    const exp = periodTransactions.filter((tx) => tx.type === 'EXPENSE').reduce((s, tx) => s + tx.amount, 0);
+    const inc = periodTransactions.filter((tx) => tx.type === 'INCOME' && !(tx.isDebtPayment && tx.description?.startsWith('Returned money / Debt settlement from '))).reduce((s, tx) => s + tx.amount, 0);
+    const exp = periodTransactions.filter((tx) => tx.type === 'EXPENSE' && !(tx.isDebtPayment && tx.description?.startsWith('Lent money to '))).reduce((s, tx) => s + tx.amount, 0);
     return {
       periodIncome: Number(inc.toFixed(2)),
       periodExpenses: Number(exp.toFixed(2)),

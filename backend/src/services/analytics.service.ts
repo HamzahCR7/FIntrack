@@ -90,6 +90,13 @@ export class AnalyticsService {
       OR: [
         {
           type: TransactionType.EXPENSE,
+          NOT: {
+            isDebtPayment: true,
+            OR: [
+              { description: { startsWith: 'Lent money to ' } },
+              { description: { startsWith: 'Returned money / Debt settlement from ' } },
+            ],
+          },
           paymentMethod: { not: PaymentMethod.CREDIT_CARD },
           OR: [
             { sourceAccountId: null },
@@ -105,20 +112,29 @@ export class AnalyticsService {
     });
     const previousMonthStart = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
     const previousMonthEnd = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    const personalDebtPairExclusion = {
+      NOT: {
+        OR: [
+          { description: { startsWith: 'Lent money to ' } },
+          { description: { startsWith: 'Returned money / Debt settlement from ' } },
+        ],
+      },
+    };
 
     const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, monthCashOutflowAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, prevMonthCashOutflowAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
       this.db.transaction.aggregate({
         _sum: { amount: true },
-        where: { type: TransactionType.INCOME },
+        where: { type: TransactionType.INCOME, ...personalDebtPairExclusion },
       }),
       this.db.transaction.aggregate({
         _sum: { amount: true },
-        where: { type: TransactionType.EXPENSE },
+        where: { type: TransactionType.EXPENSE, ...personalDebtPairExclusion },
       }),
       this.db.transaction.aggregate({
         _sum: { amount: true },
         where: {
           type: TransactionType.INCOME,
+          ...personalDebtPairExclusion,
           transactionDate: { gte: startOfMonth, lte: endOfMonth },
         },
       }),
@@ -130,6 +146,7 @@ export class AnalyticsService {
         _sum: { amount: true },
         where: {
           type: TransactionType.EXPENSE,
+          ...personalDebtPairExclusion,
           transactionDate: { gte: startOfMonth, lte: endOfMonth },
         },
       }),
@@ -137,6 +154,7 @@ export class AnalyticsService {
         _sum: { amount: true },
         where: {
           type: TransactionType.INCOME,
+          ...personalDebtPairExclusion,
           destinationAccountId: { in: pocketAccountIds },
           transactionDate: { gte: startOfMonth, lte: endOfMonth },
         },
@@ -145,6 +163,7 @@ export class AnalyticsService {
         _sum: { amount: true },
         where: {
           type: TransactionType.INCOME,
+          ...personalDebtPairExclusion,
           transactionDate: { gte: previousMonthStart, lte: previousMonthEnd },
         },
       }),
@@ -152,6 +171,7 @@ export class AnalyticsService {
         _sum: { amount: true },
         where: {
           type: TransactionType.EXPENSE,
+          ...personalDebtPairExclusion,
           transactionDate: { gte: previousMonthStart, lte: previousMonthEnd },
         },
       }),
@@ -160,7 +180,7 @@ export class AnalyticsService {
         where: cashOutflowWhere(previousMonthStart, previousMonthEnd),
       }),
       this.db.transaction.findMany({
-        where: { type: TransactionType.EXPENSE },
+        where: { type: TransactionType.EXPENSE, ...personalDebtPairExclusion },
         select: {
           amount: true,
           categoryId: true,
@@ -253,11 +273,11 @@ export class AnalyticsService {
         return Promise.all([
           this.db.transaction.aggregate({
             _sum: { amount: true },
-            where: { type: TransactionType.INCOME, transactionDate: { gte: mStart, lte: mEnd } },
+            where: { type: TransactionType.INCOME, ...personalDebtPairExclusion, transactionDate: { gte: mStart, lte: mEnd } },
           }),
           this.db.transaction.aggregate({
             _sum: { amount: true },
-            where: { type: TransactionType.EXPENSE, transactionDate: { gte: mStart, lte: mEnd } },
+            where: { type: TransactionType.EXPENSE, ...personalDebtPairExclusion, transactionDate: { gte: mStart, lte: mEnd } },
           }),
           this.db.transaction.aggregate({
             _sum: { amount: true },

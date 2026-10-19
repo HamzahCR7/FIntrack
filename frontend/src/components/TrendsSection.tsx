@@ -36,8 +36,10 @@ export const TrendsSection: React.FC<TrendsSectionProps> = ({ monthlyTrends, tra
       const date = new Date(transaction.transactionDate);
       if (date.getFullYear() !== year || date.getMonth() !== month) return;
       const row = rows[date.getDate() - 1];
-      if (transaction.type === 'INCOME') row.income += transaction.amount;
-      if (transaction.type === 'EXPENSE') row.expenses += transaction.amount;
+      const isReturnedPersonalDebt = transaction.description?.startsWith('Returned money / Debt settlement from ');
+      const isLentPersonalDebt = transaction.description?.startsWith('Lent money to ');
+      if (transaction.type === 'INCOME' && !isReturnedPersonalDebt) row.income += transaction.amount;
+      if (transaction.type === 'EXPENSE' && !isLentPersonalDebt) row.expenses += transaction.amount;
     });
     return rows.map((row) => ({ ...row, savings: row.income - row.expenses }));
   }, [selectedMonth, transactions]);

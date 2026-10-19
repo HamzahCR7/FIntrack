@@ -65,8 +65,8 @@ export const SmartGuidancePanel: React.FC<SmartGuidancePanelProps> = ({ dashboar
     const startOfMonth = new Date(year, month, 1);
     const endOfMonth = new Date(year, month + 1, 0);
 
-    const expenseTransactions = transactions.filter((tx) => tx.type === 'EXPENSE');
-    const incomeTransactions = transactions.filter((tx) => tx.type === 'INCOME');
+    const expenseTransactions = transactions.filter((tx) => tx.type === 'EXPENSE' && !tx.isDebtPayment);
+    const incomeTransactions = transactions.filter((tx) => tx.type === 'INCOME' && !tx.isDebtPayment);
     const monthlyExpenseTransactions = expenseTransactions.filter((tx) => {
       const d = new Date(tx.transactionDate);
       return d >= startOfMonth && d <= endOfMonth;
