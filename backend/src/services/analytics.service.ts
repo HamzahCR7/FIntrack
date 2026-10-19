@@ -90,8 +90,8 @@ export class AnalyticsService {
       OR: [
         {
           type: TransactionType.EXPENSE,
+          isDebtPayment: false,
           NOT: {
-            isDebtPayment: true,
             OR: [
               { description: { startsWith: 'Lent money to ' } },
               { description: { startsWith: 'Returned money / Debt settlement from ' } },

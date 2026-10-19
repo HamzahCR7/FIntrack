@@ -894,7 +894,7 @@ export const App: React.FC = () => {
                 icon={Gauge}
                 defaultOpen={true}
               >
-                <SpendForecastCard forecast={dashboardData.forecast} />
+                <SpendForecastCard forecast={dashboardData.forecast} transactions={transactions} />
               </AccordionSection>
             )}
 

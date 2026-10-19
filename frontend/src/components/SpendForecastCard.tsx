@@ -1,16 +1,20 @@
 import React from 'react';
-import { Gauge, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Minus } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { Gauge, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Minus, X } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatCurrency } from './SummaryCards';
-import { SpendForecast } from '../types';
+import { SpendForecast, Transaction } from '../types';
 import { useAutoSelectSingleOption } from '../hooks/useAutoSelectSingleOption';
 
 interface SpendForecastCardProps {
   forecast?: SpendForecast;
+  transactions?: Transaction[];
 }
 
-export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }) => {
+export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast, transactions = [] }) => {
   const [selectedHistoryMonth, setSelectedHistoryMonth] = React.useState('');
+  const [selectedWeekNumber, setSelectedWeekNumber] = React.useState<number | null>(null);
+  const [showAllWeekTransactions, setShowAllWeekTransactions] = React.useState(false);
   const historicalMonthValues = React.useMemo(
     () => forecast?.historicalMonthlyTrends.map((trend) => trend.monthKey) || [],
     [forecast?.historicalMonthlyTrends],
@@ -36,6 +40,21 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
   const selectedHistoricalTrend = forecast.historicalMonthlyTrends.find(
     (trend) => trend.monthKey === selectedHistoryMonth
   );
+  const selectedWeek = forecast.currentMonthWeeklyTrend.points.find((point) => point.weekNumber === selectedWeekNumber);
+  const now = new Date();
+  const selectedWeekTransactions = selectedWeek
+    ? transactions.filter((transaction) => {
+      const date = new Date(transaction.transactionDate);
+      return transaction.type === 'EXPENSE'
+        && !transaction.isDebtPayment
+        && date.getFullYear() === now.getFullYear()
+        && date.getMonth() === now.getMonth()
+        && Math.ceil(date.getDate() / 7) === selectedWeek.weekNumber;
+    }).sort((a, b) => new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime())
+    : [];
+  const visibleWeekTransactions = showAllWeekTransactions
+    ? selectedWeekTransactions
+    : selectedWeekTransactions.slice(0, 5);
 
   const currentMonthTrendLabel = forecast.currentMonthWeeklyTrend.direction === 'IMPROVING'
     ? 'Improving'
@@ -66,6 +85,9 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
       : 'border-slate-600/50 bg-slate-700/30 text-slate-300';
 
   const currentWeekPoint = forecast.currentMonthWeeklyTrend.points[forecast.currentMonthWeeklyTrend.points.length - 1];
+  const selectedWeekToneClass = selectedWeek && currentWeekPoint && selectedWeek.weekNumber === currentWeekPoint.weekNumber
+    ? weeklyTrendToneClass
+    : 'border-slate-600/50 bg-slate-700/30 text-slate-300';
   const currentWeekTotalDays = currentWeekPoint
     ? Math.max(1, Math.min(7, forecast.daysInMonth - ((currentWeekPoint.weekNumber - 1) * 7)))
     : null;
@@ -177,6 +199,11 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
                     outerRadius={56}
                     innerRadius={30}
                     paddingAngle={2}
+                    onClick={(_, index) => {
+                      setSelectedWeekNumber(forecast.currentMonthWeeklyTrend.points[index]?.weekNumber ?? null);
+                      setShowAllWeekTransactions(false);
+                    }}
+                    cursor="pointer"
                   >
                     {forecast.currentMonthWeeklyTrend.points.map((point, index) => (
                       <Cell key={point.weekLabel} fill={weeklyPieColors[index % weeklyPieColors.length]} />
@@ -197,14 +224,52 @@ export const SpendForecastCard: React.FC<SpendForecastCardProps> = ({ forecast }
         {forecast.currentMonthWeeklyTrend.points.length > 0 && (
           <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {forecast.currentMonthWeeklyTrend.points.map((point) => (
-              <div key={point.weekLabel} className="rounded-lg border border-current/20 bg-black/10 px-2 py-1.5">
+              <button type="button" key={point.weekLabel} onClick={() => { setSelectedWeekNumber(point.weekNumber); setShowAllWeekTransactions(false); }} className="text-left rounded-lg border border-current/20 bg-black/10 px-2 py-1.5 transition hover:bg-black/20">
                 <p className="text-[10px] uppercase tracking-wide opacity-80">{point.weekLabel} · {point.weekRangeLabel}</p>
                 <p className="text-[10px] opacity-80">{point.daysCovered} day(s) covered</p>
                 <p className="text-xs font-semibold">Spent: {formatCurrency(point.spent)}</p>
                 <p className="text-[10px] opacity-90">Burn/day: {formatCurrency(point.burnRate)}</p>
-              </div>
+              </button>
             ))}
           </div>
+        )}
+        {selectedWeek && (
+          createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/75 p-4 backdrop-blur-sm" onClick={(event) => { if (event.target === event.currentTarget) setSelectedWeekNumber(null); }}>
+            <section role="dialog" aria-modal="true" aria-label={`${selectedWeek.weekLabel} expense details`} className={`my-auto flex max-h-[85dvh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl border bg-slate-900 shadow-2xl ${selectedWeekToneClass}`}>
+              <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-800 p-5 sm:p-6">
+                <div>
+                  <h2 className="text-lg font-semibold">{selectedWeek.weekLabel} · {selectedWeek.weekRangeLabel}</h2>
+                  <p className="mt-1 text-xs opacity-80">{selectedWeek.daysCovered} day(s) covered · {formatCurrency(selectedWeek.burnRate)} per day</p>
+                </div>
+                <button type="button" onClick={() => setSelectedWeekNumber(null)} aria-label="Close week details" className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white"><X className="h-4 w-4" /></button>
+              </div>
+              <div className="min-h-0 overflow-y-auto p-5 sm:p-6">
+                <p className="text-lg font-bold text-rose-400">Spent: {formatCurrency(selectedWeek.spent)}</p>
+                <p className="mt-5 text-[10px] uppercase tracking-wide opacity-80">Expenses this week</p>
+                {selectedWeekTransactions.length ? (
+                <div className="mt-2 divide-y divide-slate-700">
+                  {visibleWeekTransactions.map((transaction) => (
+                    <div key={transaction.id} className="flex items-center justify-between gap-3 py-2 text-sm">
+                      <div className="min-w-0">
+                        <p className="truncate">{transaction.merchant || transaction.description || transaction.category?.name || 'Expense'}</p>
+                        <p className="text-[10px] opacity-70">{new Date(transaction.transactionDate).toLocaleDateString()}</p>
+                      </div>
+                      <span className="shrink-0 font-semibold text-rose-400">{formatCurrency(transaction.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+                ) : <p className="mt-2 text-sm text-slate-400">No expense transactions found for this week.</p>}
+              {selectedWeekTransactions.length > 5 && (
+                <button type="button" onClick={() => setShowAllWeekTransactions((show) => !show)} className="mt-3 inline-flex items-center rounded-lg border border-slate-700 bg-slate-800/70 px-3 py-2 text-sm font-semibold text-slate-200 transition-colors hover:border-slate-600 hover:bg-slate-800 hover:text-white">
+                  {showAllWeekTransactions ? 'Show less' : `Show more (${selectedWeekTransactions.length - 5})`}
+                </button>
+              )}
+              </div>
+            </section>
+          </div>,
+          document.body,
+          )
         )}
       </div>
 

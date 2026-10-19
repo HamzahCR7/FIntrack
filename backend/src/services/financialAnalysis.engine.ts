@@ -6,7 +6,7 @@ import { CreditCardService } from './creditCard.service';
 import { SubscriptionService } from './subscription.service';
 import { DebtService } from './debt.service';
 import { FinancialProfileService } from './financialProfile.service';
-import { TransactionType } from '../types/enums';
+import { AccountType, PaymentMethod, TransactionType } from '../types/enums';
 
 type RunwaySimulationInput = {
   months: number;
@@ -469,13 +469,36 @@ export class FinancialAnalysisEngine {
     const monthStart = new Date(Date.UTC(year, month, 1, 0, 0, 0, 0));
     const monthEnd = new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999));
 
+    const creditCardAccounts = await this.db.account.findMany({
+      where: { type: AccountType.CREDIT_CARD },
+      select: { id: true },
+    });
+    const creditCardAccountIds = creditCardAccounts.map((account) => account.id);
     const currentMonthExpenseTxs = await this.db.transaction.findMany({
       where: {
-        type: TransactionType.EXPENSE,
-        transactionDate: {
-          gte: monthStart,
-          lte: monthEnd,
-        },
+        transactionDate: { gte: monthStart, lte: monthEnd },
+        OR: [
+          {
+            type: TransactionType.EXPENSE,
+            isDebtPayment: false,
+            NOT: {
+              OR: [
+                { description: { startsWith: 'Lent money to ' } },
+                { description: { startsWith: 'Returned money / Debt settlement from ' } },
+              ],
+            },
+            paymentMethod: { not: PaymentMethod.CREDIT_CARD },
+            OR: [
+              { sourceAccountId: null },
+              { sourceAccountId: { notIn: creditCardAccountIds } },
+            ],
+          },
+          {
+            type: TransactionType.TRANSFER,
+            sourceAccountId: { notIn: creditCardAccountIds },
+            destinationAccountId: { in: creditCardAccountIds },
+          },
+        ],
       },
       select: {
         amount: true,
