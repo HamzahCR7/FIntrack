@@ -28,6 +28,7 @@ import {
   Info,
   Scissors,
   Sparkles,
+  Store,
 } from 'lucide-react';
 
 interface CategoryItem {
@@ -71,6 +72,9 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
   usePrivacyMode();
   const activeType = type ?? 'category';
   const [searchTerm, setSearchTerm] = useState('');
+  const [visibleBreakdownCount, setVisibleBreakdownCount] = useState(5);
+  const [visibleSubcategoryCount, setVisibleSubcategoryCount] = useState(5);
+  const [visibleTransactionCount, setVisibleTransactionCount] = useState(5);
   const [tableSortKey, setTableSortKey] = useState<SpendingTableSortKey>('date');
   const [tableSortDirection, setTableSortDirection] = useState<TableSortDirection>('desc');
 
@@ -197,8 +201,14 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
   // Calculate Summary Statistics
   const totalAmount = matchingTransactions.reduce((acc, tx) => acc + tx.amount, 0);
   const txCount = matchingTransactions.length;
-  const avgAmount = txCount > 0 ? totalAmount / txCount : 0;
-  const maxTx = matchingTransactions.reduce((max, tx) => (tx.amount > max ? tx.amount : max), 0);
+  const topMerchants = Object.values(matchingTransactions.reduce<Record<string, { name: string; amount: number; count: number }>>((groups, tx) => {
+    const name = tx.merchant?.trim() || tx.category?.name || 'Other transactions';
+    const key = name.toLocaleLowerCase();
+    groups[key] ??= { name, amount: 0, count: 0 };
+    groups[key].amount += tx.amount;
+    groups[key].count += 1;
+    return groups;
+  }, {})).sort((a, b) => b.amount - a.amount).slice(0, 5);
 
   // Sub-breakdowns
   let breakdownTitle = '';
@@ -283,7 +293,7 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
   if (!isOpen || !type) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
         <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-900/90 sticky top-0 z-10">
@@ -310,7 +320,7 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
         {/* Modal Content Scrollable Area */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1 custom-scrollbar">
           {/* 1. Key Statistics Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="bg-slate-800/50 border border-slate-700/60 p-4 rounded-2xl flex flex-col justify-between">
               <span className="text-xs text-slate-400 font-medium">Total Volume</span>
               <p className="text-lg font-bold text-white mt-1">{formatCurrency(totalAmount)}</p>
@@ -319,46 +329,29 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
               <span className="text-xs text-slate-400 font-medium font-medium">Total Transactions</span>
               <p className="text-lg font-bold text-slate-200 mt-1">{txCount} txns</p>
             </div>
-            <div className="bg-slate-800/50 border border-slate-700/60 p-4 rounded-2xl flex flex-col justify-between">
-              <span className="text-xs text-slate-400 font-medium">Average Size</span>
-              <p className="text-lg font-bold text-slate-200 mt-1">{formatCurrency(avgAmount)}</p>
-            </div>
-            <div className="bg-slate-800/50 border border-slate-700/60 p-4 rounded-2xl flex flex-col justify-between">
-              <span className="text-xs text-slate-400 font-medium">Highest Single Tx</span>
-              <p className="text-lg font-bold text-slate-200 mt-1">{formatCurrency(maxTx)}</p>
-            </div>
           </div>
 
           {/* 1.5 Subcategory / Specific Item Breakdown Section */}
           {subcategoryItems.length > 0 && (
-            <div className="bg-slate-800/40 border border-slate-700/60 p-5 rounded-2xl space-y-3">
-              <h3 className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-                <Tag className="w-4 h-4 text-cyan-400" />
-                Item & Subcategory Breakdown
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {subcategoryItems.map((item, idx) => (
-                  <div key={idx} className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2">
-                        {item.icon}
-                        <span className="text-slate-200 font-medium truncate max-w-[130px]">{item.label}</span>
-                      </div>
-                      <span className="text-slate-400 font-semibold">{item.percentage}%</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden mr-2">
-                        <div
-                          className="h-full rounded-full transition-all duration-300"
-                          style={{ width: `${item.percentage}%`, backgroundColor: item.color }}
-                        />
-                      </div>
-                      <span className="text-xs font-bold text-white whitespace-nowrap">{formatCurrency(item.amount)}</span>
-                    </div>
+            <details className="group rounded-2xl border border-slate-700/60 bg-slate-800/40">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-slate-200">
+                <span className="flex items-center gap-2"><Tag className="h-4 w-4 text-cyan-400" />Item & Subcategory Breakdown</span>
+                <span className="text-xs font-normal text-slate-400">{subcategoryItems.length} items · Expand</span>
+              </summary>
+              <div className="grid grid-cols-1 gap-3 px-4 pb-4 sm:grid-cols-2 md:grid-cols-3">
+                {subcategoryItems.slice(0, visibleSubcategoryCount).map((item, idx) => (
+                  <div key={idx} className="space-y-1.5 rounded-xl border border-slate-700/50 bg-slate-800/80 p-3">
+                    <div className="flex items-center justify-between text-xs"><div className="flex items-center gap-2">{item.icon}<span className="max-w-[130px] truncate font-medium text-slate-200">{item.label}</span></div><span className="font-semibold text-slate-400">{item.percentage}%</span></div>
+                    <div className="flex items-center justify-between"><div className="mr-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-700"><div className="h-full" style={{ width: `${item.percentage}%`, backgroundColor: item.color }} /></div><span className="whitespace-nowrap text-xs font-bold text-white">{formatCurrency(item.amount)}</span></div>
                   </div>
                 ))}
               </div>
-            </div>
+              {subcategoryItems.length > visibleSubcategoryCount && (
+                <button type="button" onClick={() => setVisibleSubcategoryCount((count) => count + 5)} className="mx-4 mb-4 text-xs font-semibold text-cyan-300 hover:text-cyan-200">
+                  Show 5 more ({subcategoryItems.length - visibleSubcategoryCount} remaining)
+                </button>
+              )}
+            </details>
           )}
 
           {/* 2. Secondary Breakdown Section */}
@@ -369,7 +362,7 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
                 {breakdownTitle}
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {breakdownItems.map((item, idx) => (
+                {breakdownItems.slice(0, visibleBreakdownCount).map((item, idx) => (
                   <div key={idx} className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
@@ -390,11 +383,44 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
                   </div>
                 ))}
               </div>
+              {breakdownItems.length > visibleBreakdownCount && (
+                <button type="button" onClick={() => setVisibleBreakdownCount((count) => count + 5)} className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">
+                  Show 5 more ({breakdownItems.length - visibleBreakdownCount} remaining)
+                </button>
+              )}
             </div>
           )}
 
+          {topMerchants.length > 0 && (
+            <details className="group rounded-2xl border border-slate-700/60 bg-slate-800/40">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-slate-200">
+                <span className="flex items-center gap-2"><Store className="h-4 w-4 text-emerald-400" />Top merchants</span>
+                <span className="text-xs font-normal text-slate-400">{topMerchants.length} · Expand</span>
+              </summary>
+              <div className="space-y-3 px-4 pb-4">
+                {topMerchants.map((merchant) => {
+                  const share = totalAmount > 0 ? Math.round((merchant.amount / totalAmount) * 100) : 0;
+                  return (
+                    <div key={merchant.name} className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <span className="truncate font-medium text-slate-200">{merchant.name} <span className="font-normal text-slate-500">· {merchant.count} {merchant.count === 1 ? 'txn' : 'txns'}</span></span>
+                        <span className="shrink-0 font-semibold text-white">{formatCurrency(merchant.amount)}</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-slate-700"><div className="h-full rounded-full bg-emerald-400" style={{ width: `${share}%` }} /></div>
+                    </div>
+                  );
+                })}
+              </div>
+            </details>
+          )}
+
           {/* 3. Transaction List Header & Search */}
-          <div className="space-y-4">
+          <details className="group rounded-2xl border border-slate-700/60 bg-slate-800/30">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-semibold text-slate-200">
+              <span className="flex items-center gap-2"><Calendar className="h-4 w-4 text-blue-400" />Transactions <span className="text-xs font-normal text-slate-400">({filteredTransactions.length})</span></span>
+              <span className="text-xs font-normal text-slate-400">Expand</span>
+            </summary>
+            <div className="space-y-4 px-4 pb-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <h3 className="text-sm font-semibold text-white flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-blue-400" />
@@ -456,7 +482,7 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800">
-                      {sortedFilteredTransactions.map((tx) => {
+                      {sortedFilteredTransactions.slice(0, visibleTransactionCount).map((tx) => {
                         const pmConfig = PAYMENT_METHOD_CONFIG[tx.paymentMethod] || { label: tx.paymentMethod, icon: null };
                         const isTransfer = tx.type === 'TRANSFER';
                         const isIncome = tx.type === 'INCOME';
@@ -554,7 +580,13 @@ export const SpendingDetailsModal: React.FC<SpendingDetailsModalProps> = ({
                 </div>
               </div>
             )}
-          </div>
+            {sortedFilteredTransactions.length > visibleTransactionCount && (
+              <button type="button" onClick={() => setVisibleTransactionCount((count) => count + 5)} className="text-xs font-semibold text-cyan-300 hover:text-cyan-200">
+                Show 5 more ({sortedFilteredTransactions.length - visibleTransactionCount} remaining)
+              </button>
+            )}
+            </div>
+          </details>
         </div>
 
         {/* Modal Footer */}

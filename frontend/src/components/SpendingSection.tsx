@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   PieChart,
   Pie,
@@ -88,6 +88,16 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
   const [isAllTime, setIsAllTime] = useState<boolean>(false);
+  const [activeAnalyticsSlide, setActiveAnalyticsSlide] = useState(0);
+  const analyticsCarouselRef = useRef<HTMLDivElement>(null);
+  const analyticsSlides = ['Spending by Category', 'Payment Method', 'Income vs Expenses'];
+  const goToAnalyticsSlide = (index: number) => {
+    const slide = analyticsCarouselRef.current?.children[index] as HTMLElement | undefined;
+    if (slide && analyticsCarouselRef.current) {
+      analyticsCarouselRef.current.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
+    }
+    setActiveAnalyticsSlide(index);
+  };
 
   const [activeModal, setActiveModal] = useState<{
     isOpen: boolean;
@@ -100,6 +110,21 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
     selectedCategory: null,
     selectedPaymentMethod: null,
   });
+
+  useEffect(() => {
+    if (activeModal.isOpen) return;
+    const timer = window.setInterval(() => {
+      setActiveAnalyticsSlide((current) => {
+        const next = (current + 1) % analyticsSlides.length;
+        const slide = analyticsCarouselRef.current?.children[next] as HTMLElement | undefined;
+        if (slide && analyticsCarouselRef.current) {
+          analyticsCarouselRef.current.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
+        }
+        return next;
+      });
+    }, 6500);
+    return () => window.clearInterval(timer);
+  }, [activeModal.isOpen, analyticsSlides.length]);
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -216,11 +241,13 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
   ];
 
   const handleCategoryClick = (category: any) => {
-    if (!category) return;
+    // Recharts passes click metadata around the original category datum.
+    const selectedCategory = category?.payload || category;
+    if (!selectedCategory?.id || !selectedCategory?.name) return;
     setActiveModal({
       isOpen: true,
       type: 'category',
-      selectedCategory: category,
+      selectedCategory,
       selectedPaymentMethod: null,
     });
   };
@@ -345,9 +372,24 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="space-y-3">
+        <div className="relative">
+        <div
+          ref={analyticsCarouselRef}
+          onScroll={(event) => {
+            const track = event.currentTarget;
+            const nearestSlide = Array.from(track.children).reduce((nearest, child, index, children) => {
+              const distance = Math.abs((child as HTMLElement).offsetLeft - track.scrollLeft);
+              const nearestDistance = Math.abs((children[nearest] as HTMLElement).offsetLeft - track.scrollLeft);
+              return distance < nearestDistance ? index : nearest;
+            }, 0);
+            setActiveAnalyticsSlide(nearestSlide);
+          }}
+          className="flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
         {/* 1. Spending by Category (Pie Chart) */}
-        <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-sm hover:border-slate-600/60 transition-all">
+        <div className="w-[92%] shrink-0 snap-start sm:w-[88%]">
+        <div className="h-full bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-sm hover:border-slate-600/60 transition-all">
           <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
             <div className="flex items-center gap-2">
               <PieIcon className="w-5 h-5 text-blue-400" />
@@ -390,8 +432,16 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', borderRadius: '12px', color: '#fff' }}
-                      formatter={(val: number) => formatCurrency(val)}
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null;
+                        const category = payload[0].payload as { name?: string; amount?: number };
+                        return (
+                          <div className="rounded-xl border border-slate-600 bg-slate-900 px-3 py-2 text-xs shadow-xl">
+                            <p className="font-medium text-slate-300">{category.name || 'Category'}</p>
+                            <p className="mt-0.5 font-semibold text-white">{formatCurrency(category.amount || 0)}</p>
+                          </div>
+                        );
+                      }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -399,10 +449,11 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
 
               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                 {computedCategorySpending.map((cat, idx) => (
-                  <div
+                  <button
+                    type="button"
                     key={cat.id || idx}
                     onClick={() => handleCategoryClick(cat)}
-                    className="flex items-center justify-between text-xs p-2 rounded-xl hover:bg-slate-700/60 cursor-pointer transition-all border border-transparent hover:border-slate-600/50 group"
+                    className="w-full flex items-center justify-between text-left text-xs p-2 rounded-xl hover:bg-slate-700/60 cursor-pointer transition-all border border-transparent hover:border-slate-600/50 group"
                     title={`Click to view details for ${cat.name}`}
                   >
                     <div className="flex items-center gap-2">
@@ -415,17 +466,25 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="text-slate-400 group-hover:text-slate-300">{cat.percentage}%</span>
                       <span className="text-white font-semibold">{formatCurrency(cat.amount)}</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" />
+                      <ChevronRight
+                        className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleCategoryClick(cat);
+                        }}
+                      />
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
           )}
         </div>
+        </div>
 
         {/* 2. Spending by Payment Method */}
-        <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-sm hover:border-slate-600/60 transition-all">
+        <div className="w-[92%] shrink-0 snap-start sm:w-[88%]">
+        <div className="h-full bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-sm hover:border-slate-600/60 transition-all">
           <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5 text-indigo-400" />
@@ -450,10 +509,11 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                   color: '#94a3b8',
                 };
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={item.paymentMethod}
                     onClick={() => handlePaymentMethodClick(item.paymentMethod, item.percentage)}
-                    className="space-y-1.5 p-2 rounded-xl hover:bg-slate-700/60 cursor-pointer transition-all border border-transparent hover:border-slate-600/50 group"
+                    className="w-full text-left space-y-1.5 p-2 rounded-xl hover:bg-slate-700/60 cursor-pointer transition-all border border-transparent hover:border-slate-600/50 group"
                     title={`Click to view details for ${config.label}`}
                   >
                     <div className="flex items-center justify-between text-xs">
@@ -464,7 +524,13 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="text-slate-400 group-hover:text-slate-300">{item.percentage}%</span>
                         <span className="text-white font-semibold">{formatCurrency(item.amount)}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all" />
+                        <ChevronRight
+                          className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-all"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handlePaymentMethodClick(item.paymentMethod, item.percentage);
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="w-full h-2.5 bg-slate-700/50 rounded-full overflow-hidden">
@@ -473,7 +539,7 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                         style={{ width: `${Math.min(100, item.percentage)}%`, backgroundColor: config.color }}
                       />
                     </div>
-                  </div>
+                  </button>
                 );
               })
             )}
@@ -488,9 +554,11 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
             </span>
           </div>
         </div>
+        </div>
 
         {/* 3. Income vs Expenses Comparison */}
-        <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
+        <div className="w-[92%] shrink-0 snap-start sm:w-[88%]">
+        <div className="h-full bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
           <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
             <div>
               <h3 className="text-base font-semibold text-white">Income vs Expenses</h3>
@@ -539,6 +607,16 @@ export const SpendingSection: React.FC<SpendingSectionProps> = ({
                   : '0%'}
               </p>
             </div>
+          </div>
+        </div>
+      </div>
+        </div>
+          <button type="button" onClick={() => goToAnalyticsSlide(Math.max(0, activeAnalyticsSlide - 1))} disabled={activeAnalyticsSlide === 0} aria-label="Previous analytics slide" className="absolute left-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-600/80 bg-slate-950/80 p-2.5 text-slate-300 shadow-lg backdrop-blur-sm transition-colors hover:border-indigo-400/50 hover:bg-slate-800 hover:text-indigo-200 disabled:opacity-35"><ChevronLeft className="h-5 w-5" /></button>
+          <button type="button" onClick={() => goToAnalyticsSlide(Math.min(analyticsSlides.length - 1, activeAnalyticsSlide + 1))} disabled={activeAnalyticsSlide === analyticsSlides.length - 1} aria-label="Next analytics slide" className="absolute right-2 top-1/2 z-10 -translate-y-1/2 rounded-full border border-slate-600/80 bg-slate-950/80 p-2.5 text-slate-300 shadow-lg backdrop-blur-sm transition-colors hover:border-indigo-400/50 hover:bg-slate-800 hover:text-indigo-200 disabled:opacity-35"><ChevronRight className="h-5 w-5" /></button>
+        </div>
+        <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center gap-1.5" aria-label="Analytics slides">
+            {analyticsSlides.map((label, index) => <button key={label} type="button" onClick={() => goToAnalyticsSlide(index)} aria-label={`Go to ${label}`} aria-current={activeAnalyticsSlide === index ? 'step' : undefined} className={`h-2 rounded-full transition-all ${activeAnalyticsSlide === index ? 'w-6 bg-cyan-400' : 'w-2 bg-slate-600 hover:bg-slate-400'}`} />)}
           </div>
         </div>
       </div>
