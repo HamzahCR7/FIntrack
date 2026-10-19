@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Eye, EyeOff, GripVertical, Maximize2, Minimize2, RotateCcw, Settings2, Sparkles, Trophy, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ArrowLeft, ArrowLeftRight, BarChart3, CalendarDays, Clock3, CreditCard, Eye, EyeOff, Gift, GripVertical, Gauge, HeartPulse, Maximize2, Minimize2, MoreHorizontal, RotateCcw, Settings2, Sparkles, TrendingUp, Trophy, Wallet, X } from 'lucide-react';
 import { Account, DashboardData, Subscription, Debt, Transaction } from '../types';
 import { formatCurrency } from '../utils/privacyStore';
 import { SpendingSection } from './SpendingSection';
@@ -19,6 +20,38 @@ const DEFAULT_LAYOUT: Layout = {
   mode: 'comfortable',
 };
 const LABELS: Record<WidgetId, string> = { 'financial-highlights': 'Financial highlights', spending: 'Spending analytics', dues: 'Upcoming dues', daily: 'Daily activity', trends: 'Financial trends', runway: 'Runway simulator' };
+const WIDGET_ICONS = { 'financial-highlights': Wallet, spending: BarChart3, dues: CreditCard, daily: CalendarDays, trends: TrendingUp, runway: Gauge };
+const WIDGET_ICON_COLORS: Record<WidgetId, string> = { 'financial-highlights': 'bg-amber-400/15 text-amber-300', spending: 'bg-rose-400/15 text-rose-300', dues: 'bg-orange-400/15 text-orange-300', daily: 'bg-emerald-400/15 text-emerald-300', trends: 'bg-sky-400/15 text-sky-300', runway: 'bg-violet-400/15 text-violet-300' };
+
+const InsightPopup: React.FC<{ title: string; onClose: () => void; children: React.ReactNode }> = ({ title, onClose, children }) => {
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/70 p-4 backdrop-blur-sm" onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section role="dialog" aria-modal="true" aria-label={title} className="my-auto max-h-[85dvh] w-full max-w-3xl overflow-y-auto overscroll-contain rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl sm:p-6">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-base font-semibold text-white">{title}</h2>
+          <button type="button" onClick={onClose} className="rounded-full bg-slate-800 p-2 text-slate-300" aria-label="Close insight">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        {children}
+      </section>
+    </div>,
+    document.body,
+  );
+};
 
 const loadLayout = (device: 'desktop' | 'mobile'): Layout => {
   try {
@@ -257,18 +290,34 @@ const BudgetBoard: React.FC<{ dashboard: DashboardData }> = ({ dashboard }) => {
 };
 
 const FinancialHighlights: React.FC<{ dashboard: DashboardData; transactions: Transaction[] }> = ({ dashboard, transactions }) => {
-  const [view, setView] = useState<'wrapped' | 'health' | 'timeline' | 'year' | 'flow' | 'for-you' | 'board'>('wrapped');
+  const [view, setView] = useState<'wrapped' | 'health' | 'timeline' | 'year' | 'flow' | 'for-you' | 'board' | null>(null);
+  const [showMoreViews, setShowMoreViews] = useState(false);
   const views = [
-    { id: 'wrapped' as const, label: 'Money Wrapped' },
-    { id: 'health' as const, label: 'Health rings' },
-    { id: 'timeline' as const, label: 'Bill timeline' },
-    { id: 'year' as const, label: 'Year of spending' },
-    { id: 'flow' as const, label: 'Money flow' },
-    { id: 'for-you' as const, label: 'For you' },
-    { id: 'board' as const, label: 'Budget board' },
+    { id: 'wrapped' as const, label: 'Money Wrapped', icon: Wallet, color: 'bg-amber-400/15 text-amber-300' },
+    { id: 'health' as const, label: 'Health rings', icon: HeartPulse, color: 'bg-rose-400/15 text-rose-300' },
+    { id: 'timeline' as const, label: 'Bill timeline', icon: Clock3, color: 'bg-orange-400/15 text-orange-300' },
+    { id: 'year' as const, label: 'Year of spending', icon: CalendarDays, color: 'bg-emerald-400/15 text-emerald-300' },
+    { id: 'flow' as const, label: 'Money flow', icon: ArrowLeftRight, color: 'bg-sky-400/15 text-sky-300' },
+    { id: 'for-you' as const, label: 'For you', icon: Sparkles, color: 'bg-violet-400/15 text-violet-300' },
+    { id: 'board' as const, label: 'Budget board', icon: Gift, color: 'bg-cyan-400/15 text-cyan-300' },
   ];
 
-  return <div><div className="mb-3 flex flex-wrap gap-2 rounded-2xl border border-slate-700/70 bg-slate-900/80 p-2">{views.map((item) => <button key={item.id} onClick={() => setView(item.id)} className={`min-w-[130px] flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${view === item.id ? 'bg-cyan-400 text-slate-950' : 'bg-slate-950/60 text-slate-400 hover:text-white'}`}>{item.label}</button>)}</div>{view === 'wrapped' && <MoneyWrapped transactions={transactions}/>} {view === 'health' && <FinancialHealthRings dashboard={dashboard}/>} {view === 'timeline' && <BillTimeline dashboard={dashboard}/>} {view === 'year' && <Heatmap transactions={transactions}/>} {view === 'flow' && <MoneyFlow dashboard={dashboard}/>} {view === 'for-you' && <SpendingForYou transactions={transactions}/>} {view === 'board' && <BudgetBoard dashboard={dashboard}/>}</div>;
+  const visibleViews = showMoreViews ? views : views.slice(0, 3);
+  const selectedView = views.find((item) => item.id === view);
+  const viewContent = view === 'wrapped' ? <MoneyWrapped transactions={transactions}/> : view === 'health' ? <FinancialHealthRings dashboard={dashboard}/> : view === 'timeline' ? <BillTimeline dashboard={dashboard}/> : view === 'year' ? <Heatmap transactions={transactions}/> : view === 'flow' ? <MoneyFlow dashboard={dashboard}/> : view === 'for-you' ? <SpendingForYou transactions={transactions}/> : view === 'board' ? <BudgetBoard dashboard={dashboard}/> : null;
+
+  if (selectedView && viewContent) {
+    return (
+      <div className="space-y-3">
+        <button type="button" onClick={() => setView(null)} className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-semibold text-slate-300">
+          <ArrowLeft className="h-4 w-4" /> All highlights
+        </button>
+        {viewContent}
+      </div>
+    );
+  }
+
+  return <div><div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-700/70 bg-slate-900/80 p-2">{visibleViews.map((item) => { const Icon = item.icon; return <button key={item.id} onClick={() => setView(item.id)} className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-slate-700/80 bg-slate-900/70 p-3 text-center text-slate-300 transition-colors"><span className={`flex h-10 w-10 items-center justify-center rounded-full ${item.color}`}><Icon className="h-5 w-5" /></span><span className="text-xs font-semibold">{item.label}</span></button>; })}{views.length > 3 && <button type="button" onClick={() => setShowMoreViews((current) => !current)} aria-expanded={showMoreViews} className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-600 bg-slate-900/40 p-3 text-center text-xs font-semibold text-cyan-300"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800"><MoreHorizontal className="h-5 w-5" /></span><span>{showMoreViews ? 'Show less' : 'More insights'}</span></button>}</div></div>;
 };
 
 export const CustomizableDashboard: React.FC<{
@@ -281,8 +330,11 @@ export const CustomizableDashboard: React.FC<{
   const [device, setDevice] = useState<'desktop' | 'mobile'>(() => innerWidth < 768 ? 'mobile' : 'desktop');
   const [layout, setLayout] = useState<Layout>(() => loadLayout(innerWidth < 768 ? 'mobile' : 'desktop'));
   const [customizing, setCustomizing] = useState(false);
+  const [showMoreMobileWidgets, setShowMoreMobileWidgets] = useState(false);
   const [dragged, setDragged] = useState<WidgetId | null>(null);
-  const [mobileWidget, setMobileWidget] = useState<WidgetId>('financial-highlights');
+  const [mobileWidget, setMobileWidget] = useState<WidgetId | null>(null);
+  const visibleMobileWidgets = layout.order.filter((id) => !layout.hidden.includes(id));
+  const shownMobileWidgets = showMoreMobileWidgets ? visibleMobileWidgets : visibleMobileWidgets.slice(0, 3);
   useEffect(() => { const resize = () => { const next = innerWidth < 768 ? 'mobile' : 'desktop'; if (next !== device) { setDevice(next); setLayout(loadLayout(next)); } }; addEventListener('resize', resize); return () => removeEventListener('resize', resize); }, [device]);
   useEffect(() => localStorage.setItem(`fintrack_dashboard_${device}_v1`, JSON.stringify(layout)), [device, layout]);
   const move = (target: WidgetId) => { if (!dragged || dragged === target) return; setLayout((current) => { const order = current.order.filter((id) => id !== dragged); order.splice(order.indexOf(target), 0, dragged); return { ...current, order }; }); setDragged(null); };
@@ -294,22 +346,37 @@ export const CustomizableDashboard: React.FC<{
     daily: <DailySpendingSection transactions={transactions} onAddTransactionForDate={onAddTransactionForDate}/>, trends: <TrendsSection monthlyTrends={dashboardData.monthlyTrends} transactions={transactions}/>, runway: <RunwaySimulatorCard/>,
   }[id]);
   if (device === 'mobile') return <div className="space-y-3">
-    <div className="-mx-1 overflow-x-auto px-1 pb-1" role="tablist" aria-label="Financial insights">
-      <div className="flex min-w-max gap-2">
-        {layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => (
+    <div role="tablist" aria-label="Financial insights">
+      <div className="grid grid-cols-2 gap-3">
+        {shownMobileWidgets.map((id) => {
+          const Icon = WIDGET_ICONS[id];
+          return (
+            <button
+              key={id}
+              role="tab"
+              aria-pressed={mobileWidget === id}
+              onClick={() => setMobileWidget(id)}
+              className={`flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border p-3 text-center transition-colors ${mobileWidget === id ? 'border-cyan-400/60 bg-cyan-400/10 text-cyan-200' : 'border-slate-700/80 bg-slate-900/70 text-slate-300'}`}
+            >
+              <span className={`flex h-10 w-10 items-center justify-center rounded-full ${WIDGET_ICON_COLORS[id]}`}><Icon className="h-5 w-5" /></span>
+              <span className="text-xs font-semibold">{LABELS[id]}</span>
+            </button>
+          );
+        })}
+        {visibleMobileWidgets.length > 3 && (
           <button
-            key={id}
-            role="tab"
-            aria-selected={mobileWidget === id}
-            onClick={() => setMobileWidget(id)}
-            className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${mobileWidget === id ? 'border-cyan-300/50 bg-cyan-400 text-slate-950' : 'border-slate-700 bg-slate-900 text-slate-300'}`}
+            type="button"
+            onClick={() => setShowMoreMobileWidgets((current) => !current)}
+            aria-expanded={showMoreMobileWidgets}
+            className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-600 bg-slate-900/40 p-3 text-center text-xs font-semibold text-cyan-300"
           >
-            {LABELS[id]}
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800"><MoreHorizontal className="h-5 w-5" /></span>
+            <span>{showMoreMobileWidgets ? 'Show less' : 'More insights'}</span>
           </button>
-        ))}
+        )}
       </div>
     </div>
-    <div role="tabpanel">{render(mobileWidget)}</div>
+    {mobileWidget && <InsightPopup title={LABELS[mobileWidget]} onClose={() => setMobileWidget(null)}>{render(mobileWidget)}</InsightPopup>}
   </div>;
   return <div className={layout.mode === 'compact' ? 'space-y-3' : 'space-y-5'}><div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-slate-700/70 bg-slate-900/80 p-3"><div><p className="text-sm font-semibold text-white">My dashboard · {device}</p><p className="text-[10px] text-slate-500">Drag widgets while customizing. Mobile and desktop layouts save separately.</p></div><div className="flex gap-2"><select value={layout.mode} onChange={(event) => setLayout((current) => ({ ...current, mode: event.target.value as DisplayMode }))} className="rounded-xl border border-slate-700 bg-slate-950 px-2 py-2 text-xs text-slate-300"><option value="comfortable">Comfortable</option><option value="compact">Compact</option><option value="presentation">Presentation</option></select><button onClick={() => setCustomizing((value) => !value)} className={`rounded-xl px-3 py-2 text-xs font-semibold ${customizing ? 'bg-cyan-400 text-slate-950' : 'bg-slate-800 text-slate-200'}`}><Settings2 className="mr-1 inline h-4 w-4"/>Customize</button></div></div>{customizing && <div className="grid gap-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-3 sm:grid-cols-2 lg:grid-cols-4">{layout.order.map((id) => <div key={id} className="flex items-center justify-between rounded-xl bg-slate-900 px-3 py-2 text-xs"><span className="text-slate-200">{LABELS[id]}</span><div className="flex gap-1"><button onClick={() => toggle('hidden',id)} title="Show or hide">{layout.hidden.includes(id) ? <EyeOff className="h-4 w-4 text-slate-500"/> : <Eye className="h-4 w-4 text-cyan-300"/>}</button><button onClick={() => toggle('wide',id)} title="Resize">{layout.wide.includes(id) ? <Minimize2 className="h-4 w-4"/> : <Maximize2 className="h-4 w-4"/>}</button></div></div>)}<button onClick={() => setLayout(DEFAULT_LAYOUT)} className="rounded-xl bg-slate-800 px-3 py-2 text-xs text-slate-300"><RotateCcw className="mr-1 inline h-4 w-4"/>Reset layout</button></div>}<div className={`grid grid-cols-1 ${layout.mode === 'presentation' ? 'gap-8' : layout.mode === 'compact' ? 'gap-3 lg:grid-cols-2' : 'gap-5 lg:grid-cols-2'}`}>{layout.order.filter((id) => !layout.hidden.includes(id)).map((id) => <div key={id} draggable={customizing} onDragStart={() => setDragged(id)} onDragOver={(event) => event.preventDefault()} onDrop={() => move(id)} className={`${layout.wide.includes(id) || layout.mode === 'presentation' ? 'lg:col-span-2' : ''} relative ${customizing ? 'cursor-grab rounded-2xl ring-1 ring-cyan-400/30' : ''}`}>{customizing && <div className="absolute right-3 top-3 z-20 rounded-lg bg-slate-950/90 p-1 text-cyan-300"><GripVertical className="h-4 w-4"/></div>}{render(id)}</div>)}</div></div>;
 };

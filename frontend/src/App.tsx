@@ -18,7 +18,7 @@ import {
 import { api } from './api/client';
 import { exportTransactionsToCSV, printPDFReport, exportPowerBIDataset } from './utils/exportUtils';
 import { DashboardData, Transaction, Category, Account, TransactionFilters, Budget, Goal } from './types';
-import { AlertCircle, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical, Menu, X, Plus, ArrowRight, ChevronDown, WalletCards } from 'lucide-react';
+import { AlertCircle, ArrowDownRight, ArrowUpRight, RefreshCw, LayoutDashboard, ReceiptText, Landmark, HandCoins, Repeat, Sparkles, BellRing, HelpCircle, History, Target, PieChart, Flag, Gauge, FlaskConical, Menu, X, Plus, ArrowRight, ChevronDown, WalletCards } from 'lucide-react';
 import { formatCurrency } from './utils/privacyStore';
 import { useTheme } from './utils/theme';
 
@@ -134,7 +134,6 @@ export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [mobileNavigationHistory, setMobileNavigationHistory] = useState<DashboardTab[]>([]);
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
-  const [showMobileInsights, setShowMobileInsights] = useState(false);
   const [showMobileSummaryDetails, setShowMobileSummaryDetails] = useState(false);
   const [mobileMetricDetails, setMobileMetricDetails] = useState<MetricType | null>(null);
   const [ledgerMonth, setLedgerMonth] = useState<Date | null>(() => {
@@ -429,7 +428,7 @@ export const App: React.FC = () => {
     { id: 'ai', label: 'Ask FinTrack', caption: 'Personal money guide', icon: Sparkles, color: 'fuchsia' },
   ];
   const mobilePrimaryItems = navigationItems.filter((item) => ['overview', 'goals', 'smart-guidance', 'ai'].includes(item.id));
-  const mobileMoreItems = navigationItems.filter((item) => !['overview', 'goals', 'smart-guidance', 'ai', 'budgets', 'forecast'].includes(item.id));
+  const mobileMoreItems = navigationItems.filter((item) => !['overview', 'goals', 'smart-guidance', 'ai'].includes(item.id));
   const navigateMobile = (tab: DashboardTab) => {
     if (tab === activeTab) {
       setIsMoreMenuOpen(false);
@@ -578,7 +577,7 @@ export const App: React.FC = () => {
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-2 border-t border-slate-800 pt-3">
                     <button onClick={() => setMobileMetricDetails('EXPENSE')} className="rounded-lg bg-rose-500/15 px-2 py-1.5 text-left"><p className="text-[10px] font-semibold uppercase tracking-wide text-rose-400">Spent this month</p><p className="mt-1 text-sm font-bold text-rose-400">{formatCurrency(dashboardData.summary.spendingThisMonth)}</p></button>
-                    <button onClick={() => setMobileMetricDetails('SAVINGS')} className="text-left"><p className="text-[10px] uppercase tracking-wide text-slate-500">Saved this month</p><p className="mt-1 text-sm font-semibold text-emerald-300">{formatCurrency(dashboardData.summary.savingsThisMonth)}</p></button>
+                    <button onClick={() => setMobileMetricDetails('SAVINGS')} className="rounded-lg border border-emerald-400/30 bg-emerald-500/15 px-2 py-1.5 text-left"><p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-300">Saved this month</p><p className="mt-1 text-sm font-bold text-emerald-300">{formatCurrency(dashboardData.summary.savingsThisMonth)}</p></button>
                   </div>
                   <button onClick={() => setShowMobileSummaryDetails((current) => !current)} className="mt-3 flex w-full items-center justify-between border-t border-slate-800 pt-3 text-xs font-semibold text-cyan-300" aria-expanded={showMobileSummaryDetails}>
                     More summary details
@@ -623,22 +622,14 @@ export const App: React.FC = () => {
                   <div className="mt-3 divide-y divide-slate-800">
                     {recentTransactions.length ? recentTransactions.map((transaction) => (
                       <button key={transaction.id} onClick={() => navigateMobile('transactions')} className="flex w-full items-center gap-3 py-3 text-left first:pt-0 last:pb-0">
-                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${transaction.type === 'INCOME' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/30'}`}><ReceiptText className="h-4 w-4" /></span>
+                        <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${transaction.type === 'INCOME' ? 'bg-emerald-400/10 text-emerald-300 ring-1 ring-emerald-400/30' : 'bg-rose-500/20 text-rose-400 ring-1 ring-rose-500/30'}`}>{transaction.type === 'INCOME' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}</span>
                         <span className="min-w-0 flex-1"><span className="block truncate text-sm font-medium text-slate-100">{transaction.merchant || transaction.description || transaction.category?.name || 'Transaction'}</span><span className="block text-[11px] text-slate-500">{new Date(transaction.transactionDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span></span>
-                        <span className={`text-sm font-semibold ${transaction.type === 'INCOME' ? 'text-emerald-300' : 'text-slate-100'}`}>{transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}</span>
+                        <span className={`text-sm font-semibold ${transaction.type === 'INCOME' ? 'text-emerald-300' : 'text-rose-300'}`}>{transaction.type === 'INCOME' ? '+' : '-'}{formatCurrency(transaction.amount)}</span>
                       </button>
                     )) : <p className="py-3 text-sm text-slate-400">No transactions yet. Add your first one to start tracking.</p>}
                   </div>
                 </section>
 
-                <button
-                  onClick={() => setShowMobileInsights((current) => !current)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-slate-700 bg-slate-900 px-4 py-3.5 text-left"
-                  aria-expanded={showMobileInsights}
-                >
-                  <span><span className="block text-sm font-semibold text-white">Explore all insights</span><span className="mt-0.5 block text-xs text-slate-400">Spending, dues, daily activity, trends and planning tools</span></span>
-                  <ChevronDown className={`h-5 w-5 shrink-0 text-cyan-300 transition-transform ${showMobileInsights ? 'rotate-180' : ''}`} />
-                </button>
               </section>
             )}
             {/* 1. TOP SUMMARY CARDS (Accordion Section) */}
@@ -747,7 +738,12 @@ export const App: React.FC = () => {
 
             {/* 1. OVERVIEW TAB */}
             {activeTab === 'overview' && (
-              <div className={`${showMobileInsights ? 'block' : 'hidden'} md:hidden`}><CustomizableDashboard
+              <section className="md:hidden">
+                <div className="mb-3">
+                  <h2 className="text-base font-semibold text-white">Explore insights</h2>
+                  <p className="mt-0.5 text-xs text-slate-400">Spending, dues, daily activity, trends and planning tools</p>
+                </div>
+                <CustomizableDashboard
                 dashboardData={dashboardData}
                 transactions={transactions}
                 onAddTransactionForDate={(dateStr) => {
@@ -757,7 +753,8 @@ export const App: React.FC = () => {
                 onPayCreditCard={handlePayCreditCard}
                 onPaySubscription={() => setActiveTab('subscriptions')}
                 onPayDebt={() => setActiveTab('debts')}
-              /></div>
+                />
+              </section>
             )}
             {activeTab === 'overview' && (
               <div className="hidden md:block"><CustomizableDashboard
@@ -932,10 +929,27 @@ export const App: React.FC = () => {
         <p>FinTrack Personal Financial System — Developed by Hamzah</p>
       </footer>
 
+      <nav className="mobile-tabbar fixed inset-x-2 bottom-2 z-50 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-1.5 py-1.5 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:hidden">
+        <div className="grid grid-cols-5 gap-0.5">
+          {mobilePrimaryItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return <button key={item.id} onClick={() => navigateMobile(item.id)} className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${isActive ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'}`} aria-label={item.label} aria-pressed={isActive}>
+              <Icon className="h-[18px] w-[18px]" />
+              <span className="text-[11px] font-semibold leading-none">{item.id === 'overview' ? 'Home' : item.id === 'smart-guidance' ? 'Plan' : item.id === 'ai' ? 'Ask AI' : item.label}</span>
+              {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
+            </button>;
+          })}
+          <button onClick={() => setIsMoreMenuOpen((open) => !open)} className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${!activeMobilePrimary ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'}`} aria-label="More destinations" aria-expanded={isMoreMenuOpen}>
+            <Menu className="h-[18px] w-[18px]" /><span className="text-[11px] font-semibold leading-none">More</span>
+          </button>
+        </div>
+      </nav>
+
       {isMoreMenuOpen && (
         <div className="fixed inset-0 z-[55] md:hidden" role="dialog" aria-modal="true" aria-labelledby="more-menu-title">
           <button className="absolute inset-0 bg-slate-950/70" aria-label="Close more menu" onClick={() => setIsMoreMenuOpen(false)} />
-          <section className="absolute inset-x-2 bottom-20 rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl shadow-slate-950/60">
+          <section className="absolute left-3 top-[4.5rem] max-h-[calc(100dvh-6rem)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl shadow-slate-950/60">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cyan-300">More tools</p>
@@ -943,15 +957,7 @@ export const App: React.FC = () => {
               </div>
               <button onClick={() => setIsMoreMenuOpen(false)} className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label="Close more menu"><X className="h-5 w-5" /></button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => { setIsMoreMenuOpen(false); setIsAffordModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
-                <HelpCircle className="h-5 w-5 shrink-0 text-amber-300" />
-                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Can I afford this?</span><span className="mt-1 block text-[10px] text-slate-400">Check a purchase</span></span>
-              </button>
-              <button onClick={() => { setIsMoreMenuOpen(false); setIsTimeMachineModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
-                <History className="h-5 w-5 shrink-0 text-fuchsia-300" />
-                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Time machine</span><span className="mt-1 block text-[10px] text-slate-400">Explore scenarios</span></span>
-              </button>
+        <div className="grid grid-cols-2 gap-2">
               {mobileMoreItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -961,44 +967,18 @@ export const App: React.FC = () => {
                   {item.badge ? <span className="absolute right-2 top-2 rounded-full bg-emerald-400 px-1.5 py-0.5 text-[10px] font-bold text-emerald-950">{item.badge}</span> : null}
                 </button>;
               })}
+              <button onClick={() => { setIsMoreMenuOpen(false); setIsAffordModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
+                <HelpCircle className="h-5 w-5 shrink-0 text-amber-300" />
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Can I afford this?</span><span className="mt-1 block text-[10px] text-slate-400">Check a purchase</span></span>
+              </button>
+              <button onClick={() => { setIsMoreMenuOpen(false); setIsTimeMachineModalOpen(true); }} className="flex min-h-[72px] items-center gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 px-3 text-left text-slate-200 transition-colors hover:bg-slate-800">
+                <History className="h-5 w-5 shrink-0 text-fuchsia-300" />
+                <span className="min-w-0"><span className="block text-sm font-semibold leading-tight">Time machine</span><span className="mt-1 block text-[10px] text-slate-400">Explore scenarios</span></span>
+              </button>
             </div>
           </section>
         </div>
       )}
-
-      <nav className="mobile-tabbar fixed inset-x-2 bottom-2 z-50 rounded-2xl border border-slate-700/70 bg-slate-900/95 px-1.5 py-1.5 shadow-2xl shadow-slate-950/40 backdrop-blur-xl md:hidden">
-        <div className="grid grid-cols-5 gap-0.5">
-          {mobilePrimaryItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => navigateMobile(item.id)}
-                className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${
-                  isActive ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'
-                }`}
-                aria-label={item.label}
-                aria-pressed={isActive}
-              >
-                <Icon className="h-[18px] w-[18px]" />
-                <span className="text-[11px] font-semibold leading-none">{item.id === 'overview' ? 'Home' : item.id === 'goals' ? 'Goals' : item.id === 'smart-guidance' ? 'Plan' : 'Ask AI'}</span>
-                {item.badge ? <span className="absolute right-1 top-1 rounded-full bg-emerald-400 px-1 py-0.5 text-[9px] font-bold text-emerald-950">{item.badge}</span> : null}
-              </button>
-            );
-          })}
-          <button
-            onClick={() => setIsMoreMenuOpen(true)}
-            className={`mobile-tab-btn relative flex flex-col items-center justify-center gap-1 rounded-xl px-1.5 py-2 transition-colors ${!activeMobilePrimary ? 'bg-cyan-400/20 text-cyan-200' : 'text-slate-400 hover:bg-slate-800/85'}`}
-            aria-label="More destinations"
-            aria-expanded={isMoreMenuOpen}
-          >
-            <Menu className="h-[18px] w-[18px]" />
-            <span className="text-[11px] font-semibold leading-none">More</span>
-          </button>
-        </div>
-      </nav>
 
       <Suspense fallback={null}>
       {dashboardData && <MetricDetailsModal

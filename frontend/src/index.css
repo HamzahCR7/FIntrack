@@ -68,9 +68,9 @@ html[data-theme='light'] {
   --fin-bg-2: #e2e8f0;
   --fin-card: rgba(255, 255, 255, 0.84);
   --fin-border: rgba(100, 116, 139, 0.3);
-  --fin-danger: #7f1d1d;
-  --fin-danger-strong: #7f1d1d;
-  --fin-danger-soft: rgba(127, 29, 29, 0.14);
+  --fin-danger: #b91c1c;
+  --fin-danger-strong: #991b1b;
+  --fin-danger-soft: rgba(220, 38, 38, 0.18);
 }
 
 body {
@@ -195,14 +195,14 @@ html[data-theme='light'] [class*='bg-yellow-500/'] { background-color: rgba(245,
 html[data-theme='light'] [class*='bg-rose-'][class*='/'],
 html[data-theme='light'] [class*='bg-red-'][class*='/'] { background-color: var(--fin-danger-soft) !important; }
 html[data-theme='light'] .transaction-type-expense[class~='bg-rose-600'] {
-  background: #c81e1e !important;
+  background: var(--fin-danger) !important;
   color: #fff !important;
-  border-color: #991b1b !important;
+  border-color: var(--fin-danger-strong) !important;
 }
 html[data-theme='light'] .debt-borrowed-selector[class~='bg-rose-600'] {
-  background: #c81e1e !important;
+  background: var(--fin-danger) !important;
   color: #fff !important;
-  border-color: #991b1b !important;
+  border-color: var(--fin-danger-strong) !important;
 }
 html[data-theme='light'] :is(
   [class~='bg-rose-400'], [class~='bg-rose-500'], [class~='bg-rose-600'], [class~='bg-rose-700'], [class~='bg-rose-800'], [class~='bg-rose-900'],
