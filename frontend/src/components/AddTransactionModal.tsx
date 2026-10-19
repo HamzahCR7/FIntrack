@@ -896,7 +896,7 @@ export const AddTransactionModal: React.FC<AddTransactionModalProps> = ({
             <button
               type="button"
               onClick={() => handleTypeChange('EXPENSE')}
-              className={`py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 border transition-all ${
+              className={`transaction-type-expense py-2.5 rounded-xl font-bold flex items-center justify-center gap-1.5 border transition-all ${
                 type === 'EXPENSE'
                   ? 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/20'
                   : 'bg-slate-800/80 text-slate-400 border-slate-700 hover:bg-slate-700'

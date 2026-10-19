@@ -68,7 +68,7 @@ html[data-theme='light'] {
   --fin-bg-2: #e2e8f0;
   --fin-card: rgba(255, 255, 255, 0.84);
   --fin-border: rgba(100, 116, 139, 0.3);
-  --fin-danger: #991b1b;
+  --fin-danger: #7f1d1d;
   --fin-danger-strong: #7f1d1d;
   --fin-danger-soft: rgba(127, 29, 29, 0.14);
 }
@@ -194,6 +194,16 @@ html[data-theme='light'] [class*='bg-yellow-400/'],
 html[data-theme='light'] [class*='bg-yellow-500/'] { background-color: rgba(245, 158, 11, 0.18) !important; }
 html[data-theme='light'] [class*='bg-rose-'][class*='/'],
 html[data-theme='light'] [class*='bg-red-'][class*='/'] { background-color: var(--fin-danger-soft) !important; }
+html[data-theme='light'] .transaction-type-expense[class~='bg-rose-600'] {
+  background: #c81e1e !important;
+  color: #fff !important;
+  border-color: #991b1b !important;
+}
+html[data-theme='light'] .debt-borrowed-selector[class~='bg-rose-600'] {
+  background: #c81e1e !important;
+  color: #fff !important;
+  border-color: #991b1b !important;
+}
 html[data-theme='light'] :is(
   [class~='bg-rose-400'], [class~='bg-rose-500'], [class~='bg-rose-600'], [class~='bg-rose-700'], [class~='bg-rose-800'], [class~='bg-rose-900'],
   [class~='bg-red-400'], [class~='bg-red-500'], [class~='bg-red-600'], [class~='bg-red-700'], [class~='bg-red-800'], [class~='bg-red-900']
@@ -299,6 +309,16 @@ html[data-theme='light'] .hero-action-btn { box-shadow: 0 10px 24px rgba(71, 85,
 
 html[data-theme='light'] .date-field { color-scheme: light; }
 html[data-theme='light'] .date-field::-webkit-calendar-picker-indicator { filter: none; }
+html[data-theme='light'] .add-debt-modal input,
+html[data-theme='light'] .add-debt-modal select,
+html[data-theme='light'] .add-debt-modal textarea {
+  color: #172033 !important;
+  background-color: #fff !important;
+}
+html[data-theme='light'] .add-debt-modal select option {
+  color: #172033;
+  background-color: #fff;
+}
 html[data-theme='light'] .fintrack-input,
 html[data-theme='light'] .fintrack-select {
   border-color: rgba(100, 116, 139, 0.5);

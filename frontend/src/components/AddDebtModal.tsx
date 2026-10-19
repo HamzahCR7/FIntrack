@@ -100,7 +100,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
       }}
       className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
     >
-      <div className="bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
+      <div className="add-debt-modal bg-slate-900 border border-slate-700/80 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
         <div className="flex items-center justify-between pb-3 border-b border-slate-800">
           <div className="flex items-center gap-2">
             <HandCoins className="w-5 h-5 text-emerald-400" />
@@ -158,7 +158,7 @@ export const AddDebtModal: React.FC<AddDebtModalProps> = ({ isOpen, onClose, onS
                   setType('I_OWE');
                   setRecordKind('PERSONAL');
                 }}
-                className={`py-2 rounded-xl font-semibold border transition-all ${
+                className={`debt-borrowed-selector py-2 rounded-xl font-semibold border transition-all ${
                   type === 'I_OWE'
                     ? 'bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-600/20'
                     : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700'
