@@ -236,35 +236,41 @@ export const App: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      const dashboardPromise = api.getDashboard();
-      const [dash, txs, cats, accs, budgetsData, goalsData] = await Promise.all([
-        dashboardPromise,
+      // Load the dashboard first so unrelated list requests cannot delay the
+      // primary screen after a save or refresh.
+      const dash = await api.getDashboard();
+      setDashboardData(dash);
+      setIsLoading(false);
+
+      void Promise.all([
         api.getTransactions(filters),
         api.getCategories(),
         api.getAccounts(),
         api.getBudgets(),
         api.getGoals(),
-      ]);
+      ]).then(async ([txs, cats, accs, budgetsData, goalsData]) => {
+        const visibleTransactions = await mergePendingTransactions(txs);
+        const normalizedDashboard = withCashFlowSavings(dash, visibleTransactions, accs);
 
-      const visibleTransactions = await mergePendingTransactions(txs);
-      const normalizedDashboard = withCashFlowSavings(dash, visibleTransactions, accs);
+        setDashboardData(normalizedDashboard);
+        setTransactions(visibleTransactions);
+        setLedgerTransactions(visibleTransactions);
+        setCategories(cats);
+        setAccounts(accs);
+        setBudgets(budgetsData || []);
+        setGoals(goalsData || []);
 
-      setDashboardData(normalizedDashboard);
-      setTransactions(visibleTransactions);
-      setLedgerTransactions(visibleTransactions);
-      setCategories(cats);
-      setAccounts(accs);
-      setBudgets(budgetsData || []);
-      setGoals(goalsData || []);
-
-      localStorage.setItem(APP_DATA_CACHE_KEY, JSON.stringify({
-        dashboardData: normalizedDashboard,
-        transactions: visibleTransactions,
-        categories: cats,
-        accounts: accs,
-        budgets: budgetsData || [],
-        goals: goalsData || [],
-      } satisfies CachedAppData));
+        localStorage.setItem(APP_DATA_CACHE_KEY, JSON.stringify({
+          dashboardData: normalizedDashboard,
+          transactions: visibleTransactions,
+          categories: cats,
+          accounts: accs,
+          budgets: budgetsData || [],
+          goals: goalsData || [],
+        } satisfies CachedAppData));
+      }).catch((err: any) => {
+        setError(err.response?.data?.message || err.message || 'Failed to fetch financial data from server.');
+      });
 
       void api
         .getForecast()
@@ -275,7 +281,6 @@ export const App: React.FC = () => {
           // Keep the dashboard usable even if the forecast request fails.
         });
 
-      setIsLoading(false);
     } catch (err: any) {
       setIsLoading(false);
       setError(err.response?.data?.message || err.message || 'Failed to fetch financial data from server.');
