@@ -361,8 +361,12 @@ export const App: React.FC = () => {
       ? current.map((transaction) => transaction.id === id ? { ...transaction, ...optimisticTransaction } : transaction)
       : [optimisticTransaction, ...current];
 
-    setTransactions(applyOptimisticSave);
+    const optimisticTransactions = applyOptimisticSave(transactions);
+    setTransactions(optimisticTransactions);
     setLedgerTransactions(applyOptimisticSave);
+    setDashboardData((current) => current
+      ? withCashFlowSavings(current, optimisticTransactions, accounts)
+      : current);
     setEditingTransaction(null);
     addToast(id ? 'Update saved locally — syncing' : 'Transaction saved locally — syncing', 'success');
 
