@@ -275,7 +275,7 @@ export const App: React.FC = () => {
       void api
         .getForecast()
         .then((forecast) => {
-          setDashboardData((current) => (current ? { ...current, forecast } : { ...normalizedDashboard, forecast }));
+          setDashboardData((current) => (current ? { ...current, forecast } : { ...dash, forecast }));
         })
         .catch(() => {
           // Keep the dashboard usable even if the forecast request fails.
