@@ -324,11 +324,19 @@ export const MetricDetailsModal: React.FC<MetricDetailsModalProps> = ({
     });
     return [...totals.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([, value]) => value);
   }, [transactions, activeType]);
+  const currentMonthLabel = new Date().toLocaleString('default', { month: 'short', year: 'numeric' });
+  const savingsMonthlyTrends = transactionMonthlyTrends.map((trend) => {
+    return trend.month === currentMonthLabel
+      ? { ...trend, savings: summary.savingsThisMonth, expenses: trend.income - summary.savingsThisMonth }
+      : trend;
+  });
   const historyTrends = activeType === 'POCKET'
     ? pocketMonthlyTrends
     : activeType === 'CREDIT'
       ? creditCardMonthlyTrends
-      : transactionMonthlyTrends.length > 0 ? transactionMonthlyTrends : monthlyTrends;
+      : activeType === 'SAVINGS'
+        ? savingsMonthlyTrends
+        : transactionMonthlyTrends.length > 0 ? transactionMonthlyTrends : monthlyTrends;
 
   const sortedMonthlyTrends = useMemo(() => {
     const sorted = [...historyTrends].reverse();

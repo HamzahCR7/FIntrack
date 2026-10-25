@@ -23,9 +23,24 @@ export class BudgetService {
       ? month.split('-').map(Number)
       : [now.getUTCFullYear(), now.getUTCMonth() + 1];
     const startDate = new Date(Date.UTC(year, monthIndex - 1, 1));
-    const endDate = new Date(Date.UTC(year, monthIndex, 1));
-    const budgets = await this.budgetRepo.findByCycleMonth(startDate, endDate);
-    return Promise.all(budgets.map((budget) => this.enrichBudget(budget)));
+    const nextMonthStart = new Date(Date.UTC(year, monthIndex, 1));
+    const endDate = new Date(nextMonthStart.getTime() - 1);
+    let budgets = await this.budgetRepo.findByCycleMonth(startDate, nextMonthStart);
+    if (budgets.length === 0) {
+      const activeBudgets = await this.budgetRepo.findActiveBudgets();
+      if (activeBudgets.length > 0) {
+        const latestCycleStart = activeBudgets.reduce((latest, budget) =>
+          budget.billingCycleStartDate > latest ? budget.billingCycleStartDate : latest,
+        activeBudgets[0].billingCycleStartDate);
+        const latestYear = latestCycleStart.getUTCFullYear();
+        const latestMonth = latestCycleStart.getUTCMonth();
+        budgets = activeBudgets.filter((budget) =>
+          budget.billingCycleStartDate.getUTCFullYear() === latestYear
+          && budget.billingCycleStartDate.getUTCMonth() === latestMonth,
+        );
+      }
+    }
+    return Promise.all(budgets.map((budget) => this.enrichBudget(budget, startDate, endDate)));
   }
 
   async getBudgetById(id: string): Promise<BudgetResponseDto> {
@@ -115,17 +130,18 @@ export class BudgetService {
     return { status, percentageUsed };
   }
 
-  private async enrichBudget(budget: Budget): Promise<BudgetResponseDto> {
+  private async enrichBudget(budget: Budget, selectedMonthStart?: Date, selectedMonthEnd?: Date): Promise<BudgetResponseDto> {
     const categoryIds = this.getBudgetCategoryIds(budget.categoryId, budget.categoryIds);
 
-    // Ensure start date always covers from the 1st of the budget month (00:00:00.000 UTC)
-    const startDate = budget.billingCycleStartDate
+    // When a month is selected, calculate against that calendar month regardless
+    // of the saved budget cycle dates. Otherwise use the budget's own month.
+    const startDate = selectedMonthStart || (budget.billingCycleStartDate
       ? new Date(Date.UTC(new Date(budget.billingCycleStartDate).getUTCFullYear(), new Date(budget.billingCycleStartDate).getUTCMonth(), 1, 0, 0, 0, 0))
-      : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1, 0, 0, 0, 0));
+      : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1, 0, 0, 0, 0)));
 
-    const endDate = budget.billingCycleEndDate
+    const endDate = selectedMonthEnd || (budget.billingCycleEndDate
       ? new Date(Date.UTC(new Date(budget.billingCycleEndDate).getUTCFullYear(), new Date(budget.billingCycleEndDate).getUTCMonth() + 1, 0, 23, 59, 59, 999))
-      : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 0, 23, 59, 59, 999));
+      : new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() + 1, 0, 23, 59, 59, 999)));
 
     // Calculate spending within budget period
     const spendingDetails = await this.calculateBudgetSpendingDetails(
@@ -184,9 +200,9 @@ export class BudgetService {
     }>;
   }> {
     const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
     const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
 
     const transactions = await this.transactionRepo.findByDateRange(start, end);
     const selectedCategoryTokens = this.parseCategoryIds(categoryIds);

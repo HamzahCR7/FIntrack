@@ -81,7 +81,11 @@ const BudgetsSection: React.FC<BudgetsSectionProps> = ({ categories, budgets: pa
   };
 
   const totalBudgeted = budgets.reduce((sum, b) => sum + (b.amount || 0), 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + (b.spentAmount || 0), 0);
+  const totalSpent = selectedMonth === null
+    ? [...new Map(budgets.flatMap((budget) => budget.spentTransactions || [])
+      .map((transaction) => [transaction.id, transaction])).values()]
+      .reduce((sum, transaction) => sum + transaction.amount, 0)
+    : budgets.reduce((sum, budget) => sum + (budget.spentAmount || 0), 0);
   const totalRemaining = Math.max(0, totalBudgeted - totalSpent);
 
   const alertBudgets = budgets.filter((b) => b.status === 'WARNING' || b.status === 'EXCEEDED');

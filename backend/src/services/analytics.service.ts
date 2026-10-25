@@ -121,7 +121,7 @@ export class AnalyticsService {
       },
     };
 
-    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, monthCashOutflowAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, prevMonthCashOutflowAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
+    const [allIncome, allExpenses, monthIncomeAgg, monthExpensesAgg, monthCashOutflowAgg, pocketAllowanceAgg, prevMonthIncomeAgg, prevMonthExpensesAgg, categoryExpenses, activeSubs, upcomingSubscriptions, allDebts] = await Promise.all([
       this.db.transaction.aggregate({
         _sum: { amount: true },
         where: { type: TransactionType.INCOME, ...personalDebtPairExclusion },
@@ -175,10 +175,6 @@ export class AnalyticsService {
           transactionDate: { gte: previousMonthStart, lte: previousMonthEnd },
         },
       }),
-      this.db.transaction.aggregate({
-        _sum: { amount: true },
-        where: cashOutflowWhere(previousMonthStart, previousMonthEnd),
-      }),
       this.db.transaction.findMany({
         where: { type: TransactionType.EXPENSE, ...personalDebtPairExclusion },
         select: {
@@ -218,8 +214,7 @@ export class AnalyticsService {
 
     const previousMonthIncome = prevMonthIncomeAgg._sum.amount || 0;
     const previousMonthExpenses = prevMonthExpensesAgg._sum.amount || 0;
-    const previousMonthCashOutflow = prevMonthCashOutflowAgg._sum.amount || 0;
-    const previousMonthSavings = previousMonthIncome - previousMonthCashOutflow;
+    const previousMonthSavings = previousMonthIncome - previousMonthExpenses;
 
     const categoryMap: Record<string, { id: string; name: string; icon?: string; color?: string; amount: number }> = {};
     for (const tx of categoryExpenses) {
